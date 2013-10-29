@@ -6,3 +6,15 @@ homepage:
     resource: "@HomepageBundle/Resources/config/routing.xml"
     prefix:   /
 
+register:
+    pattern:  /register
+    defaults:
+        _controller: UserBundle:Register:register
+
+login:
+    pattern:  /login
+    requirements:
+        _method:  POST
+
+logout:
+    pattern:  /logout

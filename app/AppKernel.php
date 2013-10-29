@@ -15,7 +15,10 @@ class AppKernel extends Kernel
             new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new \Propel\PropelBundle\PropelBundle(),
+            new Propel\PropelBundle\PropelBundle(),
+            new JMS\SecurityExtraBundle\JMSSecurityExtraBundle(),
+            new JMS\AopBundle\JMSAopBundle(),
+
             new wiosloCMS\HomepageBundle\HomepageBundle(),
             new wiosloCMS\UserBundle\UserBundle(),
         );

@@ -103,6 +103,8 @@ class appDevDebugProjectContainer extends Container
             'fragment.renderer.hinclude' => 'getFragment_Renderer_HincludeService',
             'fragment.renderer.inline' => 'getFragment_Renderer_InlineService',
             'http_kernel' => 'getHttpKernelService',
+            'jms_aop.interceptor_loader' => 'getJmsAop_InterceptorLoaderService',
+            'jms_aop.pointcut_container' => 'getJmsAop_PointcutContainerService',
             'kernel' => 'getKernelService',
             'locale_listener' => 'getLocaleListenerService',
             'logger' => 'getLoggerService',
@@ -135,17 +137,25 @@ class appDevDebugProjectContainer extends Container
             'router_listener' => 'getRouterListenerService',
             'routing.loader' => 'getRouting_LoaderService',
             'security.access.decision_manager' => 'getSecurity_Access_DecisionManagerService',
+            'security.access.method_interceptor' => 'getSecurity_Access_MethodInterceptorService',
+            'security.access.pointcut' => 'getSecurity_Access_PointcutService',
             'security.authentication.manager' => 'getSecurity_Authentication_ManagerService',
             'security.authentication.trust_resolver' => 'getSecurity_Authentication_TrustResolverService',
             'security.context' => 'getSecurity_ContextService',
             'security.encoder_factory' => 'getSecurity_EncoderFactoryService',
+            'security.expressions.compiler' => 'getSecurity_Expressions_CompilerService',
+            'security.expressions.handler' => 'getSecurity_Expressions_HandlerService',
+            'security.expressions.reverse_interpreter' => 'getSecurity_Expressions_ReverseInterpreterService',
+            'security.extra.metadata_driver' => 'getSecurity_Extra_MetadataDriverService',
+            'security.extra.metadata_factory' => 'getSecurity_Extra_MetadataFactoryService',
             'security.firewall' => 'getSecurity_FirewallService',
             'security.firewall.map.context.dev' => 'getSecurity_Firewall_Map_Context_DevService',
-            'security.firewall.map.context.login' => 'getSecurity_Firewall_Map_Context_LoginService',
             'security.firewall.map.context.secured_area' => 'getSecurity_Firewall_Map_Context_SecuredAreaService',
             'security.rememberme.response_listener' => 'getSecurity_Rememberme_ResponseListenerService',
+            'security.role_hierarchy' => 'getSecurity_RoleHierarchyService',
             'security.secure_random' => 'getSecurity_SecureRandomService',
-            'security.user.provider.concrete.in_memory' => 'getSecurity_User_Provider_Concrete_InMemoryService',
+            'security.user.provider.concrete.user' => 'getSecurity_User_Provider_Concrete_UserService',
+            'security.user_checker' => 'getSecurity_UserCheckerService',
             'security.validator.user_password' => 'getSecurity_Validator_UserPasswordService',
             'sensio_distribution.webconfigurator' => 'getSensioDistribution_WebconfiguratorService',
             'sensio_framework_extra.cache.listener' => 'getSensioFrameworkExtra_Cache_ListenerService',
@@ -1147,6 +1157,32 @@ class appDevDebugProjectContainer extends Container
     }
 
     /**
+     * Gets the 'jms_aop.interceptor_loader' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return JMS\AopBundle\Aop\InterceptorLoader A JMS\AopBundle\Aop\InterceptorLoader instance.
+     */
+    protected function getJmsAop_InterceptorLoaderService()
+    {
+        return $this->services['jms_aop.interceptor_loader'] = new \JMS\AopBundle\Aop\InterceptorLoader($this, array());
+    }
+
+    /**
+     * Gets the 'jms_aop.pointcut_container' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return JMS\AopBundle\Aop\PointcutContainer A JMS\AopBundle\Aop\PointcutContainer instance.
+     */
+    protected function getJmsAop_PointcutContainerService()
+    {
+        return $this->services['jms_aop.pointcut_container'] = new \JMS\AopBundle\Aop\PointcutContainer(array('security.access.method_interceptor' => $this->get('security.access.pointcut')));
+    }
+
+    /**
      * Gets the 'kernel' service.
      *
      * This service is shared.
@@ -1660,6 +1696,66 @@ class appDevDebugProjectContainer extends Container
     }
 
     /**
+     * Gets the 'security.access.decision_manager' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return JMS\SecurityExtraBundle\Security\Authorization\RememberingAccessDecisionManager A JMS\SecurityExtraBundle\Security\Authorization\RememberingAccessDecisionManager instance.
+     */
+    protected function getSecurity_Access_DecisionManagerService()
+    {
+        $a = new \JMS\SecurityExtraBundle\Security\Authorization\Expression\LazyLoadingExpressionVoter($this->get('security.expressions.handler'), $this->get('monolog.logger.security', ContainerInterface::NULL_ON_INVALID_REFERENCE));
+        $a->setLazyCompiler($this, 'security.expressions.compiler');
+        $a->setCacheDir('/var/www/wiosloCMS/app/cache/dev/jms_security/expressions');
+
+        return $this->services['security.access.decision_manager'] = new \JMS\SecurityExtraBundle\Security\Authorization\RememberingAccessDecisionManager(new \Symfony\Component\Security\Core\Authorization\AccessDecisionManager(array(0 => $a, 1 => new \Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter($this->get('security.role_hierarchy')), 2 => new \Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter($this->get('security.authentication.trust_resolver'))), 'affirmative', false, true));
+    }
+
+    /**
+     * Gets the 'security.access.method_interceptor' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return JMS\SecurityExtraBundle\Security\Authorization\Interception\MethodSecurityInterceptor A JMS\SecurityExtraBundle\Security\Authorization\Interception\MethodSecurityInterceptor instance.
+     */
+    protected function getSecurity_Access_MethodInterceptorService()
+    {
+        return $this->services['security.access.method_interceptor'] = new \JMS\SecurityExtraBundle\Security\Authorization\Interception\MethodSecurityInterceptor($this->get('security.context'), $this->get('security.authentication.manager'), $this->get('security.access.decision_manager'), new \JMS\SecurityExtraBundle\Security\Authorization\AfterInvocation\AfterInvocationManager(array()), new \JMS\SecurityExtraBundle\Security\Authorization\RunAsManager('RunAsToken', 'ROLE_'), $this->get('security.extra.metadata_factory'), $this->get('monolog.logger.security', ContainerInterface::NULL_ON_INVALID_REFERENCE));
+    }
+
+    /**
+     * Gets the 'security.access.pointcut' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return JMS\SecurityExtraBundle\Security\Authorization\Interception\SecurityPointcut A JMS\SecurityExtraBundle\Security\Authorization\Interception\SecurityPointcut instance.
+     */
+    protected function getSecurity_Access_PointcutService()
+    {
+        $this->services['security.access.pointcut'] = $instance = new \JMS\SecurityExtraBundle\Security\Authorization\Interception\SecurityPointcut($this->get('security.extra.metadata_factory'), false, array());
+
+        $instance->setSecuredClasses(array());
+
+        return $instance;
+    }
+
+    /**
+     * Gets the 'security.authentication.trust_resolver' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver A Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver instance.
+     */
+    protected function getSecurity_Authentication_TrustResolverService()
+    {
+        return $this->services['security.authentication.trust_resolver'] = new \Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver('Symfony\\Component\\Security\\Core\\Authentication\\Token\\AnonymousToken', 'Symfony\\Component\\Security\\Core\\Authentication\\Token\\RememberMeToken');
+    }
+
+    /**
      * Gets the 'security.context' service.
      *
      * This service is shared.
@@ -1682,7 +1778,55 @@ class appDevDebugProjectContainer extends Container
      */
     protected function getSecurity_EncoderFactoryService()
     {
-        return $this->services['security.encoder_factory'] = new \Symfony\Component\Security\Core\Encoder\EncoderFactory(array('Symfony\\Component\\Security\\Core\\User\\User' => array('class' => 'Symfony\\Component\\Security\\Core\\Encoder\\PlaintextPasswordEncoder', 'arguments' => array(0 => false))));
+        return $this->services['security.encoder_factory'] = new \Symfony\Component\Security\Core\Encoder\EncoderFactory(array('wiosloCMS\\UserBundle\\Model\\User' => array('class' => 'Symfony\\Component\\Security\\Core\\Encoder\\MessageDigestPasswordEncoder', 'arguments' => array(0 => 'sha512', 1 => true, 2 => 5000))));
+    }
+
+    /**
+     * Gets the 'security.expressions.compiler' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return JMS\SecurityExtraBundle\Security\Authorization\Expression\ExpressionCompiler A JMS\SecurityExtraBundle\Security\Authorization\Expression\ExpressionCompiler instance.
+     */
+    protected function getSecurity_Expressions_CompilerService()
+    {
+        $a = new \JMS\SecurityExtraBundle\Security\Authorization\Expression\Compiler\ContainerAwareVariableCompiler();
+        $a->setMaps(array('trust_resolver' => 'security.authentication.trust_resolver', 'role_hierarchy' => 'security.role_hierarchy', 'permission_evaluator' => 'security.acl.permission_evaluator'), array());
+
+        $this->services['security.expressions.compiler'] = $instance = new \JMS\SecurityExtraBundle\Security\Authorization\Expression\ExpressionCompiler();
+
+        $instance->addFunctionCompiler(new \JMS\SecurityExtraBundle\Security\Acl\Expression\HasPermissionFunctionCompiler());
+        $instance->addTypeCompiler(new \JMS\SecurityExtraBundle\Security\Authorization\Expression\Compiler\ParameterExpressionCompiler());
+        $instance->addTypeCompiler($a);
+
+        return $instance;
+    }
+
+    /**
+     * Gets the 'security.expressions.reverse_interpreter' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return JMS\SecurityExtraBundle\Security\Authorization\Expression\ReverseInterpreter A JMS\SecurityExtraBundle\Security\Authorization\Expression\ReverseInterpreter instance.
+     */
+    protected function getSecurity_Expressions_ReverseInterpreterService()
+    {
+        return $this->services['security.expressions.reverse_interpreter'] = new \JMS\SecurityExtraBundle\Security\Authorization\Expression\ReverseInterpreter($this->get('security.expressions.compiler'), $this->get('security.expressions.handler'));
+    }
+
+    /**
+     * Gets the 'security.extra.metadata_driver' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return Metadata\Driver\DriverChain A Metadata\Driver\DriverChain instance.
+     */
+    protected function getSecurity_Extra_MetadataDriverService()
+    {
+        return $this->services['security.extra.metadata_driver'] = new \Metadata\Driver\DriverChain(array(0 => new \JMS\SecurityExtraBundle\Metadata\Driver\AnnotationDriver($this->get('annotation_reader'))));
     }
 
     /**
@@ -1695,7 +1839,7 @@ class appDevDebugProjectContainer extends Container
      */
     protected function getSecurity_FirewallService()
     {
-        return $this->services['security.firewall'] = new \Symfony\Component\Security\Http\Firewall(new \Symfony\Bundle\SecurityBundle\Security\FirewallMap($this, array('security.firewall.map.context.dev' => new \Symfony\Component\HttpFoundation\RequestMatcher('^/(_(profiler|wdt)|css|images|js)/'), 'security.firewall.map.context.login' => new \Symfony\Component\HttpFoundation\RequestMatcher('^/demo/secured/login$'), 'security.firewall.map.context.secured_area' => new \Symfony\Component\HttpFoundation\RequestMatcher('^/demo/secured/'))), $this->get('event_dispatcher'));
+        return $this->services['security.firewall'] = new \Symfony\Component\Security\Http\Firewall(new \Symfony\Bundle\SecurityBundle\Security\FirewallMap($this, array('security.firewall.map.context.dev' => new \Symfony\Component\HttpFoundation\RequestMatcher('^/(_(profiler|wdt)|css|images|js)/'), 'security.firewall.map.context.secured_area' => new \Symfony\Component\HttpFoundation\RequestMatcher('^/'))), $this->get('event_dispatcher'));
     }
 
     /**
@@ -1712,19 +1856,6 @@ class appDevDebugProjectContainer extends Container
     }
 
     /**
-     * Gets the 'security.firewall.map.context.login' service.
-     *
-     * This service is shared.
-     * This method always returns the same instance of the service.
-     *
-     * @return Symfony\Bundle\SecurityBundle\Security\FirewallContext A Symfony\Bundle\SecurityBundle\Security\FirewallContext instance.
-     */
-    protected function getSecurity_Firewall_Map_Context_LoginService()
-    {
-        return $this->services['security.firewall.map.context.login'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(), NULL);
-    }
-
-    /**
      * Gets the 'security.firewall.map.context.secured_area' service.
      *
      * This service is shared.
@@ -1736,25 +1867,30 @@ class appDevDebugProjectContainer extends Container
     {
         $a = $this->get('monolog.logger.security', ContainerInterface::NULL_ON_INVALID_REFERENCE);
         $b = $this->get('security.context');
-        $c = $this->get('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE);
-        $d = $this->get('router', ContainerInterface::NULL_ON_INVALID_REFERENCE);
-        $e = $this->get('http_kernel');
-        $f = $this->get('security.authentication.manager');
+        $c = $this->get('security.user.provider.concrete.user');
+        $d = $this->get('event_dispatcher', ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        $e = $this->get('router', ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        $f = $this->get('http_kernel');
+        $g = $this->get('security.authentication.manager');
+        $h = $this->get('security.access.decision_manager');
 
-        $g = new \Symfony\Component\HttpFoundation\RequestMatcher('^/demo/secured/hello/admin/');
+        $i = new \Symfony\Component\Security\Http\AccessMap();
 
-        $h = new \Symfony\Component\Security\Http\AccessMap();
-        $h->add($g, array(0 => 'ROLE_ADMIN'), NULL);
+        $j = new \Symfony\Component\Security\Http\HttpUtils($e, $e);
 
-        $i = new \Symfony\Component\Security\Http\HttpUtils($d, $d);
+        $k = new \Symfony\Component\Security\Http\RememberMe\TokenBasedRememberMeServices(array(0 => $c), 'ThisTokenIsNotSoSecretChangeIt', 'secured_area', array('lifetime' => 31536000, 'path' => '/', 'domain' => NULL, 'name' => 'REMEMBERME', 'secure' => false, 'httponly' => true, 'always_remember_me' => false, 'remember_me_parameter' => '_remember_me'), $a);
 
-        $j = new \Symfony\Component\Security\Http\Firewall\LogoutListener($b, $i, new \Symfony\Component\Security\Http\Logout\DefaultLogoutSuccessHandler($i, '_demo'), array('csrf_parameter' => '_csrf_token', 'intention' => 'logout', 'logout_path' => '_demo_logout'));
-        $j->addHandler(new \Symfony\Component\Security\Http\Logout\SessionLogoutHandler());
+        $l = new \Symfony\Component\Security\Http\Firewall\LogoutListener($b, $j, new \Symfony\Component\Security\Http\Logout\DefaultLogoutSuccessHandler($j, '/'), array('csrf_parameter' => '_csrf_token', 'intention' => 'logout', 'logout_path' => '/logout'));
+        $l->addHandler(new \Symfony\Component\Security\Http\Logout\SessionLogoutHandler());
+        $l->addHandler($k);
 
-        $k = new \Symfony\Component\Security\Http\Authentication\DefaultAuthenticationSuccessHandler($i, array('login_path' => '_demo_login', 'always_use_default_target_path' => false, 'default_target_path' => '/', 'target_path_parameter' => '_target_path', 'use_referer' => false));
-        $k->setProviderKey('secured_area');
+        $m = new \Symfony\Component\Security\Http\Authentication\DefaultAuthenticationSuccessHandler($j, array('login_path' => '/login', 'always_use_default_target_path' => false, 'default_target_path' => '/', 'target_path_parameter' => '_target_path', 'use_referer' => false));
+        $m->setProviderKey('secured_area');
 
-        return $this->services['security.firewall.map.context.secured_area'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => new \Symfony\Component\Security\Http\Firewall\ChannelListener($h, new \Symfony\Component\Security\Http\EntryPoint\RetryAuthenticationEntryPoint(80, 443), $a), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($b, array(0 => $this->get('security.user.provider.concrete.in_memory')), 'secured_area', $a, $c), 2 => $j, 3 => new \Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationListener($b, $f, new \Symfony\Component\Security\Http\Session\SessionAuthenticationStrategy('migrate'), $i, 'secured_area', $k, new \Symfony\Component\Security\Http\Authentication\DefaultAuthenticationFailureHandler($e, $i, array('login_path' => '_demo_login', 'failure_path' => NULL, 'failure_forward' => false, 'failure_path_parameter' => '_failure_path'), $a), array('check_path' => '_security_check', 'use_forward' => false, 'require_previous_session' => true, 'username_parameter' => '_username', 'password_parameter' => '_password', 'csrf_parameter' => '_csrf_token', 'intention' => 'authenticate', 'post_only' => true), $a, $c), 4 => new \Symfony\Component\Security\Http\Firewall\AccessListener($b, $this->get('security.access.decision_manager'), $h, $f)), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($b, $this->get('security.authentication.trust_resolver'), $i, 'secured_area', new \Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint($e, $i, '_demo_login', false), NULL, NULL, $a));
+        $n = new \Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationListener($b, $g, new \Symfony\Component\Security\Http\Session\SessionAuthenticationStrategy('migrate'), $j, 'secured_area', $m, new \Symfony\Component\Security\Http\Authentication\DefaultAuthenticationFailureHandler($f, $j, array('login_path' => '/login', 'failure_path' => '/?login_error', 'failure_forward' => false, 'failure_path_parameter' => '_failure_path'), $a), array('check_path' => '/login', 'use_forward' => false, 'require_previous_session' => true, 'username_parameter' => '_username', 'password_parameter' => '_password', 'csrf_parameter' => '_csrf_token', 'intention' => 'authenticate', 'post_only' => true), $a, $d);
+        $n->setRememberMeServices($k);
+
+        return $this->services['security.firewall.map.context.secured_area'] = new \Symfony\Bundle\SecurityBundle\Security\FirewallContext(array(0 => new \Symfony\Component\Security\Http\Firewall\ChannelListener($i, new \Symfony\Component\Security\Http\EntryPoint\RetryAuthenticationEntryPoint(80, 443), $a), 1 => new \Symfony\Component\Security\Http\Firewall\ContextListener($b, array(0 => $c), 'secured_area', $a, $d), 2 => $l, 3 => $n, 4 => new \Symfony\Component\Security\Http\Firewall\RememberMeListener($b, $k, $g, $a, $d), 5 => new \Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener($b, '52701fee7eb25', $a), 6 => new \Symfony\Component\Security\Http\Firewall\AccessListener($b, $h, $i, $g), 7 => new \Symfony\Component\Security\Http\Firewall\SwitchUserListener($b, $c, $this->get('security.user_checker'), 'secured_area', $h, $a, '_sadfiug3487rg_w8d8ew67t', 'ROLE_SUPER_ADMIN', $d)), new \Symfony\Component\Security\Http\Firewall\ExceptionListener($b, $this->get('security.authentication.trust_resolver'), $j, 'secured_area', new \Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint($f, $j, '/login', false), NULL, NULL, $a));
     }
 
     /**
@@ -1768,6 +1904,19 @@ class appDevDebugProjectContainer extends Container
     protected function getSecurity_Rememberme_ResponseListenerService()
     {
         return $this->services['security.rememberme.response_listener'] = new \Symfony\Component\Security\Http\RememberMe\ResponseListener();
+    }
+
+    /**
+     * Gets the 'security.role_hierarchy' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return Symfony\Component\Security\Core\Role\RoleHierarchy A Symfony\Component\Security\Core\Role\RoleHierarchy instance.
+     */
+    protected function getSecurity_RoleHierarchyService()
+    {
+        return $this->services['security.role_hierarchy'] = new \Symfony\Component\Security\Core\Role\RoleHierarchy(array('ROLE_ADMIN' => array(0 => 'ROLE_USER'), 'ROLE_SUPER_ADMIN' => array(0 => 'ROLE_USER', 1 => 'ROLE_ADMIN')));
     }
 
     /**
@@ -2242,7 +2391,7 @@ class appDevDebugProjectContainer extends Container
     {
         $this->services['templating.helper.logout_url'] = $instance = new \Symfony\Bundle\SecurityBundle\Templating\Helper\LogoutUrlHelper($this, $this->get('router'));
 
-        $instance->registerListener('secured_area', '_demo_logout', 'logout', '_csrf_token', NULL);
+        $instance->registerListener('secured_area', '/logout', 'logout', '_csrf_token', NULL);
 
         return $instance;
     }
@@ -2719,10 +2868,12 @@ class appDevDebugProjectContainer extends Container
      */
     protected function getTwigService()
     {
+        $a = $this->get('security.context');
+
         $this->services['twig'] = $instance = new \Twig_Environment($this->get('twig.loader'), array('debug' => true, 'strict_variables' => true, 'exception_controller' => 'twig.controller.exception:showAction', 'autoescape_service' => NULL, 'autoescape_service_method' => NULL, 'cache' => '/var/www/wiosloCMS/app/cache/dev/twig', 'charset' => 'UTF-8', 'paths' => array()));
 
         $instance->addExtension(new \Symfony\Bundle\SecurityBundle\Twig\Extension\LogoutUrlExtension($this->get('templating.helper.logout_url')));
-        $instance->addExtension(new \Symfony\Bridge\Twig\Extension\SecurityExtension($this->get('security.context', ContainerInterface::NULL_ON_INVALID_REFERENCE)));
+        $instance->addExtension(new \Symfony\Bridge\Twig\Extension\SecurityExtension($a));
         $instance->addExtension(new \Symfony\Bridge\Twig\Extension\TranslationExtension($this->get('translator')));
         $instance->addExtension(new \Symfony\Bundle\TwigBundle\Extension\AssetsExtension($this));
         $instance->addExtension(new \Symfony\Bundle\TwigBundle\Extension\ActionsExtension($this));
@@ -2734,6 +2885,7 @@ class appDevDebugProjectContainer extends Container
         $instance->addExtension(new \Twig_Extension_Debug());
         $instance->addExtension(new \Symfony\Bundle\AsseticBundle\Twig\AsseticExtension($this->get('assetic.asset_factory'), $this->get('templating.name_parser'), true, array(), array(), $this->get('assetic.value_supplier.default', ContainerInterface::NULL_ON_INVALID_REFERENCE)));
         $instance->addExtension($this->get('propel.twig.extension.syntax'));
+        $instance->addExtension(new \JMS\SecurityExtraBundle\Twig\SecurityExtension($a));
         $instance->addGlobal('app', $this->get('templating.globals'));
 
         return $instance;
@@ -2783,6 +2935,7 @@ class appDevDebugProjectContainer extends Container
         $instance->addPath('/var/www/wiosloCMS/vendor/symfony/swiftmailer-bundle/Symfony/Bundle/SwiftmailerBundle/Resources/views', 'Swiftmailer');
         $instance->addPath('/var/www/wiosloCMS/vendor/propel/propel-bundle/Propel/PropelBundle/Resources/views', 'Propel');
         $instance->addPath('/var/www/wiosloCMS/src/wiosloCMS/HomepageBundle/Resources/views', 'Homepage');
+        $instance->addPath('/var/www/wiosloCMS/src/wiosloCMS/UserBundle/Resources/views', 'User');
         $instance->addPath('/var/www/wiosloCMS/vendor/symfony/symfony/src/Symfony/Bundle/WebProfilerBundle/Resources/views', 'WebProfiler');
         $instance->addPath('/var/www/wiosloCMS/vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/views', 'SensioDistribution');
         $instance->addPath('/var/www/wiosloCMS/app/Resources/views');
@@ -2988,23 +3141,6 @@ class appDevDebugProjectContainer extends Container
     }
 
     /**
-     * Gets the 'security.access.decision_manager' service.
-     *
-     * This service is shared.
-     * This method always returns the same instance of the service.
-     *
-     * This service is private.
-     * If you want to be able to request this service from the container directly,
-     * make it public, otherwise you might end up with broken code.
-     *
-     * @return Symfony\Component\Security\Core\Authorization\AccessDecisionManager A Symfony\Component\Security\Core\Authorization\AccessDecisionManager instance.
-     */
-    protected function getSecurity_Access_DecisionManagerService()
-    {
-        return $this->services['security.access.decision_manager'] = new \Symfony\Component\Security\Core\Authorization\AccessDecisionManager(array(0 => new \Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter(new \Symfony\Component\Security\Core\Role\RoleHierarchy(array('ROLE_ADMIN' => array(0 => 'ROLE_USER'), 'ROLE_SUPER_ADMIN' => array(0 => 'ROLE_USER', 1 => 'ROLE_ADMIN', 2 => 'ROLE_ALLOWED_TO_SWITCH')))), 1 => new \Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter($this->get('security.authentication.trust_resolver'))), 'affirmative', false, true);
-    }
-
-    /**
      * Gets the 'security.authentication.manager' service.
      *
      * This service is shared.
@@ -3018,7 +3154,9 @@ class appDevDebugProjectContainer extends Container
      */
     protected function getSecurity_Authentication_ManagerService()
     {
-        $this->services['security.authentication.manager'] = $instance = new \Symfony\Component\Security\Core\Authentication\AuthenticationProviderManager(array(0 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($this->get('security.user.provider.concrete.in_memory'), new \Symfony\Component\Security\Core\User\UserChecker(), 'secured_area', $this->get('security.encoder_factory'), true)), true);
+        $a = $this->get('security.user_checker');
+
+        $this->services['security.authentication.manager'] = $instance = new \Symfony\Component\Security\Core\Authentication\AuthenticationProviderManager(array(0 => new \Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider($this->get('security.user.provider.concrete.user'), $a, 'secured_area', $this->get('security.encoder_factory'), true), 1 => new \Symfony\Component\Security\Core\Authentication\Provider\RememberMeAuthenticationProvider($a, 'ThisTokenIsNotSoSecretChangeIt', 'secured_area'), 2 => new \Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider('52701fee7eb25')), true);
 
         $instance->setEventDispatcher($this->get('event_dispatcher'));
 
@@ -3026,7 +3164,7 @@ class appDevDebugProjectContainer extends Container
     }
 
     /**
-     * Gets the 'security.authentication.trust_resolver' service.
+     * Gets the 'security.expressions.handler' service.
      *
      * This service is shared.
      * This method always returns the same instance of the service.
@@ -3035,15 +3173,15 @@ class appDevDebugProjectContainer extends Container
      * If you want to be able to request this service from the container directly,
      * make it public, otherwise you might end up with broken code.
      *
-     * @return Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver A Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver instance.
+     * @return JMS\SecurityExtraBundle\Security\Authorization\Expression\ContainerAwareExpressionHandler A JMS\SecurityExtraBundle\Security\Authorization\Expression\ContainerAwareExpressionHandler instance.
      */
-    protected function getSecurity_Authentication_TrustResolverService()
+    protected function getSecurity_Expressions_HandlerService()
     {
-        return $this->services['security.authentication.trust_resolver'] = new \Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver('Symfony\\Component\\Security\\Core\\Authentication\\Token\\AnonymousToken', 'Symfony\\Component\\Security\\Core\\Authentication\\Token\\RememberMeToken');
+        return $this->services['security.expressions.handler'] = new \JMS\SecurityExtraBundle\Security\Authorization\Expression\ContainerAwareExpressionHandler($this);
     }
 
     /**
-     * Gets the 'security.user.provider.concrete.in_memory' service.
+     * Gets the 'security.extra.metadata_factory' service.
      *
      * This service is shared.
      * This method always returns the same instance of the service.
@@ -3052,16 +3190,49 @@ class appDevDebugProjectContainer extends Container
      * If you want to be able to request this service from the container directly,
      * make it public, otherwise you might end up with broken code.
      *
-     * @return Symfony\Component\Security\Core\User\InMemoryUserProvider A Symfony\Component\Security\Core\User\InMemoryUserProvider instance.
+     * @return Metadata\MetadataFactory A Metadata\MetadataFactory instance.
      */
-    protected function getSecurity_User_Provider_Concrete_InMemoryService()
+    protected function getSecurity_Extra_MetadataFactoryService()
     {
-        $this->services['security.user.provider.concrete.in_memory'] = $instance = new \Symfony\Component\Security\Core\User\InMemoryUserProvider();
+        $this->services['security.extra.metadata_factory'] = $instance = new \Metadata\MetadataFactory(new \Metadata\Driver\LazyLoadingDriver($this, 'security.extra.metadata_driver'), new \Metadata\Cache\FileCache('/var/www/wiosloCMS/app/cache/dev/jms_security', true));
 
-        $instance->createUser(new \Symfony\Component\Security\Core\User\User('user', 'userpass', array(0 => 'ROLE_USER')));
-        $instance->createUser(new \Symfony\Component\Security\Core\User\User('admin', 'adminpass', array(0 => 'ROLE_ADMIN')));
+        $instance->setIncludeInterfaces(true);
 
         return $instance;
+    }
+
+    /**
+     * Gets the 'security.user.provider.concrete.user' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * This service is private.
+     * If you want to be able to request this service from the container directly,
+     * make it public, otherwise you might end up with broken code.
+     *
+     * @return Symfony\Bridge\Propel1\Security\User\PropelUserProvider A Symfony\Bridge\Propel1\Security\User\PropelUserProvider instance.
+     */
+    protected function getSecurity_User_Provider_Concrete_UserService()
+    {
+        return $this->services['security.user.provider.concrete.user'] = new \Symfony\Bridge\Propel1\Security\User\PropelUserProvider('wiosloCMS\\UserBundle\\Model\\User', 'Email');
+    }
+
+    /**
+     * Gets the 'security.user_checker' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * This service is private.
+     * If you want to be able to request this service from the container directly,
+     * make it public, otherwise you might end up with broken code.
+     *
+     * @return Symfony\Component\Security\Core\User\UserChecker A Symfony\Component\Security\Core\User\UserChecker instance.
+     */
+    protected function getSecurity_UserCheckerService()
+    {
+        return $this->services['security.user_checker'] = new \Symfony\Component\Security\Core\User\UserChecker();
     }
 
     /**
@@ -3198,7 +3369,10 @@ class appDevDebugProjectContainer extends Container
                 'AsseticBundle' => 'Symfony\\Bundle\\AsseticBundle\\AsseticBundle',
                 'SensioFrameworkExtraBundle' => 'Sensio\\Bundle\\FrameworkExtraBundle\\SensioFrameworkExtraBundle',
                 'PropelBundle' => 'Propel\\PropelBundle\\PropelBundle',
+                'JMSSecurityExtraBundle' => 'JMS\\SecurityExtraBundle\\JMSSecurityExtraBundle',
+                'JMSAopBundle' => 'JMS\\AopBundle\\JMSAopBundle',
                 'HomepageBundle' => 'wiosloCMS\\HomepageBundle\\HomepageBundle',
+                'UserBundle' => 'wiosloCMS\\UserBundle\\UserBundle',
                 'WebProfilerBundle' => 'Symfony\\Bundle\\WebProfilerBundle\\WebProfilerBundle',
                 'SensioDistributionBundle' => 'Sensio\\Bundle\\DistributionBundle\\SensioDistributionBundle',
                 'SensioGeneratorBundle' => 'Sensio\\Bundle\\GeneratorBundle\\SensioGeneratorBundle',
@@ -3464,7 +3638,6 @@ class appDevDebugProjectContainer extends Container
                 'ROLE_SUPER_ADMIN' => array(
                     0 => 'ROLE_USER',
                     1 => 'ROLE_ADMIN',
-                    2 => 'ROLE_ALLOWED_TO_SWITCH',
                 ),
             ),
             'twig.class' => 'Twig_Environment',
@@ -3630,6 +3803,50 @@ class appDevDebugProjectContainer extends Container
             'propel.security.acl.provider.model.class' => 'Propel\\PropelBundle\\Security\\Acl\\AuditableAclProvider',
             'propel.security.user.provider.class' => 'Symfony\\Bridge\\Propel1\\Security\\User\\PropelUserProvider',
             'propel.converter.propel.class' => 'Propel\\PropelBundle\\Request\\ParamConverter\\PropelParamConverter',
+            'security.secured_services' => array(
+
+            ),
+            'security.access.method_interceptor.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Interception\\MethodSecurityInterceptor',
+            'security.access.method_access_control' => array(
+
+            ),
+            'security.access.remembering_access_decision_manager.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\RememberingAccessDecisionManager',
+            'security.access.run_as_manager.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\RunAsManager',
+            'security.authentication.provider.run_as.class' => 'JMS\\SecurityExtraBundle\\Security\\Authentication\\Provider\\RunAsAuthenticationProvider',
+            'security.run_as.key' => 'RunAsToken',
+            'security.run_as.role_prefix' => 'ROLE_',
+            'security.access.after_invocation_manager.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\AfterInvocation\\AfterInvocationManager',
+            'security.access.after_invocation.acl_provider.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\AfterInvocation\\AclAfterInvocationProvider',
+            'security.access.iddqd_voter.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Voter\\IddqdVoter',
+            'security.extra.metadata_factory.class' => 'Metadata\\MetadataFactory',
+            'security.extra.lazy_loading_driver.class' => 'Metadata\\Driver\\LazyLoadingDriver',
+            'security.extra.driver_chain.class' => 'Metadata\\Driver\\DriverChain',
+            'security.extra.annotation_driver.class' => 'JMS\\SecurityExtraBundle\\Metadata\\Driver\\AnnotationDriver',
+            'security.extra.file_cache.class' => 'Metadata\\Cache\\FileCache',
+            'security.access.secure_all_services' => false,
+            'security.extra.cache_dir' => '/var/www/wiosloCMS/app/cache/dev/jms_security',
+            'security.acl.permission_evaluator.class' => 'JMS\\SecurityExtraBundle\\Security\\Acl\\Expression\\PermissionEvaluator',
+            'security.acl.has_permission_compiler.class' => 'JMS\\SecurityExtraBundle\\Security\\Acl\\Expression\\HasPermissionFunctionCompiler',
+            'security.expressions.voter.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Expression\\LazyLoadingExpressionVoter',
+            'security.expressions.handler.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Expression\\ContainerAwareExpressionHandler',
+            'security.expressions.compiler.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Expression\\ExpressionCompiler',
+            'security.expressions.expression.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Expression\\Expression',
+            'security.expressions.variable_compiler.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Expression\\Compiler\\ContainerAwareVariableCompiler',
+            'security.expressions.parameter_compiler.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Expression\\Compiler\\ParameterExpressionCompiler',
+            'security.expressions.reverse_interpreter.class' => 'JMS\\SecurityExtraBundle\\Security\\Authorization\\Expression\\ReverseInterpreter',
+            'security.extra.config_driver.class' => 'JMS\\SecurityExtraBundle\\Metadata\\Driver\\ConfigDriver',
+            'security.extra.twig_extension.class' => 'JMS\\SecurityExtraBundle\\Twig\\SecurityExtension',
+            'security.authenticated_voter.disabled' => false,
+            'security.role_voter.disabled' => false,
+            'security.acl_voter.disabled' => false,
+            'security.extra.iddqd_ignore_roles' => array(
+                0 => 'ROLE_PREVIOUS_ADMIN',
+            ),
+            'security.iddqd_aliases' => array(
+
+            ),
+            'jms_aop.cache_dir' => '/var/www/wiosloCMS/app/cache/dev/jms_aop',
+            'jms_aop.interceptor_loader.class' => 'JMS\\AopBundle\\Aop\\InterceptorLoader',
             'web_profiler.controller.profiler.class' => 'Symfony\\Bundle\\WebProfilerBundle\\Controller\\ProfilerController',
             'web_profiler.controller.router.class' => 'Symfony\\Bundle\\WebProfilerBundle\\Controller\\RouterController',
             'web_profiler.controller.exception.class' => 'Symfony\\Bundle\\WebProfilerBundle\\Controller\\ExceptionController',

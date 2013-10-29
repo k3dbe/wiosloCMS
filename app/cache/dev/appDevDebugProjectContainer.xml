@@ -16,7 +16,10 @@
       <parameter key="AsseticBundle">Symfony\Bundle\AsseticBundle\AsseticBundle</parameter>
       <parameter key="SensioFrameworkExtraBundle">Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle</parameter>
       <parameter key="PropelBundle">Propel\PropelBundle\PropelBundle</parameter>
+      <parameter key="JMSSecurityExtraBundle">JMS\SecurityExtraBundle\JMSSecurityExtraBundle</parameter>
+      <parameter key="JMSAopBundle">JMS\AopBundle\JMSAopBundle</parameter>
       <parameter key="HomepageBundle">wiosloCMS\HomepageBundle\HomepageBundle</parameter>
+      <parameter key="UserBundle">wiosloCMS\UserBundle\UserBundle</parameter>
       <parameter key="WebProfilerBundle">Symfony\Bundle\WebProfilerBundle\WebProfilerBundle</parameter>
       <parameter key="SensioDistributionBundle">Sensio\Bundle\DistributionBundle\SensioDistributionBundle</parameter>
       <parameter key="SensioGeneratorBundle">Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle</parameter>
@@ -274,7 +277,6 @@
       <parameter key="ROLE_SUPER_ADMIN" type="collection">
         <parameter>ROLE_USER</parameter>
         <parameter>ROLE_ADMIN</parameter>
-        <parameter>ROLE_ALLOWED_TO_SWITCH</parameter>
       </parameter>
     </parameter>
     <parameter key="twig.class">Twig_Environment</parameter>
@@ -430,6 +432,44 @@
     <parameter key="propel.security.acl.provider.model.class">Propel\PropelBundle\Security\Acl\AuditableAclProvider</parameter>
     <parameter key="propel.security.user.provider.class">Symfony\Bridge\Propel1\Security\User\PropelUserProvider</parameter>
     <parameter key="propel.converter.propel.class">Propel\PropelBundle\Request\ParamConverter\PropelParamConverter</parameter>
+    <parameter key="security.secured_services" type="collection"/>
+    <parameter key="security.access.method_interceptor.class">JMS\SecurityExtraBundle\Security\Authorization\Interception\MethodSecurityInterceptor</parameter>
+    <parameter key="security.access.method_access_control" type="collection"/>
+    <parameter key="security.access.remembering_access_decision_manager.class">JMS\SecurityExtraBundle\Security\Authorization\RememberingAccessDecisionManager</parameter>
+    <parameter key="security.access.run_as_manager.class">JMS\SecurityExtraBundle\Security\Authorization\RunAsManager</parameter>
+    <parameter key="security.authentication.provider.run_as.class">JMS\SecurityExtraBundle\Security\Authentication\Provider\RunAsAuthenticationProvider</parameter>
+    <parameter key="security.run_as.key">RunAsToken</parameter>
+    <parameter key="security.run_as.role_prefix">ROLE_</parameter>
+    <parameter key="security.access.after_invocation_manager.class">JMS\SecurityExtraBundle\Security\Authorization\AfterInvocation\AfterInvocationManager</parameter>
+    <parameter key="security.access.after_invocation.acl_provider.class">JMS\SecurityExtraBundle\Security\Authorization\AfterInvocation\AclAfterInvocationProvider</parameter>
+    <parameter key="security.access.iddqd_voter.class">JMS\SecurityExtraBundle\Security\Authorization\Voter\IddqdVoter</parameter>
+    <parameter key="security.extra.metadata_factory.class">Metadata\MetadataFactory</parameter>
+    <parameter key="security.extra.lazy_loading_driver.class">Metadata\Driver\LazyLoadingDriver</parameter>
+    <parameter key="security.extra.driver_chain.class">Metadata\Driver\DriverChain</parameter>
+    <parameter key="security.extra.annotation_driver.class">JMS\SecurityExtraBundle\Metadata\Driver\AnnotationDriver</parameter>
+    <parameter key="security.extra.file_cache.class">Metadata\Cache\FileCache</parameter>
+    <parameter key="security.access.secure_all_services">false</parameter>
+    <parameter key="security.extra.cache_dir">/var/www/wiosloCMS/app/cache/dev/jms_security</parameter>
+    <parameter key="security.acl.permission_evaluator.class">JMS\SecurityExtraBundle\Security\Acl\Expression\PermissionEvaluator</parameter>
+    <parameter key="security.acl.has_permission_compiler.class">JMS\SecurityExtraBundle\Security\Acl\Expression\HasPermissionFunctionCompiler</parameter>
+    <parameter key="security.expressions.voter.class">JMS\SecurityExtraBundle\Security\Authorization\Expression\LazyLoadingExpressionVoter</parameter>
+    <parameter key="security.expressions.handler.class">JMS\SecurityExtraBundle\Security\Authorization\Expression\ContainerAwareExpressionHandler</parameter>
+    <parameter key="security.expressions.compiler.class">JMS\SecurityExtraBundle\Security\Authorization\Expression\ExpressionCompiler</parameter>
+    <parameter key="security.expressions.expression.class">JMS\SecurityExtraBundle\Security\Authorization\Expression\Expression</parameter>
+    <parameter key="security.expressions.variable_compiler.class">JMS\SecurityExtraBundle\Security\Authorization\Expression\Compiler\ContainerAwareVariableCompiler</parameter>
+    <parameter key="security.expressions.parameter_compiler.class">JMS\SecurityExtraBundle\Security\Authorization\Expression\Compiler\ParameterExpressionCompiler</parameter>
+    <parameter key="security.expressions.reverse_interpreter.class">JMS\SecurityExtraBundle\Security\Authorization\Expression\ReverseInterpreter</parameter>
+    <parameter key="security.extra.config_driver.class">JMS\SecurityExtraBundle\Metadata\Driver\ConfigDriver</parameter>
+    <parameter key="security.extra.twig_extension.class">JMS\SecurityExtraBundle\Twig\SecurityExtension</parameter>
+    <parameter key="security.authenticated_voter.disabled">false</parameter>
+    <parameter key="security.role_voter.disabled">false</parameter>
+    <parameter key="security.acl_voter.disabled">false</parameter>
+    <parameter key="security.extra.iddqd_ignore_roles" type="collection">
+      <parameter>ROLE_PREVIOUS_ADMIN</parameter>
+    </parameter>
+    <parameter key="security.iddqd_aliases" type="collection"/>
+    <parameter key="jms_aop.cache_dir">/var/www/wiosloCMS/app/cache/dev/jms_aop</parameter>
+    <parameter key="jms_aop.interceptor_loader.class">JMS\AopBundle\Aop\InterceptorLoader</parameter>
     <parameter key="web_profiler.controller.profiler.class">Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController</parameter>
     <parameter key="web_profiler.controller.router.class">Symfony\Bundle\WebProfilerBundle\Controller\RouterController</parameter>
     <parameter key="web_profiler.controller.exception.class">Symfony\Bundle\WebProfilerBundle\Controller\ExceptionController</parameter>
@@ -1473,13 +1513,23 @@
       <argument type="collection">
         <argument type="service">
           <service class="Symfony\Component\Security\Core\Authentication\Provider\DaoAuthenticationProvider" public="false">
-            <argument type="service" id="security.user.provider.concrete.in_memory"/>
-            <argument type="service">
-              <service class="Symfony\Component\Security\Core\User\UserChecker" public="false"/>
-            </argument>
+            <argument type="service" id="security.user.provider.concrete.user"/>
+            <argument type="service" id="security.user_checker"/>
             <argument>secured_area</argument>
             <argument type="service" id="security.encoder_factory"/>
             <argument>true</argument>
+          </service>
+        </argument>
+        <argument type="service">
+          <service class="Symfony\Component\Security\Core\Authentication\Provider\RememberMeAuthenticationProvider" public="false">
+            <argument type="service" id="security.user_checker"/>
+            <argument>ThisTokenIsNotSoSecretChangeIt</argument>
+            <argument>secured_area</argument>
+          </service>
+        </argument>
+        <argument type="service">
+          <service class="Symfony\Component\Security\Core\Authentication\Provider\AnonymousAuthenticationProvider" public="false">
+            <argument>52701fee7eb25</argument>
           </service>
         </argument>
       </argument>
@@ -1488,41 +1538,59 @@
         <argument type="service" id="event_dispatcher"/>
       </call>
     </service>
-    <service id="security.authentication.trust_resolver" class="Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver" public="false">
+    <service id="security.authentication.trust_resolver" class="Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver">
       <argument>Symfony\Component\Security\Core\Authentication\Token\AnonymousToken</argument>
       <argument>Symfony\Component\Security\Core\Authentication\Token\RememberMeToken</argument>
     </service>
-    <service id="security.access.decision_manager" class="Symfony\Component\Security\Core\Authorization\AccessDecisionManager" public="false">
-      <argument type="collection">
-        <argument type="service">
-          <service class="Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter" public="false">
-            <tag name="security.voter" priority="245"/>
+    <service id="security.user_checker" class="Symfony\Component\Security\Core\User\UserChecker" public="false"/>
+    <service id="security.access.decision_manager" class="JMS\SecurityExtraBundle\Security\Authorization\RememberingAccessDecisionManager">
+      <argument type="service">
+        <service class="Symfony\Component\Security\Core\Authorization\AccessDecisionManager" public="false">
+          <argument type="collection">
             <argument type="service">
-              <service class="Symfony\Component\Security\Core\Role\RoleHierarchy" public="false">
-                <argument type="collection">
-                  <argument key="ROLE_ADMIN" type="collection">
-                    <argument>ROLE_USER</argument>
-                  </argument>
-                  <argument key="ROLE_SUPER_ADMIN" type="collection">
-                    <argument>ROLE_USER</argument>
-                    <argument>ROLE_ADMIN</argument>
-                    <argument>ROLE_ALLOWED_TO_SWITCH</argument>
-                  </argument>
-                </argument>
+              <service class="JMS\SecurityExtraBundle\Security\Authorization\Expression\LazyLoadingExpressionVoter" public="false">
+                <tag name="security.voter" priority="230"/>
+                <tag name="monolog.logger" channel="security"/>
+                <argument type="service" id="security.expressions.handler"/>
+                <argument type="service" id="monolog.logger.security" on-invalid="null"/>
+                <call method="setLazyCompiler">
+                  <argument type="service" id="service_container"/>
+                  <argument>security.expressions.compiler</argument>
+                </call>
+                <call method="setCacheDir">
+                  <argument>/var/www/wiosloCMS/app/cache/dev/jms_security/expressions</argument>
+                </call>
               </service>
             </argument>
-          </service>
+            <argument type="service">
+              <service class="Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter" public="false">
+                <tag name="security.voter" priority="245"/>
+                <argument type="service" id="security.role_hierarchy"/>
+              </service>
+            </argument>
+            <argument type="service">
+              <service class="Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter" public="false">
+                <tag name="security.voter" priority="250"/>
+                <argument type="service" id="security.authentication.trust_resolver"/>
+              </service>
+            </argument>
+          </argument>
+          <argument>affirmative</argument>
+          <argument>false</argument>
+          <argument>true</argument>
+        </service>
+      </argument>
+    </service>
+    <service id="security.role_hierarchy" class="Symfony\Component\Security\Core\Role\RoleHierarchy">
+      <argument type="collection">
+        <argument key="ROLE_ADMIN" type="collection">
+          <argument>ROLE_USER</argument>
         </argument>
-        <argument type="service">
-          <service class="Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter" public="false">
-            <tag name="security.voter" priority="250"/>
-            <argument type="service" id="security.authentication.trust_resolver"/>
-          </service>
+        <argument key="ROLE_SUPER_ADMIN" type="collection">
+          <argument>ROLE_USER</argument>
+          <argument>ROLE_ADMIN</argument>
         </argument>
       </argument>
-      <argument>affirmative</argument>
-      <argument>false</argument>
-      <argument>true</argument>
     </service>
     <service id="security.firewall" class="Symfony\Component\Security\Http\Firewall">
       <tag name="kernel.event_subscriber"/>
@@ -1535,14 +1603,9 @@
                 <argument>^/(_(profiler|wdt)|css|images|js)/</argument>
               </service>
             </argument>
-            <argument key="security.firewall.map.context.login" type="service">
-              <service class="Symfony\Component\HttpFoundation\RequestMatcher" public="false">
-                <argument>^/demo/secured/login$</argument>
-              </service>
-            </argument>
             <argument key="security.firewall.map.context.secured_area" type="service">
               <service class="Symfony\Component\HttpFoundation\RequestMatcher" public="false">
-                <argument>^/demo/secured/</argument>
+                <argument>^/</argument>
               </service>
             </argument>
           </argument>
@@ -1569,7 +1632,7 @@
       <argument type="service" id="router"/>
       <call method="registerListener">
         <argument>secured_area</argument>
-        <argument>_demo_logout</argument>
+        <argument>/logout</argument>
         <argument>logout</argument>
         <argument>_csrf_token</argument>
         <argument>null</argument>
@@ -1579,35 +1642,11 @@
       <tag name="templating.helper" alias="security"/>
       <argument type="service" id="security.context" on-invalid="ignore"/>
     </service>
-    <service id="security.user.provider.concrete.in_memory" class="Symfony\Component\Security\Core\User\InMemoryUserProvider" public="false">
-      <call method="createUser">
-        <argument type="service">
-          <service class="Symfony\Component\Security\Core\User\User" public="false">
-            <argument>user</argument>
-            <argument>userpass</argument>
-            <argument type="collection">
-              <argument>ROLE_USER</argument>
-            </argument>
-          </service>
-        </argument>
-      </call>
-      <call method="createUser">
-        <argument type="service">
-          <service class="Symfony\Component\Security\Core\User\User" public="false">
-            <argument>admin</argument>
-            <argument>adminpass</argument>
-            <argument type="collection">
-              <argument>ROLE_ADMIN</argument>
-            </argument>
-          </service>
-        </argument>
-      </call>
+    <service id="security.user.provider.concrete.user" class="Symfony\Bridge\Propel1\Security\User\PropelUserProvider" public="false">
+      <argument>wiosloCMS\UserBundle\Model\User</argument>
+      <argument>Email</argument>
     </service>
     <service id="security.firewall.map.context.dev" class="Symfony\Bundle\SecurityBundle\Security\FirewallContext">
-      <argument type="collection"/>
-      <argument>null</argument>
-    </service>
-    <service id="security.firewall.map.context.login" class="Symfony\Bundle\SecurityBundle\Security\FirewallContext">
       <argument type="collection"/>
       <argument>null</argument>
     </service>
@@ -1617,19 +1656,7 @@
           <service class="Symfony\Component\Security\Http\Firewall\ChannelListener" public="false">
             <tag name="monolog.logger" channel="security"/>
             <argument type="service">
-              <service class="Symfony\Component\Security\Http\AccessMap" public="false">
-                <call method="add">
-                  <argument type="service">
-                    <service class="Symfony\Component\HttpFoundation\RequestMatcher" public="false">
-                      <argument>^/demo/secured/hello/admin/</argument>
-                    </service>
-                  </argument>
-                  <argument type="collection">
-                    <argument>ROLE_ADMIN</argument>
-                  </argument>
-                  <argument>null</argument>
-                </call>
-              </service>
+              <service class="Symfony\Component\Security\Http\AccessMap" public="false"/>
             </argument>
             <argument type="service">
               <service class="Symfony\Component\Security\Http\EntryPoint\RetryAuthenticationEntryPoint" public="false">
@@ -1644,7 +1671,7 @@
           <service class="Symfony\Component\Security\Http\Firewall\ContextListener" public="false">
             <argument type="service" id="security.context"/>
             <argument type="collection">
-              <argument type="service" id="security.user.provider.concrete.in_memory"/>
+              <argument type="service" id="security.user.provider.concrete.user"/>
             </argument>
             <argument>secured_area</argument>
             <argument type="service" id="monolog.logger.security" on-invalid="null"/>
@@ -1668,24 +1695,46 @@
                     <argument type="service" id="router" on-invalid="null"/>
                   </service>
                 </argument>
-                <argument>_demo</argument>
+                <argument>/</argument>
               </service>
             </argument>
             <argument type="collection">
               <argument key="csrf_parameter">_csrf_token</argument>
               <argument key="intention">logout</argument>
-              <argument key="logout_path">_demo_logout</argument>
+              <argument key="logout_path">/logout</argument>
             </argument>
             <call method="addHandler">
               <argument type="service">
                 <service class="Symfony\Component\Security\Http\Logout\SessionLogoutHandler" public="false"/>
               </argument>
             </call>
+            <call method="addHandler">
+              <argument type="service">
+                <service class="Symfony\Component\Security\Http\RememberMe\TokenBasedRememberMeServices" public="false">
+                  <argument type="collection">
+                    <argument type="service" id="security.user.provider.concrete.user"/>
+                  </argument>
+                  <argument>ThisTokenIsNotSoSecretChangeIt</argument>
+                  <argument>secured_area</argument>
+                  <argument type="collection">
+                    <argument key="lifetime">31536000</argument>
+                    <argument key="path">/</argument>
+                    <argument key="domain">null</argument>
+                    <argument key="name">REMEMBERME</argument>
+                    <argument key="secure">false</argument>
+                    <argument key="httponly">true</argument>
+                    <argument key="always_remember_me">false</argument>
+                    <argument key="remember_me_parameter">_remember_me</argument>
+                  </argument>
+                  <argument type="service" id="monolog.logger.security" on-invalid="null"/>
+                </service>
+              </argument>
+            </call>
           </service>
         </argument>
         <argument type="service">
           <service class="Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationListener" public="false">
-            <tag name="security.remember_me_aware" id="secured_area" provider="security.user.provider.concrete.in_memory"/>
+            <tag name="security.remember_me_aware" id="secured_area" provider="security.user.provider.concrete.user"/>
             <argument type="service" id="security.context"/>
             <argument type="service" id="security.authentication.manager"/>
             <argument type="service">
@@ -1709,7 +1758,7 @@
                   </service>
                 </argument>
                 <argument type="collection">
-                  <argument key="login_path">_demo_login</argument>
+                  <argument key="login_path">/login</argument>
                   <argument key="always_use_default_target_path">false</argument>
                   <argument key="default_target_path">/</argument>
                   <argument key="target_path_parameter">_target_path</argument>
@@ -1730,8 +1779,8 @@
                   </service>
                 </argument>
                 <argument type="collection">
-                  <argument key="login_path">_demo_login</argument>
-                  <argument key="failure_path">null</argument>
+                  <argument key="login_path">/login</argument>
+                  <argument key="failure_path">/?login_error</argument>
                   <argument key="failure_forward">false</argument>
                   <argument key="failure_path_parameter">_failure_path</argument>
                 </argument>
@@ -1739,7 +1788,7 @@
               </service>
             </argument>
             <argument type="collection">
-              <argument key="check_path">_security_check</argument>
+              <argument key="check_path">/login</argument>
               <argument key="use_forward">false</argument>
               <argument key="require_previous_session">true</argument>
               <argument key="username_parameter">_username</argument>
@@ -1750,6 +1799,63 @@
             </argument>
             <argument type="service" id="monolog.logger.security" on-invalid="null"/>
             <argument type="service" id="event_dispatcher" on-invalid="null"/>
+            <call method="setRememberMeServices">
+              <argument type="service">
+                <service class="Symfony\Component\Security\Http\RememberMe\TokenBasedRememberMeServices" public="false">
+                  <argument type="collection">
+                    <argument type="service" id="security.user.provider.concrete.user"/>
+                  </argument>
+                  <argument>ThisTokenIsNotSoSecretChangeIt</argument>
+                  <argument>secured_area</argument>
+                  <argument type="collection">
+                    <argument key="lifetime">31536000</argument>
+                    <argument key="path">/</argument>
+                    <argument key="domain">null</argument>
+                    <argument key="name">REMEMBERME</argument>
+                    <argument key="secure">false</argument>
+                    <argument key="httponly">true</argument>
+                    <argument key="always_remember_me">false</argument>
+                    <argument key="remember_me_parameter">_remember_me</argument>
+                  </argument>
+                  <argument type="service" id="monolog.logger.security" on-invalid="null"/>
+                </service>
+              </argument>
+            </call>
+          </service>
+        </argument>
+        <argument type="service">
+          <service class="Symfony\Component\Security\Http\Firewall\RememberMeListener" public="false">
+            <argument type="service" id="security.context"/>
+            <argument type="service">
+              <service class="Symfony\Component\Security\Http\RememberMe\TokenBasedRememberMeServices" public="false">
+                <argument type="collection">
+                  <argument type="service" id="security.user.provider.concrete.user"/>
+                </argument>
+                <argument>ThisTokenIsNotSoSecretChangeIt</argument>
+                <argument>secured_area</argument>
+                <argument type="collection">
+                  <argument key="lifetime">31536000</argument>
+                  <argument key="path">/</argument>
+                  <argument key="domain">null</argument>
+                  <argument key="name">REMEMBERME</argument>
+                  <argument key="secure">false</argument>
+                  <argument key="httponly">true</argument>
+                  <argument key="always_remember_me">false</argument>
+                  <argument key="remember_me_parameter">_remember_me</argument>
+                </argument>
+                <argument type="service" id="monolog.logger.security" on-invalid="null"/>
+              </service>
+            </argument>
+            <argument type="service" id="security.authentication.manager"/>
+            <argument type="service" id="monolog.logger.security" on-invalid="null"/>
+            <argument type="service" id="event_dispatcher" on-invalid="null"/>
+          </service>
+        </argument>
+        <argument type="service">
+          <service class="Symfony\Component\Security\Http\Firewall\AnonymousAuthenticationListener" public="false">
+            <argument type="service" id="security.context"/>
+            <argument>52701fee7eb25</argument>
+            <argument type="service" id="monolog.logger.security" on-invalid="null"/>
           </service>
         </argument>
         <argument type="service">
@@ -1758,21 +1864,22 @@
             <argument type="service" id="security.context"/>
             <argument type="service" id="security.access.decision_manager"/>
             <argument type="service">
-              <service class="Symfony\Component\Security\Http\AccessMap" public="false">
-                <call method="add">
-                  <argument type="service">
-                    <service class="Symfony\Component\HttpFoundation\RequestMatcher" public="false">
-                      <argument>^/demo/secured/hello/admin/</argument>
-                    </service>
-                  </argument>
-                  <argument type="collection">
-                    <argument>ROLE_ADMIN</argument>
-                  </argument>
-                  <argument>null</argument>
-                </call>
-              </service>
+              <service class="Symfony\Component\Security\Http\AccessMap" public="false"/>
             </argument>
             <argument type="service" id="security.authentication.manager"/>
+          </service>
+        </argument>
+        <argument type="service">
+          <service class="Symfony\Component\Security\Http\Firewall\SwitchUserListener" public="false">
+            <argument type="service" id="security.context"/>
+            <argument type="service" id="security.user.provider.concrete.user"/>
+            <argument type="service" id="security.user_checker"/>
+            <argument>secured_area</argument>
+            <argument type="service" id="security.access.decision_manager"/>
+            <argument type="service" id="monolog.logger.security" on-invalid="null"/>
+            <argument>_sadfiug3487rg_w8d8ew67t</argument>
+            <argument>ROLE_SUPER_ADMIN</argument>
+            <argument type="service" id="event_dispatcher" on-invalid="null"/>
           </service>
         </argument>
       </argument>
@@ -1796,7 +1903,7 @@
                   <argument type="service" id="router" on-invalid="null"/>
                 </service>
               </argument>
-              <argument>_demo_login</argument>
+              <argument>/login</argument>
               <argument>false</argument>
             </service>
           </argument>
@@ -1933,6 +2040,14 @@
       </call>
       <call method="addExtension">
         <argument type="service" id="propel.twig.extension.syntax"/>
+      </call>
+      <call method="addExtension">
+        <argument type="service">
+          <service class="JMS\SecurityExtraBundle\Twig\SecurityExtension" public="false">
+            <tag name="twig.extension" alias="jms_security_extra"/>
+            <argument type="service" id="security.context"/>
+          </service>
+        </argument>
       </call>
       <call method="addGlobal">
         <argument>app</argument>
@@ -2161,6 +2276,96 @@
       <call method="setRouter">
         <argument type="service" id="router" on-invalid="null"/>
       </call>
+    </service>
+    <service id="security.access.method_interceptor" class="JMS\SecurityExtraBundle\Security\Authorization\Interception\MethodSecurityInterceptor">
+      <tag name="monolog.logger" channel="security"/>
+      <argument type="service" id="security.context"/>
+      <argument type="service" id="security.authentication.manager"/>
+      <argument type="service" id="security.access.decision_manager"/>
+      <argument type="service">
+        <service class="JMS\SecurityExtraBundle\Security\Authorization\AfterInvocation\AfterInvocationManager" public="false">
+          <argument type="collection"/>
+        </service>
+      </argument>
+      <argument type="service">
+        <service class="JMS\SecurityExtraBundle\Security\Authorization\RunAsManager" public="false">
+          <argument>RunAsToken</argument>
+          <argument>ROLE_</argument>
+        </service>
+      </argument>
+      <argument type="service" id="security.extra.metadata_factory"/>
+      <argument type="service" id="monolog.logger.security" on-invalid="null"/>
+    </service>
+    <service id="security.access.pointcut" class="JMS\SecurityExtraBundle\Security\Authorization\Interception\SecurityPointcut">
+      <tag name="jms_aop.pointcut" interceptor="security.access.method_interceptor"/>
+      <argument type="service" id="security.extra.metadata_factory"/>
+      <argument>false</argument>
+      <argument type="collection"/>
+      <call method="setSecuredClasses">
+        <argument type="collection"/>
+      </call>
+    </service>
+    <service id="security.extra.metadata_factory" class="Metadata\MetadataFactory" public="false">
+      <argument type="service">
+        <service class="Metadata\Driver\LazyLoadingDriver" public="false">
+          <argument type="service" id="service_container"/>
+          <argument>security.extra.metadata_driver</argument>
+        </service>
+      </argument>
+      <argument type="service">
+        <service class="Metadata\Cache\FileCache" public="false">
+          <argument>/var/www/wiosloCMS/app/cache/dev/jms_security</argument>
+          <argument>true</argument>
+        </service>
+      </argument>
+      <call method="setIncludeInterfaces">
+        <argument>true</argument>
+      </call>
+    </service>
+    <service id="security.expressions.reverse_interpreter" class="JMS\SecurityExtraBundle\Security\Authorization\Expression\ReverseInterpreter">
+      <argument type="service" id="security.expressions.compiler"/>
+      <argument type="service" id="security.expressions.handler"/>
+    </service>
+    <service id="security.expressions.handler" class="JMS\SecurityExtraBundle\Security\Authorization\Expression\ContainerAwareExpressionHandler" public="false">
+      <argument type="service" id="service_container"/>
+    </service>
+    <service id="security.expressions.compiler" class="JMS\SecurityExtraBundle\Security\Authorization\Expression\ExpressionCompiler">
+      <call method="addFunctionCompiler">
+        <argument type="service">
+          <service class="JMS\SecurityExtraBundle\Security\Acl\Expression\HasPermissionFunctionCompiler" public="false">
+            <tag name="security.expressions.function_compiler"/>
+            <tag name="security.expressions.variable" variable="permission_evaluator" service="security.acl.permission_evaluator"/>
+          </service>
+        </argument>
+      </call>
+      <call method="addTypeCompiler">
+        <argument type="service">
+          <service class="JMS\SecurityExtraBundle\Security\Authorization\Expression\Compiler\ParameterExpressionCompiler" public="false">
+            <tag name="security.expressions.type_compiler"/>
+          </service>
+        </argument>
+      </call>
+      <call method="addTypeCompiler">
+        <argument type="service">
+          <service class="JMS\SecurityExtraBundle\Security\Authorization\Expression\Compiler\ContainerAwareVariableCompiler" public="false">
+            <tag name="security.expressions.type_compiler"/>
+            <tag name="security.expressions.variable" variable="trust_resolver" service="security.authentication.trust_resolver"/>
+            <tag name="security.expressions.variable" variable="role_hierarchy" service="security.role_hierarchy"/>
+            <call method="setMaps">
+              <argument type="collection">
+                <argument key="trust_resolver">security.authentication.trust_resolver</argument>
+                <argument key="role_hierarchy">security.role_hierarchy</argument>
+                <argument key="permission_evaluator">security.acl.permission_evaluator</argument>
+              </argument>
+              <argument type="collection"/>
+            </call>
+          </service>
+        </argument>
+      </call>
+    </service>
+    <service id="jms_aop.pointcut_container" class="JMS\AopBundle\Aop\PointcutContainer"/>
+    <service id="jms_aop.interceptor_loader" class="JMS\AopBundle\Aop\InterceptorLoader">
+      <argument type="service" id="service_container"/>
     </service>
     <service id="web_profiler.controller.profiler" class="Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController">
       <argument type="service" id="router" on-invalid="null"/>
@@ -2447,10 +2652,12 @@
     </service>
     <service id="security.encoder_factory" class="Symfony\Component\Security\Core\Encoder\EncoderFactory">
       <argument type="collection">
-        <argument key="Symfony\Component\Security\Core\User\User" type="collection">
-          <argument key="class">%security.encoder.plain.class%</argument>
+        <argument key="wiosloCMS\UserBundle\Model\User" type="collection">
+          <argument key="class">%security.encoder.digest.class%</argument>
           <argument key="arguments" type="collection">
-            <argument>false</argument>
+            <argument>sha512</argument>
+            <argument>true</argument>
+            <argument>5000</argument>
           </argument>
         </argument>
       </argument>
@@ -2482,6 +2689,10 @@
       <call method="addPath">
         <argument>/var/www/wiosloCMS/src/wiosloCMS/HomepageBundle/Resources/views</argument>
         <argument>Homepage</argument>
+      </call>
+      <call method="addPath">
+        <argument>/var/www/wiosloCMS/src/wiosloCMS/UserBundle/Resources/views</argument>
+        <argument>User</argument>
       </call>
       <call method="addPath">
         <argument>/var/www/wiosloCMS/vendor/symfony/symfony/src/Symfony/Bundle/WebProfilerBundle/Resources/views</argument>
@@ -2571,6 +2782,15 @@
       <call method="setSourceIp">
         <argument>null</argument>
       </call>
+    </service>
+    <service id="security.extra.metadata_driver" class="Metadata\Driver\DriverChain">
+      <argument type="collection">
+        <argument type="service">
+          <service class="JMS\SecurityExtraBundle\Metadata\Driver\AnnotationDriver" public="false">
+            <argument type="service" id="annotation_reader"/>
+          </service>
+        </argument>
+      </argument>
     </service>
     <service id="session.storage" alias="session.storage.native"/>
     <service id="debug.templating.engine.twig" alias="templating"/>
