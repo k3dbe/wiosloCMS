@@ -1499,7 +1499,7 @@ class appDevDebugProjectContainer extends Container
      */
     protected function getPropel_ConfigurationService()
     {
-        return $this->services['propel.configuration'] = new \PropelConfiguration(array('datasources' => array('default' => array('adapter' => 'mysql', 'connection' => array('dsn' => 'mysql:host=127.0.0.1;dbname=wioslo;charset=UTF-8', 'user' => 'czarnolecki', 'password' => 'czarnolecki', 'classname' => 'DebugPDO', 'options' => array(), 'attributes' => array(), 'settings' => array())))));
+        return $this->services['propel.configuration'] = new \PropelConfiguration(array('datasources' => array('main' => array('adapter' => 'mysql', 'connection' => array('dsn' => 'mysql:host=127.0.0.1;dbname=wioslo;charset=UTF8', 'user' => 'czarnolecki', 'password' => 'czarnolecki', 'classname' => 'DebugPDO', 'options' => array(), 'attributes' => array(), 'settings' => array(), 'model_paths' => array(0 => 'src/', 1 => 'vendor/'))), 'default' => array('adapter' => 'mysql', 'connection' => array('dsn' => 'mysql:host=127.0.0.1;dbname=wioslo;charset=UTF8', 'user' => 'czarnolecki', 'password' => 'czarnolecki', 'classname' => 'DebugPDO', 'options' => array(), 'attributes' => array(), 'settings' => array(), 'model_paths' => array(0 => 'src/', 1 => 'vendor/'))))));
     }
 
     /**
@@ -3619,7 +3619,7 @@ class appDevDebugProjectContainer extends Container
             'propel.path' => '/var/www/wiosloCMS/app/../vendor/propel/propel1',
             'propel.phing_path' => '/var/www/wiosloCMS/app/../vendor/phing/phing/classes',
             'propel.logging' => true,
-            'propel.dbal.default_connection' => 'default',
+            'propel.dbal.default_connection' => 'main',
             'propel.configuration.class' => 'PropelConfiguration',
             'propel.logger.class' => 'Symfony\\Bridge\\Propel1\\Logger\\PropelLogger',
             'propel.data_collector.class' => 'Symfony\\Bridge\\Propel1\\DataCollector\\PropelDataCollector',

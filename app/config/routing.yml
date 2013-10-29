@@ -1,3 +1,7 @@
+user:
+    resource: "@UserBundle/Resources/config/routing.xml"
+    prefix:   /
+
 homepage:
     resource: "@HomepageBundle/Resources/config/routing.xml"
     prefix:   /

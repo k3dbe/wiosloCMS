@@ -419,7 +419,7 @@
     <parameter key="propel.path">/var/www/wiosloCMS/app/../vendor/propel/propel1</parameter>
     <parameter key="propel.phing_path">/var/www/wiosloCMS/app/../vendor/phing/phing/classes</parameter>
     <parameter key="propel.logging">true</parameter>
-    <parameter key="propel.dbal.default_connection">default</parameter>
+    <parameter key="propel.dbal.default_connection">main</parameter>
     <parameter key="propel.configuration.class">PropelConfiguration</parameter>
     <parameter key="propel.logger.class">Symfony\Bridge\Propel1\Logger\PropelLogger</parameter>
     <parameter key="propel.data_collector.class">Symfony\Bridge\Propel1\DataCollector\PropelDataCollector</parameter>
@@ -2104,16 +2104,36 @@
     <service id="propel.configuration" class="PropelConfiguration">
       <argument type="collection">
         <argument key="datasources" type="collection">
-          <argument key="default" type="collection">
+          <argument key="main" type="collection">
             <argument key="adapter">mysql</argument>
             <argument key="connection" type="collection">
-              <argument key="dsn">mysql:host=127.0.0.1;dbname=wioslo;charset=UTF-8</argument>
+              <argument key="dsn">mysql:host=127.0.0.1;dbname=wioslo;charset=UTF8</argument>
               <argument key="user">czarnolecki</argument>
               <argument key="password">czarnolecki</argument>
               <argument key="classname">DebugPDO</argument>
               <argument key="options" type="collection"/>
               <argument key="attributes" type="collection"/>
               <argument key="settings" type="collection"/>
+              <argument key="model_paths" type="collection">
+                <argument>src/</argument>
+                <argument>vendor/</argument>
+              </argument>
+            </argument>
+          </argument>
+          <argument key="default" type="collection">
+            <argument key="adapter">mysql</argument>
+            <argument key="connection" type="collection">
+              <argument key="dsn">mysql:host=127.0.0.1;dbname=wioslo;charset=UTF8</argument>
+              <argument key="user">czarnolecki</argument>
+              <argument key="password">czarnolecki</argument>
+              <argument key="classname">DebugPDO</argument>
+              <argument key="options" type="collection"/>
+              <argument key="attributes" type="collection"/>
+              <argument key="settings" type="collection"/>
+              <argument key="model_paths" type="collection">
+                <argument>src/</argument>
+                <argument>vendor/</argument>
+              </argument>
             </argument>
           </argument>
         </argument>

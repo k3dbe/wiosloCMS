@@ -39,11 +39,13 @@ swiftmailer:
     password:  %mailer_password%
     spool:     { type: memory }
 
-#Propel Configuration
+# Propel Configuration
 propel:
     dbal:
-        driver:     "%database_driver%"
-        user:       "%database_user%"
-        password:   "%database_password%"
-        dsn:        "%database_driver%:host=%database_host%;dbname=%database_name%;charset=UTF-8"
-
+        default_connection: main
+        connections:
+            main:
+                driver: %database_driver%
+                user: %database_user%
+                password: %database_password%
+                dsn: %database_driver%:host=%database_host%;dbname=%database_name%;charset=UTF8
