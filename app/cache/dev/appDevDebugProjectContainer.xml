@@ -14,8 +14,8 @@
       <parameter key="MonologBundle">Symfony\Bundle\MonologBundle\MonologBundle</parameter>
       <parameter key="SwiftmailerBundle">Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle</parameter>
       <parameter key="AsseticBundle">Symfony\Bundle\AsseticBundle\AsseticBundle</parameter>
-      <parameter key="DoctrineBundle">Doctrine\Bundle\DoctrineBundle\DoctrineBundle</parameter>
       <parameter key="SensioFrameworkExtraBundle">Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle</parameter>
+      <parameter key="PropelBundle">Propel\PropelBundle\PropelBundle</parameter>
       <parameter key="HomepageBundle">wiosloCMS\HomepageBundle\HomepageBundle</parameter>
       <parameter key="WebProfilerBundle">Symfony\Bundle\WebProfilerBundle\WebProfilerBundle</parameter>
       <parameter key="SensioDistributionBundle">Sensio\Bundle\DistributionBundle\SensioDistributionBundle</parameter>
@@ -26,9 +26,9 @@
     <parameter key="database_driver">pdo_mysql</parameter>
     <parameter key="database_host">127.0.0.1</parameter>
     <parameter key="database_port">null</parameter>
-    <parameter key="database_name">symfony</parameter>
-    <parameter key="database_user">root</parameter>
-    <parameter key="database_password">null</parameter>
+    <parameter key="database_name">wioslo</parameter>
+    <parameter key="database_user">czarnolecki</parameter>
+    <parameter key="database_password">czarnolecki</parameter>
     <parameter key="mailer_transport">smtp</parameter>
     <parameter key="mailer_host">127.0.0.1</parameter>
     <parameter key="mailer_user">null</parameter>
@@ -406,62 +406,6 @@
     <parameter key="assetic.cache.class">Assetic\Cache\FilesystemCache</parameter>
     <parameter key="assetic.use_controller_worker.class">Symfony\Bundle\AsseticBundle\Factory\Worker\UseControllerWorker</parameter>
     <parameter key="assetic.request_listener.class">Symfony\Bundle\AsseticBundle\EventListener\RequestListener</parameter>
-    <parameter key="doctrine.dbal.logger.chain.class">Doctrine\DBAL\Logging\LoggerChain</parameter>
-    <parameter key="doctrine.dbal.logger.profiling.class">Doctrine\DBAL\Logging\DebugStack</parameter>
-    <parameter key="doctrine.dbal.logger.class">Symfony\Bridge\Doctrine\Logger\DbalLogger</parameter>
-    <parameter key="doctrine.dbal.configuration.class">Doctrine\DBAL\Configuration</parameter>
-    <parameter key="doctrine.data_collector.class">Doctrine\Bundle\DoctrineBundle\DataCollector\DoctrineDataCollector</parameter>
-    <parameter key="doctrine.dbal.connection.event_manager.class">Symfony\Bridge\Doctrine\ContainerAwareEventManager</parameter>
-    <parameter key="doctrine.dbal.connection_factory.class">Doctrine\Bundle\DoctrineBundle\ConnectionFactory</parameter>
-    <parameter key="doctrine.dbal.events.mysql_session_init.class">Doctrine\DBAL\Event\Listeners\MysqlSessionInit</parameter>
-    <parameter key="doctrine.dbal.events.oracle_session_init.class">Doctrine\DBAL\Event\Listeners\OracleSessionInit</parameter>
-    <parameter key="doctrine.class">Doctrine\Bundle\DoctrineBundle\Registry</parameter>
-    <parameter key="doctrine.entity_managers" type="collection">
-      <parameter key="default">doctrine.orm.default_entity_manager</parameter>
-    </parameter>
-    <parameter key="doctrine.default_entity_manager">default</parameter>
-    <parameter key="doctrine.dbal.connection_factory.types" type="collection"/>
-    <parameter key="doctrine.connections" type="collection">
-      <parameter key="default">doctrine.dbal.default_connection</parameter>
-    </parameter>
-    <parameter key="doctrine.default_connection">default</parameter>
-    <parameter key="doctrine.orm.configuration.class">Doctrine\ORM\Configuration</parameter>
-    <parameter key="doctrine.orm.entity_manager.class">Doctrine\ORM\EntityManager</parameter>
-    <parameter key="doctrine.orm.manager_configurator.class">Doctrine\Bundle\DoctrineBundle\ManagerConfigurator</parameter>
-    <parameter key="doctrine.orm.cache.array.class">Doctrine\Common\Cache\ArrayCache</parameter>
-    <parameter key="doctrine.orm.cache.apc.class">Doctrine\Common\Cache\ApcCache</parameter>
-    <parameter key="doctrine.orm.cache.memcache.class">Doctrine\Common\Cache\MemcacheCache</parameter>
-    <parameter key="doctrine.orm.cache.memcache_host">localhost</parameter>
-    <parameter key="doctrine.orm.cache.memcache_port">11211</parameter>
-    <parameter key="doctrine.orm.cache.memcache_instance.class">Memcache</parameter>
-    <parameter key="doctrine.orm.cache.memcached.class">Doctrine\Common\Cache\MemcachedCache</parameter>
-    <parameter key="doctrine.orm.cache.memcached_host">localhost</parameter>
-    <parameter key="doctrine.orm.cache.memcached_port">11211</parameter>
-    <parameter key="doctrine.orm.cache.memcached_instance.class">Memcached</parameter>
-    <parameter key="doctrine.orm.cache.redis.class">Doctrine\Common\Cache\RedisCache</parameter>
-    <parameter key="doctrine.orm.cache.redis_host">localhost</parameter>
-    <parameter key="doctrine.orm.cache.redis_port">6379</parameter>
-    <parameter key="doctrine.orm.cache.redis_instance.class">Redis</parameter>
-    <parameter key="doctrine.orm.cache.xcache.class">Doctrine\Common\Cache\XcacheCache</parameter>
-    <parameter key="doctrine.orm.cache.wincache.class">Doctrine\Common\Cache\WinCacheCache</parameter>
-    <parameter key="doctrine.orm.cache.zenddata.class">Doctrine\Common\Cache\ZendDataCache</parameter>
-    <parameter key="doctrine.orm.metadata.driver_chain.class">Doctrine\ORM\Mapping\Driver\DriverChain</parameter>
-    <parameter key="doctrine.orm.metadata.annotation.class">Doctrine\ORM\Mapping\Driver\AnnotationDriver</parameter>
-    <parameter key="doctrine.orm.metadata.xml.class">Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver</parameter>
-    <parameter key="doctrine.orm.metadata.yml.class">Doctrine\ORM\Mapping\Driver\SimplifiedYamlDriver</parameter>
-    <parameter key="doctrine.orm.metadata.php.class">Doctrine\ORM\Mapping\Driver\PHPDriver</parameter>
-    <parameter key="doctrine.orm.metadata.staticphp.class">Doctrine\ORM\Mapping\Driver\StaticPHPDriver</parameter>
-    <parameter key="doctrine.orm.proxy_cache_warmer.class">Symfony\Bridge\Doctrine\CacheWarmer\ProxyCacheWarmer</parameter>
-    <parameter key="form.type_guesser.doctrine.class">Symfony\Bridge\Doctrine\Form\DoctrineOrmTypeGuesser</parameter>
-    <parameter key="doctrine.orm.validator.unique.class">Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntityValidator</parameter>
-    <parameter key="doctrine.orm.validator_initializer.class">Symfony\Bridge\Doctrine\Validator\DoctrineInitializer</parameter>
-    <parameter key="doctrine.orm.security.user.provider.class">Symfony\Bridge\Doctrine\Security\User\EntityUserProvider</parameter>
-    <parameter key="doctrine.orm.listeners.resolve_target_entity.class">Doctrine\ORM\Tools\ResolveTargetEntityListener</parameter>
-    <parameter key="doctrine.orm.naming_strategy.default.class">Doctrine\ORM\Mapping\DefaultNamingStrategy</parameter>
-    <parameter key="doctrine.orm.naming_strategy.underscore.class">Doctrine\ORM\Mapping\UnderscoreNamingStrategy</parameter>
-    <parameter key="doctrine.orm.auto_generate_proxy_classes">true</parameter>
-    <parameter key="doctrine.orm.proxy_dir">/var/www/wiosloCMS/app/cache/dev/doctrine/orm/Proxies</parameter>
-    <parameter key="doctrine.orm.proxy_namespace">Proxies</parameter>
     <parameter key="sensio_framework_extra.view.guesser.class">Sensio\Bundle\FrameworkExtraBundle\Templating\TemplateGuesser</parameter>
     <parameter key="sensio_framework_extra.controller.listener.class">Sensio\Bundle\FrameworkExtraBundle\EventListener\ControllerListener</parameter>
     <parameter key="sensio_framework_extra.routing.loader.annot_dir.class">Symfony\Component\Routing\Loader\AnnotationDirectoryLoader</parameter>
@@ -472,6 +416,20 @@
     <parameter key="sensio_framework_extra.converter.doctrine.class">Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\DoctrineParamConverter</parameter>
     <parameter key="sensio_framework_extra.converter.datetime.class">Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\DateTimeParamConverter</parameter>
     <parameter key="sensio_framework_extra.view.listener.class">Sensio\Bundle\FrameworkExtraBundle\EventListener\TemplateListener</parameter>
+    <parameter key="propel.path">/var/www/wiosloCMS/app/../vendor/propel/propel1</parameter>
+    <parameter key="propel.phing_path">/var/www/wiosloCMS/app/../vendor/phing/phing/classes</parameter>
+    <parameter key="propel.logging">true</parameter>
+    <parameter key="propel.dbal.default_connection">default</parameter>
+    <parameter key="propel.configuration.class">PropelConfiguration</parameter>
+    <parameter key="propel.logger.class">Symfony\Bridge\Propel1\Logger\PropelLogger</parameter>
+    <parameter key="propel.data_collector.class">Symfony\Bridge\Propel1\DataCollector\PropelDataCollector</parameter>
+    <parameter key="propel.build_properties.class">Propel\PropelBundle\DependencyInjection\Properties</parameter>
+    <parameter key="propel.form.type.model.class">Symfony\Bridge\Propel1\Form\Type\ModelType</parameter>
+    <parameter key="propel.twig.extension.syntax.class">Propel\PropelBundle\Twig\Extension\SyntaxExtension</parameter>
+    <parameter key="form.type_guesser.propel.class">Symfony\Bridge\Propel1\Form\PropelTypeGuesser</parameter>
+    <parameter key="propel.security.acl.provider.model.class">Propel\PropelBundle\Security\Acl\AuditableAclProvider</parameter>
+    <parameter key="propel.security.user.provider.class">Symfony\Bridge\Propel1\Security\User\PropelUserProvider</parameter>
+    <parameter key="propel.converter.propel.class">Propel\PropelBundle\Request\ParamConverter\PropelParamConverter</parameter>
     <parameter key="web_profiler.controller.profiler.class">Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController</parameter>
     <parameter key="web_profiler.controller.router.class">Symfony\Bundle\WebProfilerBundle\Controller\RouterController</parameter>
     <parameter key="web_profiler.controller.exception.class">Symfony\Bundle\WebProfilerBundle\Controller\ExceptionController</parameter>
@@ -521,9 +479,9 @@
         <parameter>swiftmailer</parameter>
         <parameter>@Swiftmailer/Collector/swiftmailer.html.twig</parameter>
       </parameter>
-      <parameter key="data_collector.doctrine" type="collection">
-        <parameter>db</parameter>
-        <parameter>DoctrineBundle:Collector:db</parameter>
+      <parameter key="propel.data_collector" type="collection">
+        <parameter>propel</parameter>
+        <parameter>PropelBundle:Collector:propel</parameter>
       </parameter>
     </parameter>
   </parameters>
@@ -701,12 +659,6 @@
                 <argument>/var/www/wiosloCMS/app/Resources</argument>
               </service>
             </argument>
-          </service>
-        </argument>
-        <argument type="service">
-          <service class="Symfony\Bridge\Doctrine\CacheWarmer\ProxyCacheWarmer" public="false">
-            <tag name="kernel.cache_warmer"/>
-            <argument type="service" id="doctrine"/>
           </service>
         </argument>
       </argument>
@@ -1044,7 +996,7 @@
               <argument key="submit">form.type.submit</argument>
               <argument key="reset">form.type.reset</argument>
               <argument key="currency">form.type.currency</argument>
-              <argument key="entity">form.type.entity</argument>
+              <argument key="model">propel.form.type.model</argument>
             </argument>
             <argument type="collection">
               <argument key="form" type="collection">
@@ -1061,7 +1013,7 @@
             </argument>
             <argument type="collection">
               <argument>form.type_guesser.validator</argument>
-              <argument>form.type_guesser.doctrine</argument>
+              <argument>form.type_guesser.propel</argument>
             </argument>
           </service>
         </argument>
@@ -1270,15 +1222,12 @@
           <argument type="service" id="service_container"/>
           <argument type="collection">
             <argument key="security.validator.user_password">security.validator.user_password</argument>
-            <argument key="doctrine.orm.validator.unique">doctrine.orm.validator.unique</argument>
           </argument>
         </service>
       </argument>
       <argument type="service" id="translator.default"/>
       <argument>validators</argument>
-      <argument type="collection">
-        <argument type="service" id="doctrine.orm.validator_initializer"/>
-      </argument>
+      <argument type="collection"/>
     </service>
     <service id="validator.mapping.class_metadata_factory" class="Symfony\Component\Validator\Mapping\ClassMetadataFactory" public="false">
       <argument type="service">
@@ -1397,13 +1346,10 @@
       </call>
       <call method="add">
         <argument type="service">
-          <service class="Doctrine\Bundle\DoctrineBundle\DataCollector\DoctrineDataCollector" public="false">
-            <tag name="data_collector" template="DoctrineBundle:Collector:db" id="db"/>
-            <argument type="service" id="doctrine"/>
-            <call method="addLogger">
-              <argument>default</argument>
-              <argument type="service" id="doctrine.dbal.logger.profiling.default"/>
-            </call>
+          <service class="Symfony\Bridge\Propel1\DataCollector\PropelDataCollector" public="false">
+            <tag name="data_collector" template="PropelBundle:Collector:propel" id="propel"/>
+            <argument type="service" id="propel.logger"/>
+            <argument type="service" id="propel.configuration"/>
           </service>
         </argument>
       </call>
@@ -1986,11 +1932,7 @@
         </argument>
       </call>
       <call method="addExtension">
-        <argument type="service">
-          <service class="Doctrine\Bundle\DoctrineBundle\Twig\DoctrineExtension" public="false">
-            <tag name="twig.extension"/>
-          </service>
-        </argument>
+        <argument type="service" id="propel.twig.extension.syntax"/>
       </call>
       <call method="addGlobal">
         <argument>app</argument>
@@ -2117,144 +2059,6 @@
     <service id="assetic.request_listener" class="Symfony\Bundle\AsseticBundle\EventListener\RequestListener">
       <tag name="kernel.event_listener" event="kernel.request" method="onKernelRequest"/>
     </service>
-    <service id="doctrine.dbal.connection_factory" class="Doctrine\Bundle\DoctrineBundle\ConnectionFactory">
-      <argument type="collection"/>
-    </service>
-    <service id="doctrine" class="Doctrine\Bundle\DoctrineBundle\Registry">
-      <argument type="service" id="service_container"/>
-      <argument type="collection">
-        <argument key="default">doctrine.dbal.default_connection</argument>
-      </argument>
-      <argument type="collection">
-        <argument key="default">doctrine.orm.default_entity_manager</argument>
-      </argument>
-      <argument>default</argument>
-      <argument>default</argument>
-    </service>
-    <service id="doctrine.dbal.logger.profiling.default" class="Doctrine\DBAL\Logging\DebugStack" public="false"/>
-    <service id="doctrine.dbal.default_connection" class="stdClass" factory-method="createConnection" factory-service="doctrine.dbal.connection_factory">
-      <argument type="collection">
-        <argument key="dbname">symfony</argument>
-        <argument key="host">127.0.0.1</argument>
-        <argument key="port">null</argument>
-        <argument key="user">root</argument>
-        <argument key="password">null</argument>
-        <argument key="charset">UTF8</argument>
-        <argument key="driver">pdo_mysql</argument>
-        <argument key="driverOptions" type="collection"/>
-      </argument>
-      <argument type="service">
-        <service class="Doctrine\DBAL\Configuration" public="false">
-          <call method="setSQLLogger">
-            <argument type="service">
-              <service class="Doctrine\DBAL\Logging\LoggerChain" public="false">
-                <call method="addLogger">
-                  <argument type="service">
-                    <service class="Symfony\Bridge\Doctrine\Logger\DbalLogger" public="false">
-                      <tag name="monolog.logger" channel="doctrine"/>
-                      <argument type="service" id="monolog.logger.doctrine" on-invalid="null"/>
-                      <argument type="service" id="debug.stopwatch" on-invalid="null"/>
-                    </service>
-                  </argument>
-                </call>
-                <call method="addLogger">
-                  <argument type="service" id="doctrine.dbal.logger.profiling.default"/>
-                </call>
-              </service>
-            </argument>
-          </call>
-        </service>
-      </argument>
-      <argument type="service">
-        <service class="Symfony\Bridge\Doctrine\ContainerAwareEventManager" public="false">
-          <argument type="service" id="service_container"/>
-        </service>
-      </argument>
-      <argument type="collection"/>
-    </service>
-    <service id="form.type_guesser.doctrine" class="Symfony\Bridge\Doctrine\Form\DoctrineOrmTypeGuesser">
-      <tag name="form.type_guesser"/>
-      <argument type="service" id="doctrine"/>
-    </service>
-    <service id="form.type.entity" class="Symfony\Bridge\Doctrine\Form\Type\EntityType">
-      <tag name="form.type" alias="entity"/>
-      <argument type="service" id="doctrine"/>
-    </service>
-    <service id="doctrine.orm.validator.unique" class="Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntityValidator">
-      <tag name="validator.constraint_validator" alias="doctrine.orm.validator.unique"/>
-      <argument type="service" id="doctrine"/>
-    </service>
-    <service id="doctrine.orm.validator_initializer" class="Symfony\Bridge\Doctrine\Validator\DoctrineInitializer">
-      <tag name="validator.initializer"/>
-      <argument type="service" id="doctrine"/>
-    </service>
-    <service id="doctrine.orm.default_manager_configurator" class="Doctrine\Bundle\DoctrineBundle\ManagerConfigurator">
-      <argument type="collection"/>
-      <argument type="collection"/>
-    </service>
-    <service id="doctrine.orm.default_entity_manager" class="Doctrine\ORM\EntityManager" factory-method="create">
-      <argument type="service" id="doctrine.dbal.default_connection"/>
-      <argument type="service">
-        <service class="Doctrine\ORM\Configuration" public="false">
-          <call method="setEntityNamespaces">
-            <argument type="collection"/>
-          </call>
-          <call method="setMetadataCacheImpl">
-            <argument type="service">
-              <service class="Doctrine\Common\Cache\ArrayCache" public="false">
-                <call method="setNamespace">
-                  <argument>sf2orm_default_d5ec16c3f8a0c6946442cdcf6178526a</argument>
-                </call>
-              </service>
-            </argument>
-          </call>
-          <call method="setQueryCacheImpl">
-            <argument type="service">
-              <service class="Doctrine\Common\Cache\ArrayCache" public="false">
-                <call method="setNamespace">
-                  <argument>sf2orm_default_d5ec16c3f8a0c6946442cdcf6178526a</argument>
-                </call>
-              </service>
-            </argument>
-          </call>
-          <call method="setResultCacheImpl">
-            <argument type="service">
-              <service class="Doctrine\Common\Cache\ArrayCache" public="false">
-                <call method="setNamespace">
-                  <argument>sf2orm_default_d5ec16c3f8a0c6946442cdcf6178526a</argument>
-                </call>
-              </service>
-            </argument>
-          </call>
-          <call method="setMetadataDriverImpl">
-            <argument type="service">
-              <service class="Doctrine\ORM\Mapping\Driver\DriverChain" public="false"/>
-            </argument>
-          </call>
-          <call method="setProxyDir">
-            <argument>/var/www/wiosloCMS/app/cache/dev/doctrine/orm/Proxies</argument>
-          </call>
-          <call method="setProxyNamespace">
-            <argument>Proxies</argument>
-          </call>
-          <call method="setAutoGenerateProxyClasses">
-            <argument>true</argument>
-          </call>
-          <call method="setClassMetadataFactoryName">
-            <argument>Doctrine\ORM\Mapping\ClassMetadataFactory</argument>
-          </call>
-          <call method="setDefaultRepositoryClassName">
-            <argument>Doctrine\ORM\EntityRepository</argument>
-          </call>
-          <call method="setNamingStrategy">
-            <argument type="service">
-              <service class="Doctrine\ORM\Mapping\DefaultNamingStrategy" public="false"/>
-            </argument>
-          </call>
-        </service>
-      </argument>
-      <configurator service="doctrine.orm.default_manager_configurator" method="configure"/>
-    </service>
     <service id="sensio_framework_extra.view.guesser" class="Sensio\Bundle\FrameworkExtraBundle\Templating\TemplateGuesser">
       <argument type="service" id="kernel"/>
     </service>
@@ -2277,10 +2081,15 @@
         <argument>0</argument>
         <argument>datetime</argument>
       </call>
+      <call method="add">
+        <argument type="service" id="propel.converter.propel.orm"/>
+        <argument>1</argument>
+        <argument>propel</argument>
+      </call>
     </service>
     <service id="sensio_framework_extra.converter.doctrine.orm" class="Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\DoctrineParamConverter">
       <tag name="request.param_converter" converter="doctrine.orm"/>
-      <argument type="service" id="doctrine" on-invalid="ignore"/>
+      <argument>null</argument>
     </service>
     <service id="sensio_framework_extra.converter.datetime" class="Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\DateTimeParamConverter">
       <tag name="request.param_converter" converter="datetime"/>
@@ -2291,6 +2100,47 @@
     </service>
     <service id="sensio_framework_extra.cache.listener" class="Sensio\Bundle\FrameworkExtraBundle\EventListener\CacheListener">
       <tag name="kernel.event_subscriber"/>
+    </service>
+    <service id="propel.configuration" class="PropelConfiguration">
+      <argument type="collection">
+        <argument key="datasources" type="collection">
+          <argument key="default" type="collection">
+            <argument key="adapter">mysql</argument>
+            <argument key="connection" type="collection">
+              <argument key="dsn">mysql:host=127.0.0.1;dbname=wioslo;charset=UTF-8</argument>
+              <argument key="user">czarnolecki</argument>
+              <argument key="password">czarnolecki</argument>
+              <argument key="classname">DebugPDO</argument>
+              <argument key="options" type="collection"/>
+              <argument key="attributes" type="collection"/>
+              <argument key="settings" type="collection"/>
+            </argument>
+          </argument>
+        </argument>
+      </argument>
+    </service>
+    <service id="propel.build_properties" class="Propel\PropelBundle\DependencyInjection\Properties">
+      <argument type="collection"/>
+    </service>
+    <service id="propel.logger" class="Symfony\Bridge\Propel1\Logger\PropelLogger">
+      <tag name="monolog.logger" channel="propel"/>
+      <argument type="service" id="monolog.logger.propel" on-invalid="null"/>
+      <argument type="service" id="debug.stopwatch" on-invalid="null"/>
+    </service>
+    <service id="propel.form.type.model" class="Symfony\Bridge\Propel1\Form\Type\ModelType">
+      <tag name="form.type" alias="model"/>
+    </service>
+    <service id="propel.twig.extension.syntax" class="Propel\PropelBundle\Twig\Extension\SyntaxExtension">
+      <tag name="twig.extension"/>
+    </service>
+    <service id="form.type_guesser.propel" class="Symfony\Bridge\Propel1\Form\PropelTypeGuesser">
+      <tag name="form.type_guesser"/>
+    </service>
+    <service id="propel.converter.propel.orm" class="Propel\PropelBundle\Request\ParamConverter\PropelParamConverter">
+      <tag name="request.param_converter" converter="propel" priority="1"/>
+      <call method="setRouter">
+        <argument type="service" id="router" on-invalid="null"/>
+      </call>
     </service>
     <service id="web_profiler.controller.profiler" class="Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController">
       <argument type="service" id="router" on-invalid="null"/>
@@ -2337,9 +2187,9 @@
           <argument>swiftmailer</argument>
           <argument>@Swiftmailer/Collector/swiftmailer.html.twig</argument>
         </argument>
-        <argument key="data_collector.doctrine" type="collection">
-          <argument>db</argument>
-          <argument>DoctrineBundle:Collector:db</argument>
+        <argument key="propel.data_collector" type="collection">
+          <argument>propel</argument>
+          <argument>PropelBundle:Collector:propel</argument>
         </argument>
       </argument>
       <argument>bottom</argument>
@@ -2484,8 +2334,8 @@
         <argument type="service" id="monolog.handler.debug"/>
       </call>
     </service>
-    <service id="monolog.logger.doctrine" class="Symfony\Bridge\Monolog\Logger">
-      <argument>doctrine</argument>
+    <service id="monolog.logger.propel" class="Symfony\Bridge\Monolog\Logger">
+      <argument>propel</argument>
       <call method="pushHandler">
         <argument type="service" id="monolog.handler.chromephp"/>
       </call>
@@ -2606,8 +2456,8 @@
         <argument>Swiftmailer</argument>
       </call>
       <call method="addPath">
-        <argument>/var/www/wiosloCMS/vendor/doctrine/doctrine-bundle/Doctrine/Bundle/DoctrineBundle/Resources/views</argument>
-        <argument>Doctrine</argument>
+        <argument>/var/www/wiosloCMS/vendor/propel/propel-bundle/Propel/PropelBundle/Resources/views</argument>
+        <argument>Propel</argument>
       </call>
       <call method="addPath">
         <argument>/var/www/wiosloCMS/src/wiosloCMS/HomepageBundle/Resources/views</argument>
@@ -2710,8 +2560,6 @@
     <service id="swiftmailer.mailer" alias="swiftmailer.mailer.default"/>
     <service id="swiftmailer.transport" alias="swiftmailer.mailer.default.transport"/>
     <service id="mailer" alias="swiftmailer.mailer.default"/>
-    <service id="database_connection" alias="doctrine.dbal.default_connection"/>
-    <service id="doctrine.orm.entity_manager" alias="doctrine.orm.default_entity_manager"/>
     <service id="sensio.distribution.webconfigurator" alias="sensio_distribution.webconfigurator"/>
   </services>
 </container>
