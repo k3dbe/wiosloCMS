@@ -32,7 +32,7 @@ class RegisterController extends Controller
                 $user->setPassword($encoder->encodePassword($user->getPassword(), $user->getSalt()));
                 $user->save();
 
-                return new Response('USER DODANY');
+                return $this->forward('HomepageBundle:Authenticated:index');
             }
         }
 
