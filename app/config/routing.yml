@@ -1,0 +1,4 @@
+homepage:
+    resource: "@HomepageBundle/Resources/config/routing.xml"
+    prefix:   /
+
