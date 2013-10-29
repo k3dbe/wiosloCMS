@@ -51,7 +51,7 @@ class UserTableMap extends TableMap
         $this->addColumn('city', 'City', 'VARCHAR', false, 500, null);
         $this->addColumn('birthday', 'Birthday', 'DATE', false, null, null);
         $this->addColumn('gender', 'Gender', 'TINYINT', false, null, null);
-        $this->addColumn('password', 'Password', 'VARCHAR', false, 50, null);
+        $this->addColumn('password', 'Password', 'VARCHAR', false, 130, null);
         $this->addColumn('registered_at', 'RegisteredAt', 'TIMESTAMP', true, null, 'CURRENT_TIMESTAMP');
         // validators
     } // initialize()
