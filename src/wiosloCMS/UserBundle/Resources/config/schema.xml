@@ -12,7 +12,7 @@
 		<column name="city" phpName="City" type="VARCHAR" size="500" required="false"/>
 		<column name="birthday" phpName="Birthday" type="DATE" required="false"/>
 		<column name="gender" phpName="Gender" type="TINYINT" required="false"/>
-		<column name="password" phpName="Password" type="VARCHAR" size="50" required="false"/>
+		<column name="password" phpName="Password" type="VARCHAR" size="130" required="false"/>
 		<column name="registered_at" phpName="RegisteredAt" type="TIMESTAMP" required="true" defaultExpr="CURRENT_TIMESTAMP"/>
 
 		<unique name="username">

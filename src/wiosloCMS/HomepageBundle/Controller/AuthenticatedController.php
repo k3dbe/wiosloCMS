@@ -2,11 +2,11 @@
 
 namespace wiosloCMS\HomepageBundle\Controller;
 
-use Propel\PropelBundle\Tests\Fixtures\Model\User;
+use wiosloCMS\UserBundle\Model\User;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class DefaultController extends Controller
+class AuthenticatedController extends Controller
 {
     public function indexAction()
     {
