@@ -14,7 +14,7 @@ class PhotoController extends Controller
     public function addAction(Request $request)
     {
         if (!$this->get('security.context')->isGranted('ROLE_USER')) {
-            throw new AccessDeniedException();
+            //throw new AccessDeniedException();
         }
 
         $photo = new Photo();

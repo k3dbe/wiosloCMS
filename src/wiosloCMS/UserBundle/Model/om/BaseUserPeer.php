@@ -578,6 +578,10 @@ abstract class BaseUserPeer
             $criteria = $values->buildCriteria(); // build Criteria from User object
         }
 
+        if ($criteria->containsKey(UserPeer::ID) && $criteria->keyContainsValue(UserPeer::ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.UserPeer::ID.')');
+        }
+
 
         // Set the correct dbName
         $criteria->setDbName(UserPeer::DATABASE_NAME);

@@ -40,7 +40,7 @@ class UserTableMap extends TableMap
         $this->setPhpName('User');
         $this->setClassname('wiosloCMS\\UserBundle\\Model\\User');
         $this->setPackage('src.wiosloCMS.UserBundle.Model');
-        $this->setUseIdGenerator(false);
+        $this->setUseIdGenerator(true);
         // columns
         $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
         $this->addColumn('uri', 'Uri', 'VARCHAR', true, 250, null);
