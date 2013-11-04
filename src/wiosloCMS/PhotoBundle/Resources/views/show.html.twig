@@ -1,0 +1,12 @@
+{% extends "::base.html.twig" %}
+
+{% block body %}
+    <span>
+        {% for photo in photos %}
+            <hr>
+            <h1>{{ photo.getName() }}</h1>
+            <h3>{{ photo.getDescription() }}</h3>
+            <img src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
+        {% endfor %}
+    </span>
+{% endblock %}

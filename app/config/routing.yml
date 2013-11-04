@@ -8,7 +8,7 @@ homepage:
 
 photo:
     resource: "@PhotoBundle/Resources/config/routing.xml"
-    prefix:   /
+    prefix:   /photo/
 
 register:
     pattern:  /register

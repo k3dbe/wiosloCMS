@@ -1,5 +1,10 @@
 {% extends "::base.html.twig" %}
 
 {% block body %}
-    <a href="{{ path('homepage') }}logout">WYLOGOWANIE</a>
+
+    <a href="{{ path('photo_add') }}">DODAJ ZDJĘCIE</a>
+    <a href="{{ path('logout') }}">WYLOGOWANIE</a>
+
+    {{ render(controller('PhotoBundle:Photo:show')) }}
+
 {% endblock %}
