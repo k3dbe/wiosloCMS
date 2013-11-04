@@ -14,7 +14,7 @@ class PhotoController extends Controller
     public function addAction(Request $request)
     {
         if (!$this->get('security.context')->isGranted('ROLE_USER')) {
-            //throw new AccessDeniedException();
+            throw new AccessDeniedException();
         }
 
         $photo = new Photo();
@@ -33,7 +33,9 @@ class PhotoController extends Controller
 
     public function showAction()
     {
-        $photos = PhotoQuery::create()->orderByCreatedAt(\Criteria::DESC)->find();
+        $photos = PhotoQuery::create()
+            ->orderByCreatedAt(\Criteria::DESC)
+            ->find();
 
         return $this->render('PhotoBundle::show.html.twig', ['photos' => $photos]);
     }

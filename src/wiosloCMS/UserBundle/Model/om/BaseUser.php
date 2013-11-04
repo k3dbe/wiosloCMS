@@ -17,6 +17,10 @@ use \PropelObjectCollection;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
+use wiosloCMS\PhotoBundle\Model\Rating;
+use wiosloCMS\PhotoBundle\Model\RatingQuery;
+use wiosloCMS\PhotoBundle\Model\UserRate;
+use wiosloCMS\PhotoBundle\Model\UserRateQuery;
 use wiosloCMS\UserBundle\Model\Role;
 use wiosloCMS\UserBundle\Model\RoleQuery;
 use wiosloCMS\UserBundle\Model\User;
@@ -127,6 +131,12 @@ abstract class BaseUser extends BaseObject implements Persistent
     protected $collPhotosPartial;
 
     /**
+     * @var        PropelObjectCollection|UserRate[] Collection to store aggregation of UserRate objects.
+     */
+    protected $collUserRates;
+    protected $collUserRatesPartial;
+
+    /**
      * @var        UserSettings one-to-one related UserSettings object
      */
     protected $singleUserSettings;
@@ -136,6 +146,11 @@ abstract class BaseUser extends BaseObject implements Persistent
      */
     protected $collUserRoles;
     protected $collUserRolesPartial;
+
+    /**
+     * @var        PropelObjectCollection|Rating[] Collection to store aggregation of Rating objects.
+     */
+    protected $collRatings;
 
     /**
      * @var        PropelObjectCollection|Role[] Collection to store aggregation of Role objects.
@@ -166,6 +181,12 @@ abstract class BaseUser extends BaseObject implements Persistent
      * An array of objects scheduled for deletion.
      * @var		PropelObjectCollection
      */
+    protected $ratingsScheduledForDeletion = null;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var		PropelObjectCollection
+     */
     protected $rolesScheduledForDeletion = null;
 
     /**
@@ -173,6 +194,12 @@ abstract class BaseUser extends BaseObject implements Persistent
      * @var		PropelObjectCollection
      */
     protected $photosScheduledForDeletion = null;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var		PropelObjectCollection
+     */
+    protected $userRatesScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -774,10 +801,13 @@ abstract class BaseUser extends BaseObject implements Persistent
 
             $this->collPhotos = null;
 
+            $this->collUserRates = null;
+
             $this->singleUserSettings = null;
 
             $this->collUserRoles = null;
 
+            $this->collRatings = null;
             $this->collRoles = null;
         } // if (deep)
     }
@@ -921,6 +951,32 @@ abstract class BaseUser extends BaseObject implements Persistent
                 $this->resetModified();
             }
 
+            if ($this->ratingsScheduledForDeletion !== null) {
+                if (!$this->ratingsScheduledForDeletion->isEmpty()) {
+                    $pks = array();
+                    $pk = $this->getPrimaryKey();
+                    foreach ($this->ratingsScheduledForDeletion->getPrimaryKeys(false) as $remotePk) {
+                        $pks[] = array($remotePk, $pk);
+                    }
+                    UserRateQuery::create()
+                        ->filterByPrimaryKeys($pks)
+                        ->delete($con);
+                    $this->ratingsScheduledForDeletion = null;
+                }
+
+                foreach ($this->getRatings() as $rating) {
+                    if ($rating->isModified()) {
+                        $rating->save($con);
+                    }
+                }
+            } elseif ($this->collRatings) {
+                foreach ($this->collRatings as $rating) {
+                    if ($rating->isModified()) {
+                        $rating->save($con);
+                    }
+                }
+            }
+
             if ($this->rolesScheduledForDeletion !== null) {
                 if (!$this->rolesScheduledForDeletion->isEmpty()) {
                     $pks = array();
@@ -958,6 +1014,23 @@ abstract class BaseUser extends BaseObject implements Persistent
 
             if ($this->collPhotos !== null) {
                 foreach ($this->collPhotos as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
+            }
+
+            if ($this->userRatesScheduledForDeletion !== null) {
+                if (!$this->userRatesScheduledForDeletion->isEmpty()) {
+                    UserRateQuery::create()
+                        ->filterByPrimaryKeys($this->userRatesScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->userRatesScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collUserRates !== null) {
+                foreach ($this->collUserRates as $referrerFK) {
                     if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
                         $affectedRows += $referrerFK->save($con);
                     }
@@ -1203,6 +1276,14 @@ abstract class BaseUser extends BaseObject implements Persistent
                     }
                 }
 
+                if ($this->collUserRates !== null) {
+                    foreach ($this->collUserRates as $referrerFK) {
+                        if (!$referrerFK->validate($columns)) {
+                            $failureMap = array_merge($failureMap, $referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+
                 if ($this->singleUserSettings !== null) {
                     if (!$this->singleUserSettings->validate($columns)) {
                         $failureMap = array_merge($failureMap, $this->singleUserSettings->getValidationFailures());
@@ -1338,6 +1419,9 @@ abstract class BaseUser extends BaseObject implements Persistent
         if ($includeForeignObjects) {
             if (null !== $this->collPhotos) {
                 $result['Photos'] = $this->collPhotos->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+            }
+            if (null !== $this->collUserRates) {
+                $result['UserRates'] = $this->collUserRates->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
             if (null !== $this->singleUserSettings) {
                 $result['UserSettings'] = $this->singleUserSettings->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
@@ -1562,6 +1646,12 @@ abstract class BaseUser extends BaseObject implements Persistent
                 }
             }
 
+            foreach ($this->getUserRates() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addUserRate($relObj->copy($deepCopy));
+                }
+            }
+
             $relObj = $this->getUserSettings();
             if ($relObj) {
                 $copyObj->setUserSettings($relObj->copy($deepCopy));
@@ -1636,6 +1726,9 @@ abstract class BaseUser extends BaseObject implements Persistent
     {
         if ('Photo' == $relationName) {
             $this->initPhotos();
+        }
+        if ('UserRate' == $relationName) {
+            $this->initUserRates();
         }
         if ('UserRole' == $relationName) {
             $this->initUserRoles();
@@ -1865,6 +1958,259 @@ abstract class BaseUser extends BaseObject implements Persistent
         }
 
         return $this;
+    }
+
+    /**
+     * Clears out the collUserRates collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return User The current object (for fluent API support)
+     * @see        addUserRates()
+     */
+    public function clearUserRates()
+    {
+        $this->collUserRates = null; // important to set this to null since that means it is uninitialized
+        $this->collUserRatesPartial = null;
+
+        return $this;
+    }
+
+    /**
+     * reset is the collUserRates collection loaded partially
+     *
+     * @return void
+     */
+    public function resetPartialUserRates($v = true)
+    {
+        $this->collUserRatesPartial = $v;
+    }
+
+    /**
+     * Initializes the collUserRates collection.
+     *
+     * By default this just sets the collUserRates collection to an empty array (like clearcollUserRates());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initUserRates($overrideExisting = true)
+    {
+        if (null !== $this->collUserRates && !$overrideExisting) {
+            return;
+        }
+        $this->collUserRates = new PropelObjectCollection();
+        $this->collUserRates->setModel('UserRate');
+    }
+
+    /**
+     * Gets an array of UserRate objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this User is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @return PropelObjectCollection|UserRate[] List of UserRate objects
+     * @throws PropelException
+     */
+    public function getUserRates($criteria = null, PropelPDO $con = null)
+    {
+        $partial = $this->collUserRatesPartial && !$this->isNew();
+        if (null === $this->collUserRates || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collUserRates) {
+                // return empty collection
+                $this->initUserRates();
+            } else {
+                $collUserRates = UserRateQuery::create(null, $criteria)
+                    ->filterByUser($this)
+                    ->find($con);
+                if (null !== $criteria) {
+                    if (false !== $this->collUserRatesPartial && count($collUserRates)) {
+                      $this->initUserRates(false);
+
+                      foreach ($collUserRates as $obj) {
+                        if (false == $this->collUserRates->contains($obj)) {
+                          $this->collUserRates->append($obj);
+                        }
+                      }
+
+                      $this->collUserRatesPartial = true;
+                    }
+
+                    $collUserRates->getInternalIterator()->rewind();
+
+                    return $collUserRates;
+                }
+
+                if ($partial && $this->collUserRates) {
+                    foreach ($this->collUserRates as $obj) {
+                        if ($obj->isNew()) {
+                            $collUserRates[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collUserRates = $collUserRates;
+                $this->collUserRatesPartial = false;
+            }
+        }
+
+        return $this->collUserRates;
+    }
+
+    /**
+     * Sets a collection of UserRate objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param PropelCollection $userRates A Propel collection.
+     * @param PropelPDO $con Optional connection object
+     * @return User The current object (for fluent API support)
+     */
+    public function setUserRates(PropelCollection $userRates, PropelPDO $con = null)
+    {
+        $userRatesToDelete = $this->getUserRates(new Criteria(), $con)->diff($userRates);
+
+
+        //since at least one column in the foreign key is at the same time a PK
+        //we can not just set a PK to NULL in the lines below. We have to store
+        //a backup of all values, so we are able to manipulate these items based on the onDelete value later.
+        $this->userRatesScheduledForDeletion = clone $userRatesToDelete;
+
+        foreach ($userRatesToDelete as $userRateRemoved) {
+            $userRateRemoved->setUser(null);
+        }
+
+        $this->collUserRates = null;
+        foreach ($userRates as $userRate) {
+            $this->addUserRate($userRate);
+        }
+
+        $this->collUserRates = $userRates;
+        $this->collUserRatesPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related UserRate objects.
+     *
+     * @param Criteria $criteria
+     * @param boolean $distinct
+     * @param PropelPDO $con
+     * @return int             Count of related UserRate objects.
+     * @throws PropelException
+     */
+    public function countUserRates(Criteria $criteria = null, $distinct = false, PropelPDO $con = null)
+    {
+        $partial = $this->collUserRatesPartial && !$this->isNew();
+        if (null === $this->collUserRates || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collUserRates) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getUserRates());
+            }
+            $query = UserRateQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByUser($this)
+                ->count($con);
+        }
+
+        return count($this->collUserRates);
+    }
+
+    /**
+     * Method called to associate a UserRate object to this object
+     * through the UserRate foreign key attribute.
+     *
+     * @param    UserRate $l UserRate
+     * @return User The current object (for fluent API support)
+     */
+    public function addUserRate(UserRate $l)
+    {
+        if ($this->collUserRates === null) {
+            $this->initUserRates();
+            $this->collUserRatesPartial = true;
+        }
+
+        if (!in_array($l, $this->collUserRates->getArrayCopy(), true)) { // only add it if the **same** object is not already associated
+            $this->doAddUserRate($l);
+
+            if ($this->userRatesScheduledForDeletion and $this->userRatesScheduledForDeletion->contains($l)) {
+                $this->userRatesScheduledForDeletion->remove($this->userRatesScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param	UserRate $userRate The userRate object to add.
+     */
+    protected function doAddUserRate($userRate)
+    {
+        $this->collUserRates[]= $userRate;
+        $userRate->setUser($this);
+    }
+
+    /**
+     * @param	UserRate $userRate The userRate object to remove.
+     * @return User The current object (for fluent API support)
+     */
+    public function removeUserRate($userRate)
+    {
+        if ($this->getUserRates()->contains($userRate)) {
+            $this->collUserRates->remove($this->collUserRates->search($userRate));
+            if (null === $this->userRatesScheduledForDeletion) {
+                $this->userRatesScheduledForDeletion = clone $this->collUserRates;
+                $this->userRatesScheduledForDeletion->clear();
+            }
+            $this->userRatesScheduledForDeletion[]= clone $userRate;
+            $userRate->setUser(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this User is new, it will return
+     * an empty collection; or if this User has previously
+     * been saved, it will retrieve related UserRates from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in User.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @param string $join_behavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return PropelObjectCollection|UserRate[] List of UserRate objects
+     */
+    public function getUserRatesJoinRating($criteria = null, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $query = UserRateQuery::create(null, $criteria);
+        $query->joinWith('Rating', $join_behavior);
+
+        return $this->getUserRates($query, $con);
     }
 
     /**
@@ -2157,6 +2503,194 @@ abstract class BaseUser extends BaseObject implements Persistent
     }
 
     /**
+     * Clears out the collRatings collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return User The current object (for fluent API support)
+     * @see        addRatings()
+     */
+    public function clearRatings()
+    {
+        $this->collRatings = null; // important to set this to null since that means it is uninitialized
+        $this->collRatingsPartial = null;
+
+        return $this;
+    }
+
+    /**
+     * Initializes the collRatings collection.
+     *
+     * By default this just sets the collRatings collection to an empty collection (like clearRatings());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @return void
+     */
+    public function initRatings()
+    {
+        $this->collRatings = new PropelObjectCollection();
+        $this->collRatings->setModel('Rating');
+    }
+
+    /**
+     * Gets a collection of Rating objects related by a many-to-many relationship
+     * to the current object by way of the UserRate cross-reference table.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this User is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param Criteria $criteria Optional query object to filter the query
+     * @param PropelPDO $con Optional connection object
+     *
+     * @return PropelObjectCollection|Rating[] List of Rating objects
+     */
+    public function getRatings($criteria = null, PropelPDO $con = null)
+    {
+        if (null === $this->collRatings || null !== $criteria) {
+            if ($this->isNew() && null === $this->collRatings) {
+                // return empty collection
+                $this->initRatings();
+            } else {
+                $collRatings = RatingQuery::create(null, $criteria)
+                    ->filterByUser($this)
+                    ->find($con);
+                if (null !== $criteria) {
+                    return $collRatings;
+                }
+                $this->collRatings = $collRatings;
+            }
+        }
+
+        return $this->collRatings;
+    }
+
+    /**
+     * Sets a collection of Rating objects related by a many-to-many relationship
+     * to the current object by way of the UserRate cross-reference table.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param PropelCollection $ratings A Propel collection.
+     * @param PropelPDO $con Optional connection object
+     * @return User The current object (for fluent API support)
+     */
+    public function setRatings(PropelCollection $ratings, PropelPDO $con = null)
+    {
+        $this->clearRatings();
+        $currentRatings = $this->getRatings(null, $con);
+
+        $this->ratingsScheduledForDeletion = $currentRatings->diff($ratings);
+
+        foreach ($ratings as $rating) {
+            if (!$currentRatings->contains($rating)) {
+                $this->doAddRating($rating);
+            }
+        }
+
+        $this->collRatings = $ratings;
+
+        return $this;
+    }
+
+    /**
+     * Gets the number of Rating objects related by a many-to-many relationship
+     * to the current object by way of the UserRate cross-reference table.
+     *
+     * @param Criteria $criteria Optional query object to filter the query
+     * @param boolean $distinct Set to true to force count distinct
+     * @param PropelPDO $con Optional connection object
+     *
+     * @return int the number of related Rating objects
+     */
+    public function countRatings($criteria = null, $distinct = false, PropelPDO $con = null)
+    {
+        if (null === $this->collRatings || null !== $criteria) {
+            if ($this->isNew() && null === $this->collRatings) {
+                return 0;
+            } else {
+                $query = RatingQuery::create(null, $criteria);
+                if ($distinct) {
+                    $query->distinct();
+                }
+
+                return $query
+                    ->filterByUser($this)
+                    ->count($con);
+            }
+        } else {
+            return count($this->collRatings);
+        }
+    }
+
+    /**
+     * Associate a Rating object to this object
+     * through the UserRate cross reference table.
+     *
+     * @param  Rating $rating The UserRate object to relate
+     * @return User The current object (for fluent API support)
+     */
+    public function addRating(Rating $rating)
+    {
+        if ($this->collRatings === null) {
+            $this->initRatings();
+        }
+
+        if (!$this->collRatings->contains($rating)) { // only add it if the **same** object is not already associated
+            $this->doAddRating($rating);
+            $this->collRatings[] = $rating;
+
+            if ($this->ratingsScheduledForDeletion and $this->ratingsScheduledForDeletion->contains($rating)) {
+                $this->ratingsScheduledForDeletion->remove($this->ratingsScheduledForDeletion->search($rating));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param	Rating $rating The rating object to add.
+     */
+    protected function doAddRating(Rating $rating)
+    {
+        // set the back reference to this object directly as using provided method either results
+        // in endless loop or in multiple relations
+        if (!$rating->getUsers()->contains($this)) {
+            $userRate = new UserRate();
+            $userRate->setRating($rating);
+            $this->addUserRate($userRate);
+
+            $foreignCollection = $rating->getUsers();
+            $foreignCollection[] = $this;
+        }
+    }
+
+    /**
+     * Remove a Rating object to this object
+     * through the UserRate cross reference table.
+     *
+     * @param Rating $rating The UserRate object to relate
+     * @return User The current object (for fluent API support)
+     */
+    public function removeRating(Rating $rating)
+    {
+        if ($this->getRatings()->contains($rating)) {
+            $this->collRatings->remove($this->collRatings->search($rating));
+            if (null === $this->ratingsScheduledForDeletion) {
+                $this->ratingsScheduledForDeletion = clone $this->collRatings;
+                $this->ratingsScheduledForDeletion->clear();
+            }
+            $this->ratingsScheduledForDeletion[]= $rating;
+        }
+
+        return $this;
+    }
+
+    /**
      * Clears out the collRoles collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
@@ -2388,11 +2922,21 @@ abstract class BaseUser extends BaseObject implements Persistent
                     $o->clearAllReferences($deep);
                 }
             }
+            if ($this->collUserRates) {
+                foreach ($this->collUserRates as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
             if ($this->singleUserSettings) {
                 $this->singleUserSettings->clearAllReferences($deep);
             }
             if ($this->collUserRoles) {
                 foreach ($this->collUserRoles as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
+            if ($this->collRatings) {
+                foreach ($this->collRatings as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
@@ -2409,6 +2953,10 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->collPhotos->clearIterator();
         }
         $this->collPhotos = null;
+        if ($this->collUserRates instanceof PropelCollection) {
+            $this->collUserRates->clearIterator();
+        }
+        $this->collUserRates = null;
         if ($this->singleUserSettings instanceof PropelCollection) {
             $this->singleUserSettings->clearIterator();
         }
@@ -2417,6 +2965,10 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->collUserRoles->clearIterator();
         }
         $this->collUserRoles = null;
+        if ($this->collRatings instanceof PropelCollection) {
+            $this->collRatings->clearIterator();
+        }
+        $this->collRatings = null;
         if ($this->collRoles instanceof PropelCollection) {
             $this->collRoles->clearIterator();
         }

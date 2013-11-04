@@ -10,6 +10,7 @@ use \Propel;
 use \PropelException;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
+use wiosloCMS\PhotoBundle\Model\UserRatePeer;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserPeer;
 use wiosloCMS\UserBundle\Model\UserRolePeer;
@@ -421,6 +422,9 @@ abstract class BaseUserPeer
         // Invalidate objects in PhotoPeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
         PhotoPeer::clearInstancePool();
+        // Invalidate objects in UserRatePeer instance pool,
+        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
+        UserRatePeer::clearInstancePool();
         // Invalidate objects in UserSettingsPeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
         UserSettingsPeer::clearInstancePool();
@@ -766,6 +770,12 @@ abstract class BaseUserPeer
 
             $criteria->add(PhotoPeer::OWNER_ID, $obj->getId());
             $affectedRows += PhotoPeer::doDelete($criteria, $con);
+
+            // delete related UserRate objects
+            $criteria = new Criteria(UserRatePeer::DATABASE_NAME);
+
+            $criteria->add(UserRatePeer::USER_ID, $obj->getId());
+            $affectedRows += UserRatePeer::doDelete($criteria, $con);
 
             // delete related UserSettings objects
             $criteria = new Criteria(UserSettingsPeer::DATABASE_NAME);

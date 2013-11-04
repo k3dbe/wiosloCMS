@@ -15,6 +15,7 @@ use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
+use wiosloCMS\PhotoBundle\Model\Rating;
 use wiosloCMS\UserBundle\Model\User;
 
 /**
@@ -41,6 +42,10 @@ use wiosloCMS\UserBundle\Model\User;
  * @method PhotoQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
  * @method PhotoQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
  * @method PhotoQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
+ *
+ * @method PhotoQuery leftJoinRating($relationAlias = null) Adds a LEFT JOIN clause to the query using the Rating relation
+ * @method PhotoQuery rightJoinRating($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Rating relation
+ * @method PhotoQuery innerJoinRating($relationAlias = null) Adds a INNER JOIN clause to the query using the Rating relation
  *
  * @method Photo findOne(PropelPDO $con = null) Return the first Photo matching the query
  * @method Photo findOneOrCreate(PropelPDO $con = null) Return the first Photo matching the query, or a new Photo object populated from the query conditions when no match is found
@@ -586,6 +591,80 @@ abstract class BasePhotoQuery extends ModelCriteria
         return $this
             ->joinUser($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'User', '\wiosloCMS\UserBundle\Model\UserQuery');
+    }
+
+    /**
+     * Filter the query by a related Rating object
+     *
+     * @param   Rating|PropelObjectCollection $rating  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 PhotoQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByRating($rating, $comparison = null)
+    {
+        if ($rating instanceof Rating) {
+            return $this
+                ->addUsingAlias(PhotoPeer::ID, $rating->getPhotoId(), $comparison);
+        } elseif ($rating instanceof PropelObjectCollection) {
+            return $this
+                ->useRatingQuery()
+                ->filterByPrimaryKeys($rating->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByRating() only accepts arguments of type Rating or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the Rating relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return PhotoQuery The current query, for fluid interface
+     */
+    public function joinRating($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('Rating');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'Rating');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the Rating relation Rating object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \wiosloCMS\PhotoBundle\Model\RatingQuery A secondary query class using the current class as primary query
+     */
+    public function useRatingQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinRating($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'Rating', '\wiosloCMS\PhotoBundle\Model\RatingQuery');
     }
 
     /**

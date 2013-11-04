@@ -5,35 +5,32 @@ namespace wiosloCMS\PhotoBundle\Model\om;
 use \BaseObject;
 use \BasePeer;
 use \Criteria;
-use \DateTime;
 use \Exception;
 use \PDO;
 use \Persistent;
 use \Propel;
-use \PropelCollection;
-use \PropelDateTime;
 use \PropelException;
 use \PropelPDO;
-use wiosloCMS\PhotoBundle\Model\Photo;
-use wiosloCMS\PhotoBundle\Model\PhotoPeer;
-use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 use wiosloCMS\PhotoBundle\Model\Rating;
 use wiosloCMS\PhotoBundle\Model\RatingQuery;
+use wiosloCMS\PhotoBundle\Model\UserRate;
+use wiosloCMS\PhotoBundle\Model\UserRatePeer;
+use wiosloCMS\PhotoBundle\Model\UserRateQuery;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserQuery;
 
-abstract class BasePhoto extends BaseObject implements Persistent
+abstract class BaseUserRate extends BaseObject implements Persistent
 {
     /**
      * Peer class name
      */
-    const PEER = 'wiosloCMS\\PhotoBundle\\Model\\PhotoPeer';
+    const PEER = 'wiosloCMS\\PhotoBundle\\Model\\UserRatePeer';
 
     /**
      * The Peer class.
      * Instance provides a convenient way of calling static methods on a class
      * that calling code may not be able to identify.
-     * @var        PhotoPeer
+     * @var        UserRatePeer
      */
     protected static $peer;
 
@@ -44,56 +41,26 @@ abstract class BasePhoto extends BaseObject implements Persistent
     protected $startCopy = false;
 
     /**
-     * The value for the id field.
+     * The value for the user_id field.
      * @var        int
      */
-    protected $id;
+    protected $user_id;
 
     /**
-     * The value for the uri field.
-     * @var        string
-     */
-    protected $uri;
-
-    /**
-     * The value for the name field.
-     * @var        string
-     */
-    protected $name;
-
-    /**
-     * The value for the description field.
-     * @var        string
-     */
-    protected $description;
-
-    /**
-     * The value for the owner_id field.
+     * The value for the photo_id field.
      * @var        int
      */
-    protected $owner_id;
+    protected $photo_id;
 
     /**
-     * The value for the created_at field.
-     * @var        string
+     * @var        Rating
      */
-    protected $created_at;
-
-    /**
-     * The value for the updated_at field.
-     * @var        string
-     */
-    protected $updated_at;
+    protected $aRating;
 
     /**
      * @var        User
      */
     protected $aUser;
-
-    /**
-     * @var        Rating one-to-one related Rating object
-     */
-    protected $singleRating;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -116,239 +83,42 @@ abstract class BasePhoto extends BaseObject implements Persistent
     protected $alreadyInClearAllReferencesDeep = false;
 
     /**
-     * Get the [id] column value.
+     * Get the [user_id] column value.
      *
      * @return int
      */
-    public function getId()
+    public function getUserId()
     {
 
-        return $this->id;
+        return $this->user_id;
     }
 
     /**
-     * Get the [uri] column value.
-     *
-     * @return string
-     */
-    public function getUri()
-    {
-
-        return $this->uri;
-    }
-
-    /**
-     * Get the [name] column value.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-
-        return $this->name;
-    }
-
-    /**
-     * Get the [description] column value.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-
-        return $this->description;
-    }
-
-    /**
-     * Get the [owner_id] column value.
+     * Get the [photo_id] column value.
      *
      * @return int
      */
-    public function getOwnerId()
+    public function getPhotoId()
     {
 
-        return $this->owner_id;
+        return $this->photo_id;
     }
 
     /**
-     * Get the [optionally formatted] temporal [created_at] column value.
-     *
-     *
-     * @param string $format The date/time format string (either date()-style or strftime()-style).
-     *				 If format is null, then the raw DateTime object will be returned.
-     * @return mixed Formatted date/time value as string or DateTime object (if format is null), null if column is null, and 0 if column value is 0000-00-00 00:00:00
-     * @throws PropelException - if unable to parse/validate the date/time value.
-     */
-    public function getCreatedAt($format = null)
-    {
-        if ($this->created_at === null) {
-            return null;
-        }
-
-        if ($this->created_at === '0000-00-00 00:00:00') {
-            // while technically this is not a default value of null,
-            // this seems to be closest in meaning.
-            return null;
-        }
-
-        try {
-            $dt = new DateTime($this->created_at);
-        } catch (Exception $x) {
-            throw new PropelException("Internally stored date/time/timestamp value could not be converted to DateTime: " . var_export($this->created_at, true), $x);
-        }
-
-        if ($format === null) {
-            // Because propel.useDateTimeClass is true, we return a DateTime object.
-            return $dt;
-        }
-
-        if (strpos($format, '%') !== false) {
-            return strftime($format, $dt->format('U'));
-        }
-
-        return $dt->format($format);
-
-    }
-
-    /**
-     * Get the [optionally formatted] temporal [updated_at] column value.
-     *
-     *
-     * @param string $format The date/time format string (either date()-style or strftime()-style).
-     *				 If format is null, then the raw DateTime object will be returned.
-     * @return mixed Formatted date/time value as string or DateTime object (if format is null), null if column is null, and 0 if column value is 0000-00-00 00:00:00
-     * @throws PropelException - if unable to parse/validate the date/time value.
-     */
-    public function getUpdatedAt($format = null)
-    {
-        if ($this->updated_at === null) {
-            return null;
-        }
-
-        if ($this->updated_at === '0000-00-00 00:00:00') {
-            // while technically this is not a default value of null,
-            // this seems to be closest in meaning.
-            return null;
-        }
-
-        try {
-            $dt = new DateTime($this->updated_at);
-        } catch (Exception $x) {
-            throw new PropelException("Internally stored date/time/timestamp value could not be converted to DateTime: " . var_export($this->updated_at, true), $x);
-        }
-
-        if ($format === null) {
-            // Because propel.useDateTimeClass is true, we return a DateTime object.
-            return $dt;
-        }
-
-        if (strpos($format, '%') !== false) {
-            return strftime($format, $dt->format('U'));
-        }
-
-        return $dt->format($format);
-
-    }
-
-    /**
-     * Set the value of [id] column.
+     * Set the value of [user_id] column.
      *
      * @param  int $v new value
-     * @return Photo The current object (for fluent API support)
+     * @return UserRate The current object (for fluent API support)
      */
-    public function setId($v)
+    public function setUserId($v)
     {
         if ($v !== null && is_numeric($v)) {
             $v = (int) $v;
         }
 
-        if ($this->id !== $v) {
-            $this->id = $v;
-            $this->modifiedColumns[] = PhotoPeer::ID;
-        }
-
-
-        return $this;
-    } // setId()
-
-    /**
-     * Set the value of [uri] column.
-     *
-     * @param  string $v new value
-     * @return Photo The current object (for fluent API support)
-     */
-    public function setUri($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (string) $v;
-        }
-
-        if ($this->uri !== $v) {
-            $this->uri = $v;
-            $this->modifiedColumns[] = PhotoPeer::URI;
-        }
-
-
-        return $this;
-    } // setUri()
-
-    /**
-     * Set the value of [name] column.
-     *
-     * @param  string $v new value
-     * @return Photo The current object (for fluent API support)
-     */
-    public function setName($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (string) $v;
-        }
-
-        if ($this->name !== $v) {
-            $this->name = $v;
-            $this->modifiedColumns[] = PhotoPeer::NAME;
-        }
-
-
-        return $this;
-    } // setName()
-
-    /**
-     * Set the value of [description] column.
-     *
-     * @param  string $v new value
-     * @return Photo The current object (for fluent API support)
-     */
-    public function setDescription($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (string) $v;
-        }
-
-        if ($this->description !== $v) {
-            $this->description = $v;
-            $this->modifiedColumns[] = PhotoPeer::DESCRIPTION;
-        }
-
-
-        return $this;
-    } // setDescription()
-
-    /**
-     * Set the value of [owner_id] column.
-     *
-     * @param  int $v new value
-     * @return Photo The current object (for fluent API support)
-     */
-    public function setOwnerId($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (int) $v;
-        }
-
-        if ($this->owner_id !== $v) {
-            $this->owner_id = $v;
-            $this->modifiedColumns[] = PhotoPeer::OWNER_ID;
+        if ($this->user_id !== $v) {
+            $this->user_id = $v;
+            $this->modifiedColumns[] = UserRatePeer::USER_ID;
         }
 
         if ($this->aUser !== null && $this->aUser->getId() !== $v) {
@@ -357,53 +127,32 @@ abstract class BasePhoto extends BaseObject implements Persistent
 
 
         return $this;
-    } // setOwnerId()
+    } // setUserId()
 
     /**
-     * Sets the value of [created_at] column to a normalized version of the date/time value specified.
+     * Set the value of [photo_id] column.
      *
-     * @param mixed $v string, integer (timestamp), or DateTime value.
-     *               Empty strings are treated as null.
-     * @return Photo The current object (for fluent API support)
+     * @param  int $v new value
+     * @return UserRate The current object (for fluent API support)
      */
-    public function setCreatedAt($v)
+    public function setPhotoId($v)
     {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->created_at !== null || $dt !== null) {
-            $currentDateAsString = ($this->created_at !== null && $tmpDt = new DateTime($this->created_at)) ? $tmpDt->format('Y-m-d H:i:s') : null;
-            $newDateAsString = $dt ? $dt->format('Y-m-d H:i:s') : null;
-            if ($currentDateAsString !== $newDateAsString) {
-                $this->created_at = $newDateAsString;
-                $this->modifiedColumns[] = PhotoPeer::CREATED_AT;
-            }
-        } // if either are not null
+        if ($v !== null && is_numeric($v)) {
+            $v = (int) $v;
+        }
+
+        if ($this->photo_id !== $v) {
+            $this->photo_id = $v;
+            $this->modifiedColumns[] = UserRatePeer::PHOTO_ID;
+        }
+
+        if ($this->aRating !== null && $this->aRating->getPhotoId() !== $v) {
+            $this->aRating = null;
+        }
 
 
         return $this;
-    } // setCreatedAt()
-
-    /**
-     * Sets the value of [updated_at] column to a normalized version of the date/time value specified.
-     *
-     * @param mixed $v string, integer (timestamp), or DateTime value.
-     *               Empty strings are treated as null.
-     * @return Photo The current object (for fluent API support)
-     */
-    public function setUpdatedAt($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->updated_at !== null || $dt !== null) {
-            $currentDateAsString = ($this->updated_at !== null && $tmpDt = new DateTime($this->updated_at)) ? $tmpDt->format('Y-m-d H:i:s') : null;
-            $newDateAsString = $dt ? $dt->format('Y-m-d H:i:s') : null;
-            if ($currentDateAsString !== $newDateAsString) {
-                $this->updated_at = $newDateAsString;
-                $this->modifiedColumns[] = PhotoPeer::UPDATED_AT;
-            }
-        } // if either are not null
-
-
-        return $this;
-    } // setUpdatedAt()
+    } // setPhotoId()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -437,13 +186,8 @@ abstract class BasePhoto extends BaseObject implements Persistent
     {
         try {
 
-            $this->id = ($row[$startcol + 0] !== null) ? (int) $row[$startcol + 0] : null;
-            $this->uri = ($row[$startcol + 1] !== null) ? (string) $row[$startcol + 1] : null;
-            $this->name = ($row[$startcol + 2] !== null) ? (string) $row[$startcol + 2] : null;
-            $this->description = ($row[$startcol + 3] !== null) ? (string) $row[$startcol + 3] : null;
-            $this->owner_id = ($row[$startcol + 4] !== null) ? (int) $row[$startcol + 4] : null;
-            $this->created_at = ($row[$startcol + 5] !== null) ? (string) $row[$startcol + 5] : null;
-            $this->updated_at = ($row[$startcol + 6] !== null) ? (string) $row[$startcol + 6] : null;
+            $this->user_id = ($row[$startcol + 0] !== null) ? (int) $row[$startcol + 0] : null;
+            $this->photo_id = ($row[$startcol + 1] !== null) ? (int) $row[$startcol + 1] : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -453,10 +197,10 @@ abstract class BasePhoto extends BaseObject implements Persistent
             }
             $this->postHydrate($row, $startcol, $rehydrate);
 
-            return $startcol + 7; // 7 = PhotoPeer::NUM_HYDRATE_COLUMNS.
+            return $startcol + 2; // 2 = UserRatePeer::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException("Error populating Photo object", $e);
+            throw new PropelException("Error populating UserRate object", $e);
         }
     }
 
@@ -476,8 +220,11 @@ abstract class BasePhoto extends BaseObject implements Persistent
     public function ensureConsistency()
     {
 
-        if ($this->aUser !== null && $this->owner_id !== $this->aUser->getId()) {
+        if ($this->aUser !== null && $this->user_id !== $this->aUser->getId()) {
             $this->aUser = null;
+        }
+        if ($this->aRating !== null && $this->photo_id !== $this->aRating->getPhotoId()) {
+            $this->aRating = null;
         }
     } // ensureConsistency
 
@@ -502,13 +249,13 @@ abstract class BasePhoto extends BaseObject implements Persistent
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(UserRatePeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $stmt = PhotoPeer::doSelectStmt($this->buildPkeyCriteria(), $con);
+        $stmt = UserRatePeer::doSelectStmt($this->buildPkeyCriteria(), $con);
         $row = $stmt->fetch(PDO::FETCH_NUM);
         $stmt->closeCursor();
         if (!$row) {
@@ -518,9 +265,8 @@ abstract class BasePhoto extends BaseObject implements Persistent
 
         if ($deep) {  // also de-associate any related objects?
 
+            $this->aRating = null;
             $this->aUser = null;
-            $this->singleRating = null;
-
         } // if (deep)
     }
 
@@ -541,12 +287,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(UserRatePeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         $con->beginTransaction();
         try {
-            $deleteQuery = PhotoQuery::create()
+            $deleteQuery = UserRateQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -584,7 +330,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(UserRatePeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         $con->beginTransaction();
@@ -593,19 +339,8 @@ abstract class BasePhoto extends BaseObject implements Persistent
             $ret = $this->preSave($con);
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
-                // timestampable behavior
-                if (!$this->isColumnModified(PhotoPeer::CREATED_AT)) {
-                    $this->setCreatedAt(time());
-                }
-                if (!$this->isColumnModified(PhotoPeer::UPDATED_AT)) {
-                    $this->setUpdatedAt(time());
-                }
             } else {
                 $ret = $ret && $this->preUpdate($con);
-                // timestampable behavior
-                if ($this->isModified() && !$this->isColumnModified(PhotoPeer::UPDATED_AT)) {
-                    $this->setUpdatedAt(time());
-                }
             }
             if ($ret) {
                 $affectedRows = $this->doSave($con);
@@ -615,7 +350,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                PhotoPeer::addInstanceToPool($this);
+                UserRatePeer::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -650,6 +385,13 @@ abstract class BasePhoto extends BaseObject implements Persistent
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
+            if ($this->aRating !== null) {
+                if ($this->aRating->isModified() || $this->aRating->isNew()) {
+                    $affectedRows += $this->aRating->save($con);
+                }
+                $this->setRating($this->aRating);
+            }
+
             if ($this->aUser !== null) {
                 if ($this->aUser->isModified() || $this->aUser->isNew()) {
                     $affectedRows += $this->aUser->save($con);
@@ -666,12 +408,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
                 }
                 $affectedRows += 1;
                 $this->resetModified();
-            }
-
-            if ($this->singleRating !== null) {
-                if (!$this->singleRating->isDeleted() && ($this->singleRating->isNew() || $this->singleRating->isModified())) {
-                        $affectedRows += $this->singleRating->save($con);
-                }
             }
 
             $this->alreadyInSave = false;
@@ -694,36 +430,17 @@ abstract class BasePhoto extends BaseObject implements Persistent
         $modifiedColumns = array();
         $index = 0;
 
-        $this->modifiedColumns[] = PhotoPeer::ID;
-        if (null !== $this->id) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key (' . PhotoPeer::ID . ')');
-        }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(PhotoPeer::ID)) {
-            $modifiedColumns[':p' . $index++]  = '`id`';
+        if ($this->isColumnModified(UserRatePeer::USER_ID)) {
+            $modifiedColumns[':p' . $index++]  = '`user_id`';
         }
-        if ($this->isColumnModified(PhotoPeer::URI)) {
-            $modifiedColumns[':p' . $index++]  = '`uri`';
-        }
-        if ($this->isColumnModified(PhotoPeer::NAME)) {
-            $modifiedColumns[':p' . $index++]  = '`name`';
-        }
-        if ($this->isColumnModified(PhotoPeer::DESCRIPTION)) {
-            $modifiedColumns[':p' . $index++]  = '`description`';
-        }
-        if ($this->isColumnModified(PhotoPeer::OWNER_ID)) {
-            $modifiedColumns[':p' . $index++]  = '`owner_id`';
-        }
-        if ($this->isColumnModified(PhotoPeer::CREATED_AT)) {
-            $modifiedColumns[':p' . $index++]  = '`created_at`';
-        }
-        if ($this->isColumnModified(PhotoPeer::UPDATED_AT)) {
-            $modifiedColumns[':p' . $index++]  = '`updated_at`';
+        if ($this->isColumnModified(UserRatePeer::PHOTO_ID)) {
+            $modifiedColumns[':p' . $index++]  = '`photo_id`';
         }
 
         $sql = sprintf(
-            'INSERT INTO `Photo` (%s) VALUES (%s)',
+            'INSERT INTO `UserRate` (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -732,26 +449,11 @@ abstract class BasePhoto extends BaseObject implements Persistent
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case '`id`':
-                        $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
+                    case '`user_id`':
+                        $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
                         break;
-                    case '`uri`':
-                        $stmt->bindValue($identifier, $this->uri, PDO::PARAM_STR);
-                        break;
-                    case '`name`':
-                        $stmt->bindValue($identifier, $this->name, PDO::PARAM_STR);
-                        break;
-                    case '`description`':
-                        $stmt->bindValue($identifier, $this->description, PDO::PARAM_STR);
-                        break;
-                    case '`owner_id`':
-                        $stmt->bindValue($identifier, $this->owner_id, PDO::PARAM_INT);
-                        break;
-                    case '`created_at`':
-                        $stmt->bindValue($identifier, $this->created_at, PDO::PARAM_STR);
-                        break;
-                    case '`updated_at`':
-                        $stmt->bindValue($identifier, $this->updated_at, PDO::PARAM_STR);
+                    case '`photo_id`':
+                        $stmt->bindValue($identifier, $this->photo_id, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -760,13 +462,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
             Propel::log($e->getMessage(), Propel::LOG_ERR);
             throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), $e);
         }
-
-        try {
-            $pk = $con->lastInsertId();
-        } catch (Exception $e) {
-            throw new PropelException('Unable to get autoincrement id.', $e);
-        }
-        $this->setId($pk);
 
         $this->setNew(false);
     }
@@ -852,6 +547,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
+            if ($this->aRating !== null) {
+                if (!$this->aRating->validate($columns)) {
+                    $failureMap = array_merge($failureMap, $this->aRating->getValidationFailures());
+                }
+            }
+
             if ($this->aUser !== null) {
                 if (!$this->aUser->validate($columns)) {
                     $failureMap = array_merge($failureMap, $this->aUser->getValidationFailures());
@@ -859,16 +560,10 @@ abstract class BasePhoto extends BaseObject implements Persistent
             }
 
 
-            if (($retval = PhotoPeer::doValidate($this, $columns)) !== true) {
+            if (($retval = UserRatePeer::doValidate($this, $columns)) !== true) {
                 $failureMap = array_merge($failureMap, $retval);
             }
 
-
-                if ($this->singleRating !== null) {
-                    if (!$this->singleRating->validate($columns)) {
-                        $failureMap = array_merge($failureMap, $this->singleRating->getValidationFailures());
-                    }
-                }
 
 
             $this->alreadyInValidation = false;
@@ -889,7 +584,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function getByName($name, $type = BasePeer::TYPE_PHPNAME)
     {
-        $pos = PhotoPeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
+        $pos = UserRatePeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -906,25 +601,10 @@ abstract class BasePhoto extends BaseObject implements Persistent
     {
         switch ($pos) {
             case 0:
-                return $this->getId();
+                return $this->getUserId();
                 break;
             case 1:
-                return $this->getUri();
-                break;
-            case 2:
-                return $this->getName();
-                break;
-            case 3:
-                return $this->getDescription();
-                break;
-            case 4:
-                return $this->getOwnerId();
-                break;
-            case 5:
-                return $this->getCreatedAt();
-                break;
-            case 6:
-                return $this->getUpdatedAt();
+                return $this->getPhotoId();
                 break;
             default:
                 return null;
@@ -949,19 +629,14 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function toArray($keyType = BasePeer::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
-        if (isset($alreadyDumpedObjects['Photo'][$this->getPrimaryKey()])) {
+        if (isset($alreadyDumpedObjects['UserRate'][serialize($this->getPrimaryKey())])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['Photo'][$this->getPrimaryKey()] = true;
-        $keys = PhotoPeer::getFieldNames($keyType);
+        $alreadyDumpedObjects['UserRate'][serialize($this->getPrimaryKey())] = true;
+        $keys = UserRatePeer::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getId(),
-            $keys[1] => $this->getUri(),
-            $keys[2] => $this->getName(),
-            $keys[3] => $this->getDescription(),
-            $keys[4] => $this->getOwnerId(),
-            $keys[5] => $this->getCreatedAt(),
-            $keys[6] => $this->getUpdatedAt(),
+            $keys[0] => $this->getUserId(),
+            $keys[1] => $this->getPhotoId(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -969,11 +644,11 @@ abstract class BasePhoto extends BaseObject implements Persistent
         }
 
         if ($includeForeignObjects) {
+            if (null !== $this->aRating) {
+                $result['Rating'] = $this->aRating->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
             if (null !== $this->aUser) {
                 $result['User'] = $this->aUser->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
-            }
-            if (null !== $this->singleRating) {
-                $result['Rating'] = $this->singleRating->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
             }
         }
 
@@ -993,7 +668,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function setByName($name, $value, $type = BasePeer::TYPE_PHPNAME)
     {
-        $pos = PhotoPeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
+        $pos = UserRatePeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
 
         $this->setByPosition($pos, $value);
     }
@@ -1010,25 +685,10 @@ abstract class BasePhoto extends BaseObject implements Persistent
     {
         switch ($pos) {
             case 0:
-                $this->setId($value);
+                $this->setUserId($value);
                 break;
             case 1:
-                $this->setUri($value);
-                break;
-            case 2:
-                $this->setName($value);
-                break;
-            case 3:
-                $this->setDescription($value);
-                break;
-            case 4:
-                $this->setOwnerId($value);
-                break;
-            case 5:
-                $this->setCreatedAt($value);
-                break;
-            case 6:
-                $this->setUpdatedAt($value);
+                $this->setPhotoId($value);
                 break;
         } // switch()
     }
@@ -1052,15 +712,10 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function fromArray($arr, $keyType = BasePeer::TYPE_PHPNAME)
     {
-        $keys = PhotoPeer::getFieldNames($keyType);
+        $keys = UserRatePeer::getFieldNames($keyType);
 
-        if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setUri($arr[$keys[1]]);
-        if (array_key_exists($keys[2], $arr)) $this->setName($arr[$keys[2]]);
-        if (array_key_exists($keys[3], $arr)) $this->setDescription($arr[$keys[3]]);
-        if (array_key_exists($keys[4], $arr)) $this->setOwnerId($arr[$keys[4]]);
-        if (array_key_exists($keys[5], $arr)) $this->setCreatedAt($arr[$keys[5]]);
-        if (array_key_exists($keys[6], $arr)) $this->setUpdatedAt($arr[$keys[6]]);
+        if (array_key_exists($keys[0], $arr)) $this->setUserId($arr[$keys[0]]);
+        if (array_key_exists($keys[1], $arr)) $this->setPhotoId($arr[$keys[1]]);
     }
 
     /**
@@ -1070,15 +725,10 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(PhotoPeer::DATABASE_NAME);
+        $criteria = new Criteria(UserRatePeer::DATABASE_NAME);
 
-        if ($this->isColumnModified(PhotoPeer::ID)) $criteria->add(PhotoPeer::ID, $this->id);
-        if ($this->isColumnModified(PhotoPeer::URI)) $criteria->add(PhotoPeer::URI, $this->uri);
-        if ($this->isColumnModified(PhotoPeer::NAME)) $criteria->add(PhotoPeer::NAME, $this->name);
-        if ($this->isColumnModified(PhotoPeer::DESCRIPTION)) $criteria->add(PhotoPeer::DESCRIPTION, $this->description);
-        if ($this->isColumnModified(PhotoPeer::OWNER_ID)) $criteria->add(PhotoPeer::OWNER_ID, $this->owner_id);
-        if ($this->isColumnModified(PhotoPeer::CREATED_AT)) $criteria->add(PhotoPeer::CREATED_AT, $this->created_at);
-        if ($this->isColumnModified(PhotoPeer::UPDATED_AT)) $criteria->add(PhotoPeer::UPDATED_AT, $this->updated_at);
+        if ($this->isColumnModified(UserRatePeer::USER_ID)) $criteria->add(UserRatePeer::USER_ID, $this->user_id);
+        if ($this->isColumnModified(UserRatePeer::PHOTO_ID)) $criteria->add(UserRatePeer::PHOTO_ID, $this->photo_id);
 
         return $criteria;
     }
@@ -1093,30 +743,37 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function buildPkeyCriteria()
     {
-        $criteria = new Criteria(PhotoPeer::DATABASE_NAME);
-        $criteria->add(PhotoPeer::ID, $this->id);
+        $criteria = new Criteria(UserRatePeer::DATABASE_NAME);
+        $criteria->add(UserRatePeer::USER_ID, $this->user_id);
+        $criteria->add(UserRatePeer::PHOTO_ID, $this->photo_id);
 
         return $criteria;
     }
 
     /**
-     * Returns the primary key for this object (row).
-     * @return int
+     * Returns the composite primary key for this object.
+     * The array elements will be in same order as specified in XML.
+     * @return array
      */
     public function getPrimaryKey()
     {
-        return $this->getId();
+        $pks = array();
+        $pks[0] = $this->getUserId();
+        $pks[1] = $this->getPhotoId();
+
+        return $pks;
     }
 
     /**
-     * Generic method to set the primary key (id column).
+     * Set the [composite] primary key.
      *
-     * @param  int $key Primary key.
+     * @param array $keys The elements of the composite key (order must match the order in XML file).
      * @return void
      */
-    public function setPrimaryKey($key)
+    public function setPrimaryKey($keys)
     {
-        $this->setId($key);
+        $this->setUserId($keys[0]);
+        $this->setPhotoId($keys[1]);
     }
 
     /**
@@ -1126,7 +783,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
     public function isPrimaryKeyNull()
     {
 
-        return null === $this->getId();
+        return (null === $this->getUserId()) && (null === $this->getPhotoId());
     }
 
     /**
@@ -1135,19 +792,15 @@ abstract class BasePhoto extends BaseObject implements Persistent
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param object $copyObj An object of Photo (or compatible) type.
+     * @param object $copyObj An object of UserRate (or compatible) type.
      * @param boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setUri($this->getUri());
-        $copyObj->setName($this->getName());
-        $copyObj->setDescription($this->getDescription());
-        $copyObj->setOwnerId($this->getOwnerId());
-        $copyObj->setCreatedAt($this->getCreatedAt());
-        $copyObj->setUpdatedAt($this->getUpdatedAt());
+        $copyObj->setUserId($this->getUserId());
+        $copyObj->setPhotoId($this->getPhotoId());
 
         if ($deepCopy && !$this->startCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1156,18 +809,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
             // store object hash to prevent cycle
             $this->startCopy = true;
 
-            $relObj = $this->getRating();
-            if ($relObj) {
-                $copyObj->setRating($relObj->copy($deepCopy));
-            }
-
             //unflag object copy
             $this->startCopy = false;
         } // if ($deepCopy)
 
         if ($makeNew) {
             $copyObj->setNew(true);
-            $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1180,7 +827,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
      * objects.
      *
      * @param boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return Photo Clone of current object.
+     * @return UserRate Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1200,30 +847,82 @@ abstract class BasePhoto extends BaseObject implements Persistent
      * same instance for all member of this class. The method could therefore
      * be static, but this would prevent one from overriding the behavior.
      *
-     * @return PhotoPeer
+     * @return UserRatePeer
      */
     public function getPeer()
     {
         if (self::$peer === null) {
-            self::$peer = new PhotoPeer();
+            self::$peer = new UserRatePeer();
         }
 
         return self::$peer;
     }
 
     /**
+     * Declares an association between this object and a Rating object.
+     *
+     * @param                  Rating $v
+     * @return UserRate The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setRating(Rating $v = null)
+    {
+        if ($v === null) {
+            $this->setPhotoId(NULL);
+        } else {
+            $this->setPhotoId($v->getPhotoId());
+        }
+
+        $this->aRating = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the Rating object, it will not be re-added.
+        if ($v !== null) {
+            $v->addUserRate($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated Rating object
+     *
+     * @param PropelPDO $con Optional Connection object.
+     * @param $doQuery Executes a query to get the object if required
+     * @return Rating The associated Rating object.
+     * @throws PropelException
+     */
+    public function getRating(PropelPDO $con = null, $doQuery = true)
+    {
+        if ($this->aRating === null && ($this->photo_id !== null) && $doQuery) {
+            $this->aRating = RatingQuery::create()->findPk($this->photo_id, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aRating->addUserRates($this);
+             */
+        }
+
+        return $this->aRating;
+    }
+
+    /**
      * Declares an association between this object and a User object.
      *
      * @param                  User $v
-     * @return Photo The current object (for fluent API support)
+     * @return UserRate The current object (for fluent API support)
      * @throws PropelException
      */
     public function setUser(User $v = null)
     {
         if ($v === null) {
-            $this->setOwnerId(NULL);
+            $this->setUserId(NULL);
         } else {
-            $this->setOwnerId($v->getId());
+            $this->setUserId($v->getId());
         }
 
         $this->aUser = $v;
@@ -1231,7 +930,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the User object, it will not be re-added.
         if ($v !== null) {
-            $v->addPhoto($this);
+            $v->addUserRate($this);
         }
 
 
@@ -1249,67 +948,18 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function getUser(PropelPDO $con = null, $doQuery = true)
     {
-        if ($this->aUser === null && ($this->owner_id !== null) && $doQuery) {
-            $this->aUser = UserQuery::create()->findPk($this->owner_id, $con);
+        if ($this->aUser === null && ($this->user_id !== null) && $doQuery) {
+            $this->aUser = UserQuery::create()->findPk($this->user_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aUser->addPhotos($this);
+                $this->aUser->addUserRates($this);
              */
         }
 
         return $this->aUser;
-    }
-
-
-    /**
-     * Initializes a collection based on the name of a relation.
-     * Avoids crafting an 'init[$relationName]s' method name
-     * that wouldn't work when StandardEnglishPluralizer is used.
-     *
-     * @param string $relationName The name of the relation to initialize
-     * @return void
-     */
-    public function initRelation($relationName)
-    {
-    }
-
-    /**
-     * Gets a single Rating object, which is related to this object by a one-to-one relationship.
-     *
-     * @param PropelPDO $con optional connection object
-     * @return Rating
-     * @throws PropelException
-     */
-    public function getRating(PropelPDO $con = null)
-    {
-
-        if ($this->singleRating === null && !$this->isNew()) {
-            $this->singleRating = RatingQuery::create()->findPk($this->getPrimaryKey(), $con);
-        }
-
-        return $this->singleRating;
-    }
-
-    /**
-     * Sets a single Rating object as related to this object by a one-to-one relationship.
-     *
-     * @param                  Rating $v Rating
-     * @return Photo The current object (for fluent API support)
-     * @throws PropelException
-     */
-    public function setRating(Rating $v = null)
-    {
-        $this->singleRating = $v;
-
-        // Make sure that that the passed-in Rating isn't already associated with this object
-        if ($v !== null && $v->getPhoto(null, false) === null) {
-            $v->setPhoto($this);
-        }
-
-        return $this;
     }
 
     /**
@@ -1317,13 +967,8 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function clear()
     {
-        $this->id = null;
-        $this->uri = null;
-        $this->name = null;
-        $this->description = null;
-        $this->owner_id = null;
-        $this->created_at = null;
-        $this->updated_at = null;
+        $this->user_id = null;
+        $this->photo_id = null;
         $this->alreadyInSave = false;
         $this->alreadyInValidation = false;
         $this->alreadyInClearAllReferencesDeep = false;
@@ -1346,8 +991,8 @@ abstract class BasePhoto extends BaseObject implements Persistent
     {
         if ($deep && !$this->alreadyInClearAllReferencesDeep) {
             $this->alreadyInClearAllReferencesDeep = true;
-            if ($this->singleRating) {
-                $this->singleRating->clearAllReferences($deep);
+            if ($this->aRating instanceof Persistent) {
+              $this->aRating->clearAllReferences($deep);
             }
             if ($this->aUser instanceof Persistent) {
               $this->aUser->clearAllReferences($deep);
@@ -1356,10 +1001,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
             $this->alreadyInClearAllReferencesDeep = false;
         } // if ($deep)
 
-        if ($this->singleRating instanceof PropelCollection) {
-            $this->singleRating->clearIterator();
-        }
-        $this->singleRating = null;
+        $this->aRating = null;
         $this->aUser = null;
     }
 
@@ -1370,7 +1012,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function __toString()
     {
-        return (string) $this->exportTo(PhotoPeer::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(UserRatePeer::DEFAULT_STRING_FORMAT);
     }
 
     /**
@@ -1381,20 +1023,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
     public function isAlreadyInSave()
     {
         return $this->alreadyInSave;
-    }
-
-    // timestampable behavior
-
-    /**
-     * Mark the current object so that the update date doesn't get updated during next save
-     *
-     * @return     Photo The current object (for fluent API support)
-     */
-    public function keepUpdateDateUnchanged()
-    {
-        $this->modifiedColumns[] = PhotoPeer::UPDATED_AT;
-
-        return $this;
     }
 
 }

@@ -63,8 +63,10 @@ class UserTableMap extends TableMap
     public function buildRelations()
     {
         $this->addRelation('Photo', 'wiosloCMS\\PhotoBundle\\Model\\Photo', RelationMap::ONE_TO_MANY, array('id' => 'owner_id', ), 'CASCADE', 'CASCADE', 'Photos');
+        $this->addRelation('UserRate', 'wiosloCMS\\PhotoBundle\\Model\\UserRate', RelationMap::ONE_TO_MANY, array('id' => 'user_id', ), 'CASCADE', 'CASCADE', 'UserRates');
         $this->addRelation('UserSettings', 'wiosloCMS\\UserBundle\\Model\\UserSettings', RelationMap::ONE_TO_ONE, array('id' => 'user_id', ), 'CASCADE', 'CASCADE');
         $this->addRelation('UserRole', 'wiosloCMS\\UserBundle\\Model\\UserRole', RelationMap::ONE_TO_MANY, array('id' => 'user_id', ), 'CASCADE', 'CASCADE', 'UserRoles');
+        $this->addRelation('Rating', 'wiosloCMS\\PhotoBundle\\Model\\Rating', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'Ratings');
         $this->addRelation('Role', 'wiosloCMS\\UserBundle\\Model\\Role', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'Roles');
     } // buildRelations()
 

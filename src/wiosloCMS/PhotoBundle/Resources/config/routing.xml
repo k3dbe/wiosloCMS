@@ -8,4 +8,8 @@
 		<default key="_controller">PhotoBundle:Photo:add</default>
 	</route>
 
+	<route id="rate" pattern="rate/{photoId}/{action}" methods="GET">
+		<default key="_controller">PhotoBundle:Rating:rate</default>
+	</route>
+
 </routes>

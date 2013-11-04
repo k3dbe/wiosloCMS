@@ -23,7 +23,7 @@
 		</unique>
 
 		<behavior name="sluggable">
-			<parameter nkame="slug_column" value="uri"/>
+			<parameter name="slug_column" value="uri"/>
 			<parameter name="slug_pattern" value="{username}"/>
 			<parameter name="replace_pattern" value="/[^\w\/]+/u"/>
 			<parameter name="replacement" value="-"/>

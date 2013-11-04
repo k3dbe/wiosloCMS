@@ -13,6 +13,8 @@ use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\Rating;
+use wiosloCMS\PhotoBundle\Model\UserRate;
 use wiosloCMS\UserBundle\Model\Role;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserPeer;
@@ -54,6 +56,10 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method UserQuery leftJoinPhoto($relationAlias = null) Adds a LEFT JOIN clause to the query using the Photo relation
  * @method UserQuery rightJoinPhoto($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Photo relation
  * @method UserQuery innerJoinPhoto($relationAlias = null) Adds a INNER JOIN clause to the query using the Photo relation
+ *
+ * @method UserQuery leftJoinUserRate($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserRate relation
+ * @method UserQuery rightJoinUserRate($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserRate relation
+ * @method UserQuery innerJoinUserRate($relationAlias = null) Adds a INNER JOIN clause to the query using the UserRate relation
  *
  * @method UserQuery leftJoinUserSettings($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSettings relation
  * @method UserQuery rightJoinUserSettings($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSettings relation
@@ -775,6 +781,80 @@ abstract class BaseUserQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query by a related UserRate object
+     *
+     * @param   UserRate|PropelObjectCollection $userRate  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 UserQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByUserRate($userRate, $comparison = null)
+    {
+        if ($userRate instanceof UserRate) {
+            return $this
+                ->addUsingAlias(UserPeer::ID, $userRate->getUserId(), $comparison);
+        } elseif ($userRate instanceof PropelObjectCollection) {
+            return $this
+                ->useUserRateQuery()
+                ->filterByPrimaryKeys($userRate->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByUserRate() only accepts arguments of type UserRate or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the UserRate relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return UserQuery The current query, for fluid interface
+     */
+    public function joinUserRate($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('UserRate');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'UserRate');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the UserRate relation UserRate object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \wiosloCMS\PhotoBundle\Model\UserRateQuery A secondary query class using the current class as primary query
+     */
+    public function useUserRateQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinUserRate($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'UserRate', '\wiosloCMS\PhotoBundle\Model\UserRateQuery');
+    }
+
+    /**
      * Filter the query by a related UserSettings object
      *
      * @param   UserSettings|PropelObjectCollection $userSettings  the related object to use as filter
@@ -920,6 +1000,23 @@ abstract class BaseUserQuery extends ModelCriteria
         return $this
             ->joinUserRole($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'UserRole', '\wiosloCMS\UserBundle\Model\UserRoleQuery');
+    }
+
+    /**
+     * Filter the query by a related Rating object
+     * using the UserRate table as cross reference
+     *
+     * @param   Rating $rating the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return   UserQuery The current query, for fluid interface
+     */
+    public function filterByRating($rating, $comparison = Criteria::EQUAL)
+    {
+        return $this
+            ->useUserRateQuery()
+            ->filterByRating($rating, $comparison)
+            ->endUse();
     }
 
     /**

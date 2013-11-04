@@ -7,6 +7,11 @@
             <h1>{{ photo.getName() }}</h1>
             <h3>{{ photo.getDescription() }}</h3>
             <img src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
+            <div>
+                <a href="{{ path('rate', {'photoId' : photo.getId(), 'action' : 'minus'})  }}">MINUS</a>
+                {{ photo.getRating().getValue() }}
+                <a href="{{ path('rate', {'photoId' : photo.getId(), 'action' : 'plus'})  }}">PLUS</a>
+            </div>
         {% endfor %}
     </span>
 {% endblock %}

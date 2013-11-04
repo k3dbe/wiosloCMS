@@ -9,65 +9,50 @@ use \PDOStatement;
 use \Propel;
 use \PropelException;
 use \PropelPDO;
-use wiosloCMS\PhotoBundle\Model\Photo;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
+use wiosloCMS\PhotoBundle\Model\Rating;
 use wiosloCMS\PhotoBundle\Model\RatingPeer;
-use wiosloCMS\PhotoBundle\Model\map\PhotoTableMap;
-use wiosloCMS\UserBundle\Model\UserPeer;
+use wiosloCMS\PhotoBundle\Model\UserRatePeer;
+use wiosloCMS\PhotoBundle\Model\map\RatingTableMap;
 
-abstract class BasePhotoPeer
+abstract class BaseRatingPeer
 {
 
     /** the default database name for this class */
     const DATABASE_NAME = 'main';
 
     /** the table name for this class */
-    const TABLE_NAME = 'Photo';
+    const TABLE_NAME = 'PhotoRating';
 
     /** the related Propel class for this table */
-    const OM_CLASS = 'wiosloCMS\\PhotoBundle\\Model\\Photo';
+    const OM_CLASS = 'wiosloCMS\\PhotoBundle\\Model\\Rating';
 
     /** the related TableMap class for this table */
-    const TM_CLASS = 'wiosloCMS\\PhotoBundle\\Model\\map\\PhotoTableMap';
+    const TM_CLASS = 'wiosloCMS\\PhotoBundle\\Model\\map\\RatingTableMap';
 
     /** The total number of columns. */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 2;
 
     /** The number of lazy-loaded columns. */
     const NUM_LAZY_LOAD_COLUMNS = 0;
 
     /** The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS) */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 2;
 
-    /** the column name for the id field */
-    const ID = 'Photo.id';
+    /** the column name for the photo_id field */
+    const PHOTO_ID = 'PhotoRating.photo_id';
 
-    /** the column name for the uri field */
-    const URI = 'Photo.uri';
-
-    /** the column name for the name field */
-    const NAME = 'Photo.name';
-
-    /** the column name for the description field */
-    const DESCRIPTION = 'Photo.description';
-
-    /** the column name for the owner_id field */
-    const OWNER_ID = 'Photo.owner_id';
-
-    /** the column name for the created_at field */
-    const CREATED_AT = 'Photo.created_at';
-
-    /** the column name for the updated_at field */
-    const UPDATED_AT = 'Photo.updated_at';
+    /** the column name for the value field */
+    const VALUE = 'PhotoRating.value';
 
     /** The default string format for model objects of the related table **/
     const DEFAULT_STRING_FORMAT = 'YAML';
 
     /**
-     * An identity map to hold any loaded instances of Photo objects.
+     * An identity map to hold any loaded instances of Rating objects.
      * This must be public so that other peer classes can access this when hydrating from JOIN
      * queries.
-     * @var        array Photo[]
+     * @var        array Rating[]
      */
     public static $instances = array();
 
@@ -76,30 +61,30 @@ abstract class BasePhotoPeer
      * holds an array of fieldnames
      *
      * first dimension keys are the type constants
-     * e.g. PhotoPeer::$fieldNames[PhotoPeer::TYPE_PHPNAME][0] = 'Id'
+     * e.g. RatingPeer::$fieldNames[RatingPeer::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        BasePeer::TYPE_PHPNAME => array ('Id', 'Uri', 'Name', 'Description', 'OwnerId', 'CreatedAt', 'UpdatedAt', ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'uri', 'name', 'description', 'ownerId', 'createdAt', 'updatedAt', ),
-        BasePeer::TYPE_COLNAME => array (PhotoPeer::ID, PhotoPeer::URI, PhotoPeer::NAME, PhotoPeer::DESCRIPTION, PhotoPeer::OWNER_ID, PhotoPeer::CREATED_AT, PhotoPeer::UPDATED_AT, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'URI', 'NAME', 'DESCRIPTION', 'OWNER_ID', 'CREATED_AT', 'UPDATED_AT', ),
-        BasePeer::TYPE_FIELDNAME => array ('id', 'uri', 'name', 'description', 'owner_id', 'created_at', 'updated_at', ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
+        BasePeer::TYPE_PHPNAME => array ('PhotoId', 'Value', ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('photoId', 'value', ),
+        BasePeer::TYPE_COLNAME => array (RatingPeer::PHOTO_ID, RatingPeer::VALUE, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('PHOTO_ID', 'VALUE', ),
+        BasePeer::TYPE_FIELDNAME => array ('photo_id', 'value', ),
+        BasePeer::TYPE_NUM => array (0, 1, )
     );
 
     /**
      * holds an array of keys for quick access to the fieldnames array
      *
      * first dimension keys are the type constants
-     * e.g. PhotoPeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
+     * e.g. RatingPeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Uri' => 1, 'Name' => 2, 'Description' => 3, 'OwnerId' => 4, 'CreatedAt' => 5, 'UpdatedAt' => 6, ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'uri' => 1, 'name' => 2, 'description' => 3, 'ownerId' => 4, 'createdAt' => 5, 'updatedAt' => 6, ),
-        BasePeer::TYPE_COLNAME => array (PhotoPeer::ID => 0, PhotoPeer::URI => 1, PhotoPeer::NAME => 2, PhotoPeer::DESCRIPTION => 3, PhotoPeer::OWNER_ID => 4, PhotoPeer::CREATED_AT => 5, PhotoPeer::UPDATED_AT => 6, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'URI' => 1, 'NAME' => 2, 'DESCRIPTION' => 3, 'OWNER_ID' => 4, 'CREATED_AT' => 5, 'UPDATED_AT' => 6, ),
-        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'uri' => 1, 'name' => 2, 'description' => 3, 'owner_id' => 4, 'created_at' => 5, 'updated_at' => 6, ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
+        BasePeer::TYPE_PHPNAME => array ('PhotoId' => 0, 'Value' => 1, ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('photoId' => 0, 'value' => 1, ),
+        BasePeer::TYPE_COLNAME => array (RatingPeer::PHOTO_ID => 0, RatingPeer::VALUE => 1, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('PHOTO_ID' => 0, 'VALUE' => 1, ),
+        BasePeer::TYPE_FIELDNAME => array ('photo_id' => 0, 'value' => 1, ),
+        BasePeer::TYPE_NUM => array (0, 1, )
     );
 
     /**
@@ -114,10 +99,10 @@ abstract class BasePhotoPeer
      */
     public static function translateFieldName($name, $fromType, $toType)
     {
-        $toNames = PhotoPeer::getFieldNames($toType);
-        $key = isset(PhotoPeer::$fieldKeys[$fromType][$name]) ? PhotoPeer::$fieldKeys[$fromType][$name] : null;
+        $toNames = RatingPeer::getFieldNames($toType);
+        $key = isset(RatingPeer::$fieldKeys[$fromType][$name]) ? RatingPeer::$fieldKeys[$fromType][$name] : null;
         if ($key === null) {
-            throw new PropelException("'$name' could not be found in the field names of type '$fromType'. These are: " . print_r(PhotoPeer::$fieldKeys[$fromType], true));
+            throw new PropelException("'$name' could not be found in the field names of type '$fromType'. These are: " . print_r(RatingPeer::$fieldKeys[$fromType], true));
         }
 
         return $toNames[$key];
@@ -134,11 +119,11 @@ abstract class BasePhotoPeer
      */
     public static function getFieldNames($type = BasePeer::TYPE_PHPNAME)
     {
-        if (!array_key_exists($type, PhotoPeer::$fieldNames)) {
+        if (!array_key_exists($type, RatingPeer::$fieldNames)) {
             throw new PropelException('Method getFieldNames() expects the parameter $type to be one of the class constants BasePeer::TYPE_PHPNAME, BasePeer::TYPE_STUDLYPHPNAME, BasePeer::TYPE_COLNAME, BasePeer::TYPE_FIELDNAME, BasePeer::TYPE_NUM. ' . $type . ' was given.');
         }
 
-        return PhotoPeer::$fieldNames[$type];
+        return RatingPeer::$fieldNames[$type];
     }
 
     /**
@@ -150,12 +135,12 @@ abstract class BasePhotoPeer
      *		$c->addJoin(TablePeer::alias("alias1", TablePeer::PRIMARY_KEY_COLUMN), TablePeer::PRIMARY_KEY_COLUMN);
      * </code>
      * @param      string $alias The alias for the current table.
-     * @param      string $column The column name for current table. (i.e. PhotoPeer::COLUMN_NAME).
+     * @param      string $column The column name for current table. (i.e. RatingPeer::COLUMN_NAME).
      * @return string
      */
     public static function alias($alias, $column)
     {
-        return str_replace(PhotoPeer::TABLE_NAME.'.', $alias.'.', $column);
+        return str_replace(RatingPeer::TABLE_NAME.'.', $alias.'.', $column);
     }
 
     /**
@@ -173,21 +158,11 @@ abstract class BasePhotoPeer
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(PhotoPeer::ID);
-            $criteria->addSelectColumn(PhotoPeer::URI);
-            $criteria->addSelectColumn(PhotoPeer::NAME);
-            $criteria->addSelectColumn(PhotoPeer::DESCRIPTION);
-            $criteria->addSelectColumn(PhotoPeer::OWNER_ID);
-            $criteria->addSelectColumn(PhotoPeer::CREATED_AT);
-            $criteria->addSelectColumn(PhotoPeer::UPDATED_AT);
+            $criteria->addSelectColumn(RatingPeer::PHOTO_ID);
+            $criteria->addSelectColumn(RatingPeer::VALUE);
         } else {
-            $criteria->addSelectColumn($alias . '.id');
-            $criteria->addSelectColumn($alias . '.uri');
-            $criteria->addSelectColumn($alias . '.name');
-            $criteria->addSelectColumn($alias . '.description');
-            $criteria->addSelectColumn($alias . '.owner_id');
-            $criteria->addSelectColumn($alias . '.created_at');
-            $criteria->addSelectColumn($alias . '.updated_at');
+            $criteria->addSelectColumn($alias . '.photo_id');
+            $criteria->addSelectColumn($alias . '.value');
         }
     }
 
@@ -207,21 +182,21 @@ abstract class BasePhotoPeer
         // We need to set the primary table name, since in the case that there are no WHERE columns
         // it will be impossible for the BasePeer::createSelectSql() method to determine which
         // tables go into the FROM clause.
-        $criteria->setPrimaryTableName(PhotoPeer::TABLE_NAME);
+        $criteria->setPrimaryTableName(RatingPeer::TABLE_NAME);
 
         if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
             $criteria->setDistinct();
         }
 
         if (!$criteria->hasSelectClause()) {
-            PhotoPeer::addSelectColumns($criteria);
+            RatingPeer::addSelectColumns($criteria);
         }
 
         $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
-        $criteria->setDbName(PhotoPeer::DATABASE_NAME); // Set the correct dbName
+        $criteria->setDbName(RatingPeer::DATABASE_NAME); // Set the correct dbName
 
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
         // BasePeer returns a PDOStatement
         $stmt = BasePeer::doCount($criteria, $con);
@@ -240,7 +215,7 @@ abstract class BasePhotoPeer
      *
      * @param      Criteria $criteria object used to create the SELECT statement.
      * @param      PropelPDO $con
-     * @return Photo
+     * @return Rating
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
@@ -248,7 +223,7 @@ abstract class BasePhotoPeer
     {
         $critcopy = clone $criteria;
         $critcopy->setLimit(1);
-        $objects = PhotoPeer::doSelect($critcopy, $con);
+        $objects = RatingPeer::doSelect($critcopy, $con);
         if ($objects) {
             return $objects[0];
         }
@@ -266,7 +241,7 @@ abstract class BasePhotoPeer
      */
     public static function doSelect(Criteria $criteria, PropelPDO $con = null)
     {
-        return PhotoPeer::populateObjects(PhotoPeer::doSelectStmt($criteria, $con));
+        return RatingPeer::populateObjects(RatingPeer::doSelectStmt($criteria, $con));
     }
     /**
      * Prepares the Criteria object and uses the parent doSelect() method to execute a PDOStatement.
@@ -284,16 +259,16 @@ abstract class BasePhotoPeer
     public static function doSelectStmt(Criteria $criteria, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
         if (!$criteria->hasSelectClause()) {
             $criteria = clone $criteria;
-            PhotoPeer::addSelectColumns($criteria);
+            RatingPeer::addSelectColumns($criteria);
         }
 
         // Set the correct dbName
-        $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+        $criteria->setDbName(RatingPeer::DATABASE_NAME);
 
         // BasePeer returns a PDOStatement
         return BasePeer::doSelect($criteria, $con);
@@ -307,16 +282,16 @@ abstract class BasePhotoPeer
      * to the cache in order to ensure that the same objects are always returned by doSelect*()
      * and retrieveByPK*() calls.
      *
-     * @param Photo $obj A Photo object.
+     * @param Rating $obj A Rating object.
      * @param      string $key (optional) key to use for instance map (for performance boost if key was already calculated externally).
      */
     public static function addInstanceToPool($obj, $key = null)
     {
         if (Propel::isInstancePoolingEnabled()) {
             if ($key === null) {
-                $key = (string) $obj->getId();
+                $key = (string) $obj->getPhotoId();
             } // if key === null
-            PhotoPeer::$instances[$key] = $obj;
+            RatingPeer::$instances[$key] = $obj;
         }
     }
 
@@ -328,7 +303,7 @@ abstract class BasePhotoPeer
      * methods in your stub classes -- you may need to explicitly remove objects
      * from the cache in order to prevent returning objects that no longer exist.
      *
-     * @param      mixed $value A Photo object or a primary key value.
+     * @param      mixed $value A Rating object or a primary key value.
      *
      * @return void
      * @throws PropelException - if the value is invalid.
@@ -336,17 +311,17 @@ abstract class BasePhotoPeer
     public static function removeInstanceFromPool($value)
     {
         if (Propel::isInstancePoolingEnabled() && $value !== null) {
-            if (is_object($value) && $value instanceof Photo) {
-                $key = (string) $value->getId();
+            if (is_object($value) && $value instanceof Rating) {
+                $key = (string) $value->getPhotoId();
             } elseif (is_scalar($value)) {
                 // assume we've been passed a primary key
                 $key = (string) $value;
             } else {
-                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or Photo object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value,true)));
+                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or Rating object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value,true)));
                 throw $e;
             }
 
-            unset(PhotoPeer::$instances[$key]);
+            unset(RatingPeer::$instances[$key]);
         }
     } // removeInstanceFromPool()
 
@@ -357,14 +332,14 @@ abstract class BasePhotoPeer
      * a multi-column primary key, a serialize()d version of the primary key will be returned.
      *
      * @param      string $key The key (@see getPrimaryKeyHash()) for this instance.
-     * @return Photo Found object or null if 1) no instance exists for specified key or 2) instance pooling has been disabled.
+     * @return Rating Found object or null if 1) no instance exists for specified key or 2) instance pooling has been disabled.
      * @see        getPrimaryKeyHash()
      */
     public static function getInstanceFromPool($key)
     {
         if (Propel::isInstancePoolingEnabled()) {
-            if (isset(PhotoPeer::$instances[$key])) {
-                return PhotoPeer::$instances[$key];
+            if (isset(RatingPeer::$instances[$key])) {
+                return RatingPeer::$instances[$key];
             }
         }
 
@@ -379,22 +354,22 @@ abstract class BasePhotoPeer
     public static function clearInstancePool($and_clear_all_references = false)
     {
       if ($and_clear_all_references) {
-        foreach (PhotoPeer::$instances as $instance) {
+        foreach (RatingPeer::$instances as $instance) {
           $instance->clearAllReferences(true);
         }
       }
-        PhotoPeer::$instances = array();
+        RatingPeer::$instances = array();
     }
 
     /**
-     * Method to invalidate the instance pool of all tables related to Photo
+     * Method to invalidate the instance pool of all tables related to PhotoRating
      * by a foreign key with ON DELETE CASCADE
      */
     public static function clearRelatedInstancePool()
     {
-        // Invalidate objects in RatingPeer instance pool,
+        // Invalidate objects in UserRatePeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
-        RatingPeer::clearInstancePool();
+        UserRatePeer::clearInstancePool();
     }
 
     /**
@@ -444,11 +419,11 @@ abstract class BasePhotoPeer
         $results = array();
 
         // set the class once to avoid overhead in the loop
-        $cls = PhotoPeer::getOMClass();
+        $cls = RatingPeer::getOMClass();
         // populate the object(s)
         while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $key = PhotoPeer::getPrimaryKeyHashFromRow($row, 0);
-            if (null !== ($obj = PhotoPeer::getInstanceFromPool($key))) {
+            $key = RatingPeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj = RatingPeer::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
@@ -457,7 +432,7 @@ abstract class BasePhotoPeer
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                PhotoPeer::addInstanceToPool($obj, $key);
+                RatingPeer::addInstanceToPool($obj, $key);
             } // if key exists
         }
         $stmt->closeCursor();
@@ -471,21 +446,21 @@ abstract class BasePhotoPeer
      * @param      int $startcol The 0-based offset for reading from the resultset row.
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
-     * @return array (Photo object, last column rank)
+     * @return array (Rating object, last column rank)
      */
     public static function populateObject($row, $startcol = 0)
     {
-        $key = PhotoPeer::getPrimaryKeyHashFromRow($row, $startcol);
-        if (null !== ($obj = PhotoPeer::getInstanceFromPool($key))) {
+        $key = RatingPeer::getPrimaryKeyHashFromRow($row, $startcol);
+        if (null !== ($obj = RatingPeer::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $startcol, true); // rehydrate
-            $col = $startcol + PhotoPeer::NUM_HYDRATE_COLUMNS;
+            $col = $startcol + RatingPeer::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = PhotoPeer::OM_CLASS;
+            $cls = RatingPeer::OM_CLASS;
             $obj = new $cls();
             $col = $obj->hydrate($row, $startcol);
-            PhotoPeer::addInstanceToPool($obj, $key);
+            RatingPeer::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -493,7 +468,7 @@ abstract class BasePhotoPeer
 
 
     /**
-     * Returns the number of rows matching criteria, joining the related User table
+     * Returns the number of rows matching criteria, joining the related Photo table
      *
      * @param      Criteria $criteria
      * @param      boolean $distinct Whether to select only distinct columns; deprecated: use Criteria->setDistinct() instead.
@@ -501,7 +476,7 @@ abstract class BasePhotoPeer
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
      * @return int Number of matching rows.
      */
-    public static function doCountJoinUser(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doCountJoinPhoto(Criteria $criteria, $distinct = false, PropelPDO $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         // we're going to modify criteria, so copy it first
         $criteria = clone $criteria;
@@ -509,26 +484,26 @@ abstract class BasePhotoPeer
         // We need to set the primary table name, since in the case that there are no WHERE columns
         // it will be impossible for the BasePeer::createSelectSql() method to determine which
         // tables go into the FROM clause.
-        $criteria->setPrimaryTableName(PhotoPeer::TABLE_NAME);
+        $criteria->setPrimaryTableName(RatingPeer::TABLE_NAME);
 
         if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
             $criteria->setDistinct();
         }
 
         if (!$criteria->hasSelectClause()) {
-            PhotoPeer::addSelectColumns($criteria);
+            RatingPeer::addSelectColumns($criteria);
         }
 
         $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
 
         // Set the correct dbName
-        $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+        $criteria->setDbName(RatingPeer::DATABASE_NAME);
 
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(PhotoPeer::OWNER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(RatingPeer::PHOTO_ID, PhotoPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -544,61 +519,62 @@ abstract class BasePhotoPeer
 
 
     /**
-     * Selects a collection of Photo objects pre-filled with their User objects.
+     * Selects a collection of Rating objects pre-filled with their Photo objects.
      * @param      Criteria  $criteria
      * @param      PropelPDO $con
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
-     * @return array           Array of Photo objects.
+     * @return array           Array of Rating objects.
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
-    public static function doSelectJoinUser(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    public static function doSelectJoinPhoto(Criteria $criteria, $con = null, $join_behavior = Criteria::LEFT_JOIN)
     {
         $criteria = clone $criteria;
 
         // Set the correct dbName if it has not been overridden
         if ($criteria->getDbName() == Propel::getDefaultDB()) {
-            $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+            $criteria->setDbName(RatingPeer::DATABASE_NAME);
         }
 
+        RatingPeer::addSelectColumns($criteria);
+        $startcol = RatingPeer::NUM_HYDRATE_COLUMNS;
         PhotoPeer::addSelectColumns($criteria);
-        $startcol = PhotoPeer::NUM_HYDRATE_COLUMNS;
-        UserPeer::addSelectColumns($criteria);
 
-        $criteria->addJoin(PhotoPeer::OWNER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(RatingPeer::PHOTO_ID, PhotoPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
 
         while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $key1 = PhotoPeer::getPrimaryKeyHashFromRow($row, 0);
-            if (null !== ($obj1 = PhotoPeer::getInstanceFromPool($key1))) {
+            $key1 = RatingPeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = RatingPeer::getInstanceFromPool($key1))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj1->hydrate($row, 0, true); // rehydrate
             } else {
 
-                $cls = PhotoPeer::getOMClass();
+                $cls = RatingPeer::getOMClass();
 
                 $obj1 = new $cls();
                 $obj1->hydrate($row);
-                PhotoPeer::addInstanceToPool($obj1, $key1);
+                RatingPeer::addInstanceToPool($obj1, $key1);
             } // if $obj1 already loaded
 
-            $key2 = UserPeer::getPrimaryKeyHashFromRow($row, $startcol);
+            $key2 = PhotoPeer::getPrimaryKeyHashFromRow($row, $startcol);
             if ($key2 !== null) {
-                $obj2 = UserPeer::getInstanceFromPool($key2);
+                $obj2 = PhotoPeer::getInstanceFromPool($key2);
                 if (!$obj2) {
 
-                    $cls = UserPeer::getOMClass();
+                    $cls = PhotoPeer::getOMClass();
 
                     $obj2 = new $cls();
                     $obj2->hydrate($row, $startcol);
-                    UserPeer::addInstanceToPool($obj2, $key2);
+                    PhotoPeer::addInstanceToPool($obj2, $key2);
                 } // if obj2 already loaded
 
-                // Add the $obj1 (Photo) to $obj2 (User)
-                $obj2->addPhoto($obj1);
+                // Add the $obj1 (Rating) to $obj2 (Photo)
+                // one to one relationship
+                $obj1->setPhoto($obj2);
 
             } // if joined row was not null
 
@@ -627,26 +603,26 @@ abstract class BasePhotoPeer
         // We need to set the primary table name, since in the case that there are no WHERE columns
         // it will be impossible for the BasePeer::createSelectSql() method to determine which
         // tables go into the FROM clause.
-        $criteria->setPrimaryTableName(PhotoPeer::TABLE_NAME);
+        $criteria->setPrimaryTableName(RatingPeer::TABLE_NAME);
 
         if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
             $criteria->setDistinct();
         }
 
         if (!$criteria->hasSelectClause()) {
-            PhotoPeer::addSelectColumns($criteria);
+            RatingPeer::addSelectColumns($criteria);
         }
 
         $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
 
         // Set the correct dbName
-        $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+        $criteria->setDbName(RatingPeer::DATABASE_NAME);
 
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(PhotoPeer::OWNER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(RatingPeer::PHOTO_ID, PhotoPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -661,12 +637,12 @@ abstract class BasePhotoPeer
     }
 
     /**
-     * Selects a collection of Photo objects pre-filled with all related objects.
+     * Selects a collection of Rating objects pre-filled with all related objects.
      *
      * @param      Criteria  $criteria
      * @param      PropelPDO $con
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
-     * @return array           Array of Photo objects.
+     * @return array           Array of Rating objects.
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
@@ -676,50 +652,50 @@ abstract class BasePhotoPeer
 
         // Set the correct dbName if it has not been overridden
         if ($criteria->getDbName() == Propel::getDefaultDB()) {
-            $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+            $criteria->setDbName(RatingPeer::DATABASE_NAME);
         }
 
+        RatingPeer::addSelectColumns($criteria);
+        $startcol2 = RatingPeer::NUM_HYDRATE_COLUMNS;
+
         PhotoPeer::addSelectColumns($criteria);
-        $startcol2 = PhotoPeer::NUM_HYDRATE_COLUMNS;
+        $startcol3 = $startcol2 + PhotoPeer::NUM_HYDRATE_COLUMNS;
 
-        UserPeer::addSelectColumns($criteria);
-        $startcol3 = $startcol2 + UserPeer::NUM_HYDRATE_COLUMNS;
-
-        $criteria->addJoin(PhotoPeer::OWNER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(RatingPeer::PHOTO_ID, PhotoPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
 
         while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $key1 = PhotoPeer::getPrimaryKeyHashFromRow($row, 0);
-            if (null !== ($obj1 = PhotoPeer::getInstanceFromPool($key1))) {
+            $key1 = RatingPeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = RatingPeer::getInstanceFromPool($key1))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj1->hydrate($row, 0, true); // rehydrate
             } else {
-                $cls = PhotoPeer::getOMClass();
+                $cls = RatingPeer::getOMClass();
 
                 $obj1 = new $cls();
                 $obj1->hydrate($row);
-                PhotoPeer::addInstanceToPool($obj1, $key1);
+                RatingPeer::addInstanceToPool($obj1, $key1);
             } // if obj1 already loaded
 
-            // Add objects for joined User rows
+            // Add objects for joined Photo rows
 
-            $key2 = UserPeer::getPrimaryKeyHashFromRow($row, $startcol2);
+            $key2 = PhotoPeer::getPrimaryKeyHashFromRow($row, $startcol2);
             if ($key2 !== null) {
-                $obj2 = UserPeer::getInstanceFromPool($key2);
+                $obj2 = PhotoPeer::getInstanceFromPool($key2);
                 if (!$obj2) {
 
-                    $cls = UserPeer::getOMClass();
+                    $cls = PhotoPeer::getOMClass();
 
                     $obj2 = new $cls();
                     $obj2->hydrate($row, $startcol2);
-                    UserPeer::addInstanceToPool($obj2, $key2);
+                    PhotoPeer::addInstanceToPool($obj2, $key2);
                 } // if obj2 loaded
 
-                // Add the $obj1 (Photo) to the collection in $obj2 (User)
-                $obj2->addPhoto($obj1);
+                // Add the $obj1 (Rating) to the collection in $obj2 (Photo)
+                $obj1->setPhoto($obj2);
             } // if joined row not null
 
             $results[] = $obj1;
@@ -738,7 +714,7 @@ abstract class BasePhotoPeer
      */
     public static function getTableMap()
     {
-        return Propel::getDatabaseMap(PhotoPeer::DATABASE_NAME)->getTable(PhotoPeer::TABLE_NAME);
+        return Propel::getDatabaseMap(RatingPeer::DATABASE_NAME)->getTable(RatingPeer::TABLE_NAME);
     }
 
     /**
@@ -746,9 +722,9 @@ abstract class BasePhotoPeer
      */
     public static function buildTableMap()
     {
-      $dbMap = Propel::getDatabaseMap(BasePhotoPeer::DATABASE_NAME);
-      if (!$dbMap->hasTable(BasePhotoPeer::TABLE_NAME)) {
-        $dbMap->addTableObject(new \wiosloCMS\PhotoBundle\Model\map\PhotoTableMap());
+      $dbMap = Propel::getDatabaseMap(BaseRatingPeer::DATABASE_NAME);
+      if (!$dbMap->hasTable(BaseRatingPeer::TABLE_NAME)) {
+        $dbMap->addTableObject(new \wiosloCMS\PhotoBundle\Model\map\RatingTableMap());
       }
     }
 
@@ -760,13 +736,13 @@ abstract class BasePhotoPeer
      */
     public static function getOMClass($row = 0, $colnum = 0)
     {
-        return PhotoPeer::OM_CLASS;
+        return RatingPeer::OM_CLASS;
     }
 
     /**
-     * Performs an INSERT on the database, given a Photo or Criteria object.
+     * Performs an INSERT on the database, given a Rating or Criteria object.
      *
-     * @param      mixed $values Criteria or Photo object containing data that is used to create the INSERT statement.
+     * @param      mixed $values Criteria or Rating object containing data that is used to create the INSERT statement.
      * @param      PropelPDO $con the PropelPDO connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -775,22 +751,18 @@ abstract class BasePhotoPeer
     public static function doInsert($values, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         if ($values instanceof Criteria) {
             $criteria = clone $values; // rename for clarity
         } else {
-            $criteria = $values->buildCriteria(); // build Criteria from Photo object
-        }
-
-        if ($criteria->containsKey(PhotoPeer::ID) && $criteria->keyContainsValue(PhotoPeer::ID) ) {
-            throw new PropelException('Cannot insert a value for auto-increment primary key ('.PhotoPeer::ID.')');
+            $criteria = $values->buildCriteria(); // build Criteria from Rating object
         }
 
 
         // Set the correct dbName
-        $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+        $criteria->setDbName(RatingPeer::DATABASE_NAME);
 
         try {
             // use transaction because $criteria could contain info
@@ -807,9 +779,9 @@ abstract class BasePhotoPeer
     }
 
     /**
-     * Performs an UPDATE on the database, given a Photo or Criteria object.
+     * Performs an UPDATE on the database, given a Rating or Criteria object.
      *
-     * @param      mixed $values Criteria or Photo object containing data that is used to create the UPDATE statement.
+     * @param      mixed $values Criteria or Rating object containing data that is used to create the UPDATE statement.
      * @param      PropelPDO $con The connection to use (specify PropelPDO connection object to exert more control over transactions).
      * @return int             The number of affected rows (if supported by underlying database driver).
      * @throws PropelException Any exceptions caught during processing will be
@@ -818,35 +790,35 @@ abstract class BasePhotoPeer
     public static function doUpdate($values, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
-        $selectCriteria = new Criteria(PhotoPeer::DATABASE_NAME);
+        $selectCriteria = new Criteria(RatingPeer::DATABASE_NAME);
 
         if ($values instanceof Criteria) {
             $criteria = clone $values; // rename for clarity
 
-            $comparison = $criteria->getComparison(PhotoPeer::ID);
-            $value = $criteria->remove(PhotoPeer::ID);
+            $comparison = $criteria->getComparison(RatingPeer::PHOTO_ID);
+            $value = $criteria->remove(RatingPeer::PHOTO_ID);
             if ($value) {
-                $selectCriteria->add(PhotoPeer::ID, $value, $comparison);
+                $selectCriteria->add(RatingPeer::PHOTO_ID, $value, $comparison);
             } else {
-                $selectCriteria->setPrimaryTableName(PhotoPeer::TABLE_NAME);
+                $selectCriteria->setPrimaryTableName(RatingPeer::TABLE_NAME);
             }
 
-        } else { // $values is Photo object
+        } else { // $values is Rating object
             $criteria = $values->buildCriteria(); // gets full criteria
             $selectCriteria = $values->buildPkeyCriteria(); // gets criteria w/ primary key(s)
         }
 
         // set the correct dbName
-        $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+        $criteria->setDbName(RatingPeer::DATABASE_NAME);
 
         return BasePeer::doUpdate($selectCriteria, $criteria, $con);
     }
 
     /**
-     * Deletes all rows from the Photo table.
+     * Deletes all rows from the PhotoRating table.
      *
      * @param      PropelPDO $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).
@@ -855,20 +827,20 @@ abstract class BasePhotoPeer
     public static function doDeleteAll(PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
         $affectedRows = 0; // initialize var to track total num of affected rows
         try {
             // use transaction because $criteria could contain info
             // for more than one table or we could emulating ON DELETE CASCADE, etc.
             $con->beginTransaction();
-            $affectedRows += PhotoPeer::doOnDeleteCascade(new Criteria(PhotoPeer::DATABASE_NAME), $con);
-            $affectedRows += BasePeer::doDeleteAll(PhotoPeer::TABLE_NAME, $con, PhotoPeer::DATABASE_NAME);
+            $affectedRows += RatingPeer::doOnDeleteCascade(new Criteria(RatingPeer::DATABASE_NAME), $con);
+            $affectedRows += BasePeer::doDeleteAll(RatingPeer::TABLE_NAME, $con, RatingPeer::DATABASE_NAME);
             // Because this db requires some delete cascade/set null emulation, we have to
             // clear the cached instance *after* the emulation has happened (since
             // instances get re-added by the select statement contained therein).
-            PhotoPeer::clearInstancePool();
-            PhotoPeer::clearRelatedInstancePool();
+            RatingPeer::clearInstancePool();
+            RatingPeer::clearRelatedInstancePool();
             $con->commit();
 
             return $affectedRows;
@@ -879,9 +851,9 @@ abstract class BasePhotoPeer
     }
 
     /**
-     * Performs a DELETE on the database, given a Photo or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a Rating or Criteria object OR a primary key value.
      *
-     * @param      mixed $values Criteria or Photo object or primary key or array of primary keys
+     * @param      mixed $values Criteria or Rating object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param      PropelPDO $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -892,22 +864,22 @@ abstract class BasePhotoPeer
      public static function doDelete($values, PropelPDO $con = null)
      {
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = clone $values;
-        } elseif ($values instanceof Photo) { // it's a model object
+        } elseif ($values instanceof Rating) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(PhotoPeer::DATABASE_NAME);
-            $criteria->add(PhotoPeer::ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(RatingPeer::DATABASE_NAME);
+            $criteria->add(RatingPeer::PHOTO_ID, (array) $values, Criteria::IN);
         }
 
         // Set the correct dbName
-        $criteria->setDbName(PhotoPeer::DATABASE_NAME);
+        $criteria->setDbName(RatingPeer::DATABASE_NAME);
 
         $affectedRows = 0; // initialize var to track total num of affected rows
 
@@ -918,23 +890,23 @@ abstract class BasePhotoPeer
 
             // cloning the Criteria in case it's modified by doSelect() or doSelectStmt()
             $c = clone $criteria;
-            $affectedRows += PhotoPeer::doOnDeleteCascade($c, $con);
+            $affectedRows += RatingPeer::doOnDeleteCascade($c, $con);
 
             // Because this db requires some delete cascade/set null emulation, we have to
             // clear the cached instance *after* the emulation has happened (since
             // instances get re-added by the select statement contained therein).
             if ($values instanceof Criteria) {
-                PhotoPeer::clearInstancePool();
-            } elseif ($values instanceof Photo) { // it's a model object
-                PhotoPeer::removeInstanceFromPool($values);
+                RatingPeer::clearInstancePool();
+            } elseif ($values instanceof Rating) { // it's a model object
+                RatingPeer::removeInstanceFromPool($values);
             } else { // it's a primary key, or an array of pks
                 foreach ((array) $values as $singleval) {
-                    PhotoPeer::removeInstanceFromPool($singleval);
+                    RatingPeer::removeInstanceFromPool($singleval);
                 }
             }
 
             $affectedRows += BasePeer::doDelete($criteria, $con);
-            PhotoPeer::clearRelatedInstancePool();
+            RatingPeer::clearRelatedInstancePool();
             $con->commit();
 
             return $affectedRows;
@@ -963,28 +935,28 @@ abstract class BasePhotoPeer
         $affectedRows = 0;
 
         // first find the objects that are implicated by the $criteria
-        $objects = PhotoPeer::doSelect($criteria, $con);
+        $objects = RatingPeer::doSelect($criteria, $con);
         foreach ($objects as $obj) {
 
 
-            // delete related Rating objects
-            $criteria = new Criteria(RatingPeer::DATABASE_NAME);
+            // delete related UserRate objects
+            $criteria = new Criteria(UserRatePeer::DATABASE_NAME);
 
-            $criteria->add(RatingPeer::PHOTO_ID, $obj->getId());
-            $affectedRows += RatingPeer::doDelete($criteria, $con);
+            $criteria->add(UserRatePeer::PHOTO_ID, $obj->getPhotoId());
+            $affectedRows += UserRatePeer::doDelete($criteria, $con);
         }
 
         return $affectedRows;
     }
 
     /**
-     * Validates all modified columns of given Photo object.
+     * Validates all modified columns of given Rating object.
      * If parameter $columns is either a single column name or an array of column names
      * than only those columns are validated.
      *
      * NOTICE: This does not apply to primary or foreign keys for now.
      *
-     * @param Photo $obj The object to validate.
+     * @param Rating $obj The object to validate.
      * @param      mixed $cols Column name or array of column names.
      *
      * @return mixed TRUE if all columns are valid or the error message of the first invalid column.
@@ -994,8 +966,8 @@ abstract class BasePhotoPeer
         $columns = array();
 
         if ($cols) {
-            $dbMap = Propel::getDatabaseMap(PhotoPeer::DATABASE_NAME);
-            $tableMap = $dbMap->getTable(PhotoPeer::TABLE_NAME);
+            $dbMap = Propel::getDatabaseMap(RatingPeer::DATABASE_NAME);
+            $tableMap = $dbMap->getTable(RatingPeer::TABLE_NAME);
 
             if (! is_array($cols)) {
                 $cols = array($cols);
@@ -1011,7 +983,7 @@ abstract class BasePhotoPeer
 
         }
 
-        return BasePeer::doValidate(PhotoPeer::DATABASE_NAME, PhotoPeer::TABLE_NAME, $columns);
+        return BasePeer::doValidate(RatingPeer::DATABASE_NAME, RatingPeer::TABLE_NAME, $columns);
     }
 
     /**
@@ -1019,23 +991,23 @@ abstract class BasePhotoPeer
      *
      * @param int $pk the primary key.
      * @param      PropelPDO $con the connection to use
-     * @return Photo
+     * @return Rating
      */
     public static function retrieveByPK($pk, PropelPDO $con = null)
     {
 
-        if (null !== ($obj = PhotoPeer::getInstanceFromPool((string) $pk))) {
+        if (null !== ($obj = RatingPeer::getInstanceFromPool((string) $pk))) {
             return $obj;
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria = new Criteria(PhotoPeer::DATABASE_NAME);
-        $criteria->add(PhotoPeer::ID, $pk);
+        $criteria = new Criteria(RatingPeer::DATABASE_NAME);
+        $criteria->add(RatingPeer::PHOTO_ID, $pk);
 
-        $v = PhotoPeer::doSelect($criteria, $con);
+        $v = RatingPeer::doSelect($criteria, $con);
 
         return !empty($v) > 0 ? $v[0] : null;
     }
@@ -1045,31 +1017,31 @@ abstract class BasePhotoPeer
      *
      * @param      array $pks List of primary keys
      * @param      PropelPDO $con the connection to use
-     * @return Photo[]
+     * @return Rating[]
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
     public static function retrieveByPKs($pks, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(PhotoPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(RatingPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
         $objs = null;
         if (empty($pks)) {
             $objs = array();
         } else {
-            $criteria = new Criteria(PhotoPeer::DATABASE_NAME);
-            $criteria->add(PhotoPeer::ID, $pks, Criteria::IN);
-            $objs = PhotoPeer::doSelect($criteria, $con);
+            $criteria = new Criteria(RatingPeer::DATABASE_NAME);
+            $criteria->add(RatingPeer::PHOTO_ID, $pks, Criteria::IN);
+            $objs = RatingPeer::doSelect($criteria, $con);
         }
 
         return $objs;
     }
 
-} // BasePhotoPeer
+} // BaseRatingPeer
 
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-BasePhotoPeer::buildTableMap();
+BaseRatingPeer::buildTableMap();
 
