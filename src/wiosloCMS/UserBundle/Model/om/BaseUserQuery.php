@@ -12,6 +12,7 @@ use \PropelCollection;
 use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
+use wiosloCMS\PhotoBundle\Model\Photo;
 use wiosloCMS\UserBundle\Model\Role;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserPeer;
@@ -31,6 +32,7 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method UserQuery orderByGender($order = Criteria::ASC) Order by the gender column
  * @method UserQuery orderByPassword($order = Criteria::ASC) Order by the password column
  * @method UserQuery orderByRegisteredAt($order = Criteria::ASC) Order by the registered_at column
+ * @method UserQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
  *
  * @method UserQuery groupById() Group by the id column
  * @method UserQuery groupByUri() Group by the uri column
@@ -43,10 +45,15 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method UserQuery groupByGender() Group by the gender column
  * @method UserQuery groupByPassword() Group by the password column
  * @method UserQuery groupByRegisteredAt() Group by the registered_at column
+ * @method UserQuery groupByUpdatedAt() Group by the updated_at column
  *
  * @method UserQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method UserQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
  * @method UserQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ *
+ * @method UserQuery leftJoinPhoto($relationAlias = null) Adds a LEFT JOIN clause to the query using the Photo relation
+ * @method UserQuery rightJoinPhoto($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Photo relation
+ * @method UserQuery innerJoinPhoto($relationAlias = null) Adds a INNER JOIN clause to the query using the Photo relation
  *
  * @method UserQuery leftJoinUserSettings($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSettings relation
  * @method UserQuery rightJoinUserSettings($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSettings relation
@@ -69,6 +76,7 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method User findOneByGender(int $gender) Return the first User filtered by the gender column
  * @method User findOneByPassword(string $password) Return the first User filtered by the password column
  * @method User findOneByRegisteredAt(string $registered_at) Return the first User filtered by the registered_at column
+ * @method User findOneByUpdatedAt(string $updated_at) Return the first User filtered by the updated_at column
  *
  * @method array findById(int $id) Return User objects filtered by the id column
  * @method array findByUri(string $uri) Return User objects filtered by the uri column
@@ -81,6 +89,7 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method array findByGender(int $gender) Return User objects filtered by the gender column
  * @method array findByPassword(string $password) Return User objects filtered by the password column
  * @method array findByRegisteredAt(string $registered_at) Return User objects filtered by the registered_at column
+ * @method array findByUpdatedAt(string $updated_at) Return User objects filtered by the updated_at column
  */
 abstract class BaseUserQuery extends ModelCriteria
 {
@@ -186,7 +195,7 @@ abstract class BaseUserQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT `id`, `uri`, `username`, `name`, `surname`, `email`, `city`, `birthday`, `gender`, `password`, `registered_at` FROM `User` WHERE `id` = :p0';
+        $sql = 'SELECT `id`, `uri`, `username`, `name`, `surname`, `email`, `city`, `birthday`, `gender`, `password`, `registered_at`, `updated_at` FROM `User` WHERE `id` = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -649,6 +658,123 @@ abstract class BaseUserQuery extends ModelCriteria
     }
 
     /**
+     * Filter the query on the updated_at column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByUpdatedAt('2011-03-14'); // WHERE updated_at = '2011-03-14'
+     * $query->filterByUpdatedAt('now'); // WHERE updated_at = '2011-03-14'
+     * $query->filterByUpdatedAt(array('max' => 'yesterday')); // WHERE updated_at < '2011-03-13'
+     * </code>
+     *
+     * @param     mixed $updatedAt The value to use as filter.
+     *              Values can be integers (unix timestamps), DateTime objects, or strings.
+     *              Empty strings are treated as NULL.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return UserQuery The current query, for fluid interface
+     */
+    public function filterByUpdatedAt($updatedAt = null, $comparison = null)
+    {
+        if (is_array($updatedAt)) {
+            $useMinMax = false;
+            if (isset($updatedAt['min'])) {
+                $this->addUsingAlias(UserPeer::UPDATED_AT, $updatedAt['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($updatedAt['max'])) {
+                $this->addUsingAlias(UserPeer::UPDATED_AT, $updatedAt['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(UserPeer::UPDATED_AT, $updatedAt, $comparison);
+    }
+
+    /**
+     * Filter the query by a related Photo object
+     *
+     * @param   Photo|PropelObjectCollection $photo  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 UserQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByPhoto($photo, $comparison = null)
+    {
+        if ($photo instanceof Photo) {
+            return $this
+                ->addUsingAlias(UserPeer::ID, $photo->getOwnerId(), $comparison);
+        } elseif ($photo instanceof PropelObjectCollection) {
+            return $this
+                ->usePhotoQuery()
+                ->filterByPrimaryKeys($photo->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByPhoto() only accepts arguments of type Photo or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the Photo relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return UserQuery The current query, for fluid interface
+     */
+    public function joinPhoto($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('Photo');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'Photo');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the Photo relation Photo object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \wiosloCMS\PhotoBundle\Model\PhotoQuery A secondary query class using the current class as primary query
+     */
+    public function usePhotoQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinPhoto($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'Photo', '\wiosloCMS\PhotoBundle\Model\PhotoQuery');
+    }
+
+    /**
      * Filter the query by a related UserSettings object
      *
      * @param   UserSettings|PropelObjectCollection $userSettings  the related object to use as filter
@@ -856,4 +982,69 @@ abstract class BaseUserQuery extends ModelCriteria
         return $this->filterBySlug($slug)->findOne($con);
     }
 
+    // timestampable behavior
+
+    /**
+     * Filter by the latest updated
+     *
+     * @param      int $nbDays Maximum age of the latest update in days
+     *
+     * @return     UserQuery The current query, for fluid interface
+     */
+    public function recentlyUpdated($nbDays = 7)
+    {
+        return $this->addUsingAlias(UserPeer::UPDATED_AT, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+    }
+
+    /**
+     * Order by update date desc
+     *
+     * @return     UserQuery The current query, for fluid interface
+     */
+    public function lastUpdatedFirst()
+    {
+        return $this->addDescendingOrderByColumn(UserPeer::UPDATED_AT);
+    }
+
+    /**
+     * Order by update date asc
+     *
+     * @return     UserQuery The current query, for fluid interface
+     */
+    public function firstUpdatedFirst()
+    {
+        return $this->addAscendingOrderByColumn(UserPeer::UPDATED_AT);
+    }
+
+    /**
+     * Filter by the latest created
+     *
+     * @param      int $nbDays Maximum age of in days
+     *
+     * @return     UserQuery The current query, for fluid interface
+     */
+    public function recentlyCreated($nbDays = 7)
+    {
+        return $this->addUsingAlias(UserPeer::REGISTERED_AT, time() - $nbDays * 24 * 60 * 60, Criteria::GREATER_EQUAL);
+    }
+
+    /**
+     * Order by create date desc
+     *
+     * @return     UserQuery The current query, for fluid interface
+     */
+    public function lastCreatedFirst()
+    {
+        return $this->addDescendingOrderByColumn(UserPeer::REGISTERED_AT);
+    }
+
+    /**
+     * Order by create date asc
+     *
+     * @return     UserQuery The current query, for fluid interface
+     */
+    public function firstCreatedFirst()
+    {
+        return $this->addAscendingOrderByColumn(UserPeer::REGISTERED_AT);
+    }
 }

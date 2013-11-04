@@ -4,7 +4,7 @@
 
 	<table name="User" phpName="User" idMethod="native">
 		<column name="id" phpName="Id" type="INTEGER" primaryKey="true" required="true"/>
-		<column name="uri" phpName="Uri" type="VARCHAR" size="250" required="false"/>
+		<column name="uri" phpName="Uri" type="VARCHAR" size="250" required="true"/>
 		<column name="username" phpName="Username" type="VARCHAR" size="50" required="true"/>
 		<column name="name" phpName="Name" type="VARCHAR" size="50" required="true"/>
 		<column name="surname" phpName="Surname" type="VARCHAR" size="100" required="false"/>
@@ -13,8 +13,8 @@
 		<column name="birthday" phpName="Birthday" type="DATE" required="false"/>
 		<column name="gender" phpName="Gender" type="TINYINT" required="false"/>
 		<column name="password" phpName="Password" type="VARCHAR" size="130" required="false"/>
-		<column name="registered_at" phpName="RegisteredAt" type="TIMESTAMP" required="true" defaultExpr="CURRENT_TIMESTAMP"/>
-
+		<column name="registered_at" phpName="RegisteredAt" type="TIMESTAMP" required="true"/>
+		<column name="updated_at" phpName="UpdatedAt" type="TIMESTAMP" required="true"/>
 		<unique name="username">
 			<unique-column name="username"/>
 		</unique>
@@ -30,6 +30,11 @@
 			<parameter name="separator" value="_"/>
 			<parameter name="permanent" value="true"/>
 			<parameter name="scope_column" value=""/>
+		</behavior>
+
+		<behavior name="timestampable">
+			<parameter name="create_column" value="registered_at" />
+			<parameter name="update_column" value="updated_at" />
 		</behavior>
 
 		<vendor type="mysql">

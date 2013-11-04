@@ -15,6 +15,8 @@ use \PropelDateTime;
 use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
+use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 use wiosloCMS\UserBundle\Model\Role;
 use wiosloCMS\UserBundle\Model\RoleQuery;
 use wiosloCMS\UserBundle\Model\User;
@@ -108,10 +110,21 @@ abstract class BaseUser extends BaseObject implements Persistent
 
     /**
      * The value for the registered_at field.
-     * Note: this column has a database default value of: (expression) CURRENT_TIMESTAMP
      * @var        string
      */
     protected $registered_at;
+
+    /**
+     * The value for the updated_at field.
+     * @var        string
+     */
+    protected $updated_at;
+
+    /**
+     * @var        PropelObjectCollection|Photo[] Collection to store aggregation of Photo objects.
+     */
+    protected $collPhotos;
+    protected $collPhotosPartial;
 
     /**
      * @var        UserSettings one-to-one related UserSettings object
@@ -159,27 +172,13 @@ abstract class BaseUser extends BaseObject implements Persistent
      * An array of objects scheduled for deletion.
      * @var		PropelObjectCollection
      */
+    protected $photosScheduledForDeletion = null;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var		PropelObjectCollection
+     */
     protected $userRolesScheduledForDeletion = null;
-
-    /**
-     * Applies default values to this object.
-     * This method should be called from the object's constructor (or
-     * equivalent initialization method).
-     * @see        __construct()
-     */
-    public function applyDefaultValues()
-    {
-    }
-
-    /**
-     * Initializes internal state of BaseUser object.
-     * @see        applyDefaults()
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->applyDefaultValues();
-    }
 
     /**
      * Get the [id] column value.
@@ -345,6 +344,46 @@ abstract class BaseUser extends BaseObject implements Persistent
             $dt = new DateTime($this->registered_at);
         } catch (Exception $x) {
             throw new PropelException("Internally stored date/time/timestamp value could not be converted to DateTime: " . var_export($this->registered_at, true), $x);
+        }
+
+        if ($format === null) {
+            // Because propel.useDateTimeClass is true, we return a DateTime object.
+            return $dt;
+        }
+
+        if (strpos($format, '%') !== false) {
+            return strftime($format, $dt->format('U'));
+        }
+
+        return $dt->format($format);
+
+    }
+
+    /**
+     * Get the [optionally formatted] temporal [updated_at] column value.
+     *
+     *
+     * @param string $format The date/time format string (either date()-style or strftime()-style).
+     *				 If format is null, then the raw DateTime object will be returned.
+     * @return mixed Formatted date/time value as string or DateTime object (if format is null), null if column is null, and 0 if column value is 0000-00-00 00:00:00
+     * @throws PropelException - if unable to parse/validate the date/time value.
+     */
+    public function getUpdatedAt($format = null)
+    {
+        if ($this->updated_at === null) {
+            return null;
+        }
+
+        if ($this->updated_at === '0000-00-00 00:00:00') {
+            // while technically this is not a default value of null,
+            // this seems to be closest in meaning.
+            return null;
+        }
+
+        try {
+            $dt = new DateTime($this->updated_at);
+        } catch (Exception $x) {
+            throw new PropelException("Internally stored date/time/timestamp value could not be converted to DateTime: " . var_export($this->updated_at, true), $x);
         }
 
         if ($format === null) {
@@ -596,6 +635,29 @@ abstract class BaseUser extends BaseObject implements Persistent
     } // setRegisteredAt()
 
     /**
+     * Sets the value of [updated_at] column to a normalized version of the date/time value specified.
+     *
+     * @param mixed $v string, integer (timestamp), or DateTime value.
+     *               Empty strings are treated as null.
+     * @return User The current object (for fluent API support)
+     */
+    public function setUpdatedAt($v)
+    {
+        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
+        if ($this->updated_at !== null || $dt !== null) {
+            $currentDateAsString = ($this->updated_at !== null && $tmpDt = new DateTime($this->updated_at)) ? $tmpDt->format('Y-m-d H:i:s') : null;
+            $newDateAsString = $dt ? $dt->format('Y-m-d H:i:s') : null;
+            if ($currentDateAsString !== $newDateAsString) {
+                $this->updated_at = $newDateAsString;
+                $this->modifiedColumns[] = UserPeer::UPDATED_AT;
+            }
+        } // if either are not null
+
+
+        return $this;
+    } // setUpdatedAt()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -638,6 +700,7 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->gender = ($row[$startcol + 8] !== null) ? (int) $row[$startcol + 8] : null;
             $this->password = ($row[$startcol + 9] !== null) ? (string) $row[$startcol + 9] : null;
             $this->registered_at = ($row[$startcol + 10] !== null) ? (string) $row[$startcol + 10] : null;
+            $this->updated_at = ($row[$startcol + 11] !== null) ? (string) $row[$startcol + 11] : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -647,7 +710,7 @@ abstract class BaseUser extends BaseObject implements Persistent
             }
             $this->postHydrate($row, $startcol, $rehydrate);
 
-            return $startcol + 11; // 11 = UserPeer::NUM_HYDRATE_COLUMNS.
+            return $startcol + 12; // 12 = UserPeer::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating User object", $e);
@@ -708,6 +771,8 @@ abstract class BaseUser extends BaseObject implements Persistent
         $this->hydrate($row, 0, true); // rehydrate
 
         if ($deep) {  // also de-associate any related objects?
+
+            $this->collPhotos = null;
 
             $this->singleUserSettings = null;
 
@@ -793,8 +858,19 @@ abstract class BaseUser extends BaseObject implements Persistent
             }
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
+                // timestampable behavior
+                if (!$this->isColumnModified(UserPeer::REGISTERED_AT)) {
+                    $this->setRegisteredAt(time());
+                }
+                if (!$this->isColumnModified(UserPeer::UPDATED_AT)) {
+                    $this->setUpdatedAt(time());
+                }
             } else {
                 $ret = $ret && $this->preUpdate($con);
+                // timestampable behavior
+                if ($this->isModified() && !$this->isColumnModified(UserPeer::UPDATED_AT)) {
+                    $this->setUpdatedAt(time());
+                }
             }
             if ($ret) {
                 $affectedRows = $this->doSave($con);
@@ -867,6 +943,23 @@ abstract class BaseUser extends BaseObject implements Persistent
                 foreach ($this->collRoles as $role) {
                     if ($role->isModified()) {
                         $role->save($con);
+                    }
+                }
+            }
+
+            if ($this->photosScheduledForDeletion !== null) {
+                if (!$this->photosScheduledForDeletion->isEmpty()) {
+                    PhotoQuery::create()
+                        ->filterByPrimaryKeys($this->photosScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->photosScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collPhotos !== null) {
+                foreach ($this->collPhotos as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
                     }
                 }
             }
@@ -949,6 +1042,9 @@ abstract class BaseUser extends BaseObject implements Persistent
         if ($this->isColumnModified(UserPeer::REGISTERED_AT)) {
             $modifiedColumns[':p' . $index++]  = '`registered_at`';
         }
+        if ($this->isColumnModified(UserPeer::UPDATED_AT)) {
+            $modifiedColumns[':p' . $index++]  = '`updated_at`';
+        }
 
         $sql = sprintf(
             'INSERT INTO `User` (%s) VALUES (%s)',
@@ -992,6 +1088,9 @@ abstract class BaseUser extends BaseObject implements Persistent
                         break;
                     case '`registered_at`':
                         $stmt->bindValue($identifier, $this->registered_at, PDO::PARAM_STR);
+                        break;
+                    case '`updated_at`':
+                        $stmt->bindValue($identifier, $this->updated_at, PDO::PARAM_STR);
                         break;
                 }
             }
@@ -1085,6 +1184,14 @@ abstract class BaseUser extends BaseObject implements Persistent
             }
 
 
+                if ($this->collPhotos !== null) {
+                    foreach ($this->collPhotos as $referrerFK) {
+                        if (!$referrerFK->validate($columns)) {
+                            $failureMap = array_merge($failureMap, $referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+
                 if ($this->singleUserSettings !== null) {
                     if (!$this->singleUserSettings->validate($columns)) {
                         $failureMap = array_merge($failureMap, $this->singleUserSettings->getValidationFailures());
@@ -1167,6 +1274,9 @@ abstract class BaseUser extends BaseObject implements Persistent
             case 10:
                 return $this->getRegisteredAt();
                 break;
+            case 11:
+                return $this->getUpdatedAt();
+                break;
             default:
                 return null;
                 break;
@@ -1207,6 +1317,7 @@ abstract class BaseUser extends BaseObject implements Persistent
             $keys[8] => $this->getGender(),
             $keys[9] => $this->getPassword(),
             $keys[10] => $this->getRegisteredAt(),
+            $keys[11] => $this->getUpdatedAt(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1214,6 +1325,9 @@ abstract class BaseUser extends BaseObject implements Persistent
         }
 
         if ($includeForeignObjects) {
+            if (null !== $this->collPhotos) {
+                $result['Photos'] = $this->collPhotos->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+            }
             if (null !== $this->singleUserSettings) {
                 $result['UserSettings'] = $this->singleUserSettings->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
             }
@@ -1287,6 +1401,9 @@ abstract class BaseUser extends BaseObject implements Persistent
             case 10:
                 $this->setRegisteredAt($value);
                 break;
+            case 11:
+                $this->setUpdatedAt($value);
+                break;
         } // switch()
     }
 
@@ -1322,6 +1439,7 @@ abstract class BaseUser extends BaseObject implements Persistent
         if (array_key_exists($keys[8], $arr)) $this->setGender($arr[$keys[8]]);
         if (array_key_exists($keys[9], $arr)) $this->setPassword($arr[$keys[9]]);
         if (array_key_exists($keys[10], $arr)) $this->setRegisteredAt($arr[$keys[10]]);
+        if (array_key_exists($keys[11], $arr)) $this->setUpdatedAt($arr[$keys[11]]);
     }
 
     /**
@@ -1344,6 +1462,7 @@ abstract class BaseUser extends BaseObject implements Persistent
         if ($this->isColumnModified(UserPeer::GENDER)) $criteria->add(UserPeer::GENDER, $this->gender);
         if ($this->isColumnModified(UserPeer::PASSWORD)) $criteria->add(UserPeer::PASSWORD, $this->password);
         if ($this->isColumnModified(UserPeer::REGISTERED_AT)) $criteria->add(UserPeer::REGISTERED_AT, $this->registered_at);
+        if ($this->isColumnModified(UserPeer::UPDATED_AT)) $criteria->add(UserPeer::UPDATED_AT, $this->updated_at);
 
         return $criteria;
     }
@@ -1417,6 +1536,7 @@ abstract class BaseUser extends BaseObject implements Persistent
         $copyObj->setGender($this->getGender());
         $copyObj->setPassword($this->getPassword());
         $copyObj->setRegisteredAt($this->getRegisteredAt());
+        $copyObj->setUpdatedAt($this->getUpdatedAt());
 
         if ($deepCopy && !$this->startCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1424,6 +1544,12 @@ abstract class BaseUser extends BaseObject implements Persistent
             $copyObj->setNew(false);
             // store object hash to prevent cycle
             $this->startCopy = true;
+
+            foreach ($this->getPhotos() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addPhoto($relObj->copy($deepCopy));
+                }
+            }
 
             $relObj = $this->getUserSettings();
             if ($relObj) {
@@ -1497,9 +1623,237 @@ abstract class BaseUser extends BaseObject implements Persistent
      */
     public function initRelation($relationName)
     {
+        if ('Photo' == $relationName) {
+            $this->initPhotos();
+        }
         if ('UserRole' == $relationName) {
             $this->initUserRoles();
         }
+    }
+
+    /**
+     * Clears out the collPhotos collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return User The current object (for fluent API support)
+     * @see        addPhotos()
+     */
+    public function clearPhotos()
+    {
+        $this->collPhotos = null; // important to set this to null since that means it is uninitialized
+        $this->collPhotosPartial = null;
+
+        return $this;
+    }
+
+    /**
+     * reset is the collPhotos collection loaded partially
+     *
+     * @return void
+     */
+    public function resetPartialPhotos($v = true)
+    {
+        $this->collPhotosPartial = $v;
+    }
+
+    /**
+     * Initializes the collPhotos collection.
+     *
+     * By default this just sets the collPhotos collection to an empty array (like clearcollPhotos());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initPhotos($overrideExisting = true)
+    {
+        if (null !== $this->collPhotos && !$overrideExisting) {
+            return;
+        }
+        $this->collPhotos = new PropelObjectCollection();
+        $this->collPhotos->setModel('Photo');
+    }
+
+    /**
+     * Gets an array of Photo objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this User is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @return PropelObjectCollection|Photo[] List of Photo objects
+     * @throws PropelException
+     */
+    public function getPhotos($criteria = null, PropelPDO $con = null)
+    {
+        $partial = $this->collPhotosPartial && !$this->isNew();
+        if (null === $this->collPhotos || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collPhotos) {
+                // return empty collection
+                $this->initPhotos();
+            } else {
+                $collPhotos = PhotoQuery::create(null, $criteria)
+                    ->filterByUser($this)
+                    ->find($con);
+                if (null !== $criteria) {
+                    if (false !== $this->collPhotosPartial && count($collPhotos)) {
+                      $this->initPhotos(false);
+
+                      foreach ($collPhotos as $obj) {
+                        if (false == $this->collPhotos->contains($obj)) {
+                          $this->collPhotos->append($obj);
+                        }
+                      }
+
+                      $this->collPhotosPartial = true;
+                    }
+
+                    $collPhotos->getInternalIterator()->rewind();
+
+                    return $collPhotos;
+                }
+
+                if ($partial && $this->collPhotos) {
+                    foreach ($this->collPhotos as $obj) {
+                        if ($obj->isNew()) {
+                            $collPhotos[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collPhotos = $collPhotos;
+                $this->collPhotosPartial = false;
+            }
+        }
+
+        return $this->collPhotos;
+    }
+
+    /**
+     * Sets a collection of Photo objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param PropelCollection $photos A Propel collection.
+     * @param PropelPDO $con Optional connection object
+     * @return User The current object (for fluent API support)
+     */
+    public function setPhotos(PropelCollection $photos, PropelPDO $con = null)
+    {
+        $photosToDelete = $this->getPhotos(new Criteria(), $con)->diff($photos);
+
+
+        $this->photosScheduledForDeletion = $photosToDelete;
+
+        foreach ($photosToDelete as $photoRemoved) {
+            $photoRemoved->setUser(null);
+        }
+
+        $this->collPhotos = null;
+        foreach ($photos as $photo) {
+            $this->addPhoto($photo);
+        }
+
+        $this->collPhotos = $photos;
+        $this->collPhotosPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related Photo objects.
+     *
+     * @param Criteria $criteria
+     * @param boolean $distinct
+     * @param PropelPDO $con
+     * @return int             Count of related Photo objects.
+     * @throws PropelException
+     */
+    public function countPhotos(Criteria $criteria = null, $distinct = false, PropelPDO $con = null)
+    {
+        $partial = $this->collPhotosPartial && !$this->isNew();
+        if (null === $this->collPhotos || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collPhotos) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getPhotos());
+            }
+            $query = PhotoQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByUser($this)
+                ->count($con);
+        }
+
+        return count($this->collPhotos);
+    }
+
+    /**
+     * Method called to associate a Photo object to this object
+     * through the Photo foreign key attribute.
+     *
+     * @param    Photo $l Photo
+     * @return User The current object (for fluent API support)
+     */
+    public function addPhoto(Photo $l)
+    {
+        if ($this->collPhotos === null) {
+            $this->initPhotos();
+            $this->collPhotosPartial = true;
+        }
+
+        if (!in_array($l, $this->collPhotos->getArrayCopy(), true)) { // only add it if the **same** object is not already associated
+            $this->doAddPhoto($l);
+
+            if ($this->photosScheduledForDeletion and $this->photosScheduledForDeletion->contains($l)) {
+                $this->photosScheduledForDeletion->remove($this->photosScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param	Photo $photo The photo object to add.
+     */
+    protected function doAddPhoto($photo)
+    {
+        $this->collPhotos[]= $photo;
+        $photo->setUser($this);
+    }
+
+    /**
+     * @param	Photo $photo The photo object to remove.
+     * @return User The current object (for fluent API support)
+     */
+    public function removePhoto($photo)
+    {
+        if ($this->getPhotos()->contains($photo)) {
+            $this->collPhotos->remove($this->collPhotos->search($photo));
+            if (null === $this->photosScheduledForDeletion) {
+                $this->photosScheduledForDeletion = clone $this->collPhotos;
+                $this->photosScheduledForDeletion->clear();
+            }
+            $this->photosScheduledForDeletion[]= clone $photo;
+            $photo->setUser(null);
+        }
+
+        return $this;
     }
 
     /**
@@ -1995,11 +2349,11 @@ abstract class BaseUser extends BaseObject implements Persistent
         $this->gender = null;
         $this->password = null;
         $this->registered_at = null;
+        $this->updated_at = null;
         $this->alreadyInSave = false;
         $this->alreadyInValidation = false;
         $this->alreadyInClearAllReferencesDeep = false;
         $this->clearAllReferences();
-        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);
@@ -2018,6 +2372,11 @@ abstract class BaseUser extends BaseObject implements Persistent
     {
         if ($deep && !$this->alreadyInClearAllReferencesDeep) {
             $this->alreadyInClearAllReferencesDeep = true;
+            if ($this->collPhotos) {
+                foreach ($this->collPhotos as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
             if ($this->singleUserSettings) {
                 $this->singleUserSettings->clearAllReferences($deep);
             }
@@ -2035,6 +2394,10 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->alreadyInClearAllReferencesDeep = false;
         } // if ($deep)
 
+        if ($this->collPhotos instanceof PropelCollection) {
+            $this->collPhotos->clearIterator();
+        }
+        $this->collPhotos = null;
         if ($this->singleUserSettings instanceof PropelCollection) {
             $this->singleUserSettings->clearIterator();
         }
@@ -2220,6 +2583,20 @@ abstract class BaseUser extends BaseObject implements Persistent
         }
 
         return $slug2 . ($slugNum + 1);
+    }
+
+    // timestampable behavior
+
+    /**
+     * Mark the current object so that the update date doesn't get updated during next save
+     *
+     * @return     User The current object (for fluent API support)
+     */
+    public function keepUpdateDateUnchanged()
+    {
+        $this->modifiedColumns[] = UserPeer::UPDATED_AT;
+
+        return $this;
     }
 
 }

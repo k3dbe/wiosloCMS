@@ -43,7 +43,7 @@ class UserTableMap extends TableMap
         $this->setUseIdGenerator(false);
         // columns
         $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
-        $this->addColumn('uri', 'Uri', 'VARCHAR', false, 250, null);
+        $this->addColumn('uri', 'Uri', 'VARCHAR', true, 250, null);
         $this->addColumn('username', 'Username', 'VARCHAR', true, 50, null);
         $this->addColumn('name', 'Name', 'VARCHAR', true, 50, null);
         $this->addColumn('surname', 'Surname', 'VARCHAR', false, 100, null);
@@ -52,7 +52,8 @@ class UserTableMap extends TableMap
         $this->addColumn('birthday', 'Birthday', 'DATE', false, null, null);
         $this->addColumn('gender', 'Gender', 'TINYINT', false, null, null);
         $this->addColumn('password', 'Password', 'VARCHAR', false, 130, null);
-        $this->addColumn('registered_at', 'RegisteredAt', 'TIMESTAMP', true, null, 'CURRENT_TIMESTAMP');
+        $this->addColumn('registered_at', 'RegisteredAt', 'TIMESTAMP', true, null, null);
+        $this->addColumn('updated_at', 'UpdatedAt', 'TIMESTAMP', true, null, null);
         // validators
     } // initialize()
 
@@ -61,6 +62,7 @@ class UserTableMap extends TableMap
      */
     public function buildRelations()
     {
+        $this->addRelation('Photo', 'wiosloCMS\\PhotoBundle\\Model\\Photo', RelationMap::ONE_TO_MANY, array('id' => 'owner_id', ), 'CASCADE', 'CASCADE', 'Photos');
         $this->addRelation('UserSettings', 'wiosloCMS\\UserBundle\\Model\\UserSettings', RelationMap::ONE_TO_ONE, array('id' => 'user_id', ), 'CASCADE', 'CASCADE');
         $this->addRelation('UserRole', 'wiosloCMS\\UserBundle\\Model\\UserRole', RelationMap::ONE_TO_MANY, array('id' => 'user_id', ), 'CASCADE', 'CASCADE', 'UserRoles');
         $this->addRelation('Role', 'wiosloCMS\\UserBundle\\Model\\Role', RelationMap::MANY_TO_MANY, array(), 'CASCADE', 'CASCADE', 'Roles');
@@ -84,6 +86,11 @@ class UserTableMap extends TableMap
   'separator' => '_',
   'permanent' => 'true',
   'scope_column' => '',
+),
+            'timestampable' =>  array (
+  'create_column' => 'registered_at',
+  'update_column' => 'updated_at',
+  'disable_updated_at' => 'false',
 ),
         );
     } // getBehaviors()
