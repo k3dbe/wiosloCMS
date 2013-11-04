@@ -2,8 +2,7 @@
 
 {% block body %}
 
-    <a href="{{ path('photo_add') }}">DODAJ ZDJĘCIE</a>
-    <a href="{{ path('logout') }}">WYLOGOWANIE</a>
+    {{ render(controller('HomepageBundle:Top:show')) }}
 
     {{ render(controller('PhotoBundle:Photo:show')) }}
 

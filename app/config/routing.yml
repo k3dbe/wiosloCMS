@@ -17,8 +17,8 @@ register:
 
 login:
     pattern:  /login
-    requirements:
-        _method:  POST
+    defaults:
+      _controller: UserBundle:Login:login
 
 logout:
     pattern:  /logout
