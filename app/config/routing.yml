@@ -6,6 +6,10 @@ homepage:
     resource: "@HomepageBundle/Resources/config/routing.xml"
     prefix:   /
 
+photo:
+    resource: "@PhotoBundle/Resources/config/routing.xml"
+    prefix:   /
+
 register:
     pattern:  /register
     defaults:
