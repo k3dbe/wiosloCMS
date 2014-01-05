@@ -21,10 +21,12 @@ use wiosloCMS\UserBundle\Model\User;
 
 /**
  * @method RatingQuery orderByPhotoId($order = Criteria::ASC) Order by the photo_id column
- * @method RatingQuery orderByValue($order = Criteria::ASC) Order by the value column
+ * @method RatingQuery orderByPlus($order = Criteria::ASC) Order by the plus column
+ * @method RatingQuery orderByMinus($order = Criteria::ASC) Order by the minus column
  *
  * @method RatingQuery groupByPhotoId() Group by the photo_id column
- * @method RatingQuery groupByValue() Group by the value column
+ * @method RatingQuery groupByPlus() Group by the plus column
+ * @method RatingQuery groupByMinus() Group by the minus column
  *
  * @method RatingQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method RatingQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -41,10 +43,12 @@ use wiosloCMS\UserBundle\Model\User;
  * @method Rating findOne(PropelPDO $con = null) Return the first Rating matching the query
  * @method Rating findOneOrCreate(PropelPDO $con = null) Return the first Rating matching the query, or a new Rating object populated from the query conditions when no match is found
  *
- * @method Rating findOneByValue(int $value) Return the first Rating filtered by the value column
+ * @method Rating findOneByPlus(int $plus) Return the first Rating filtered by the plus column
+ * @method Rating findOneByMinus(int $minus) Return the first Rating filtered by the minus column
  *
  * @method array findByPhotoId(int $photo_id) Return Rating objects filtered by the photo_id column
- * @method array findByValue(int $value) Return Rating objects filtered by the value column
+ * @method array findByPlus(int $plus) Return Rating objects filtered by the plus column
+ * @method array findByMinus(int $minus) Return Rating objects filtered by the minus column
  */
 abstract class BaseRatingQuery extends ModelCriteria
 {
@@ -150,7 +154,7 @@ abstract class BaseRatingQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT `photo_id`, `value` FROM `PhotoRating` WHERE `photo_id` = :p0';
+        $sql = 'SELECT `photo_id`, `plus`, `minus` FROM `PhotoRating` WHERE `photo_id` = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -284,17 +288,17 @@ abstract class BaseRatingQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the value column
+     * Filter the query on the plus column
      *
      * Example usage:
      * <code>
-     * $query->filterByValue(1234); // WHERE value = 1234
-     * $query->filterByValue(array(12, 34)); // WHERE value IN (12, 34)
-     * $query->filterByValue(array('min' => 12)); // WHERE value >= 12
-     * $query->filterByValue(array('max' => 12)); // WHERE value <= 12
+     * $query->filterByPlus(1234); // WHERE plus = 1234
+     * $query->filterByPlus(array(12, 34)); // WHERE plus IN (12, 34)
+     * $query->filterByPlus(array('min' => 12)); // WHERE plus >= 12
+     * $query->filterByPlus(array('max' => 12)); // WHERE plus <= 12
      * </code>
      *
-     * @param     mixed $value The value to use as filter.
+     * @param     mixed $plus The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
@@ -302,16 +306,16 @@ abstract class BaseRatingQuery extends ModelCriteria
      *
      * @return RatingQuery The current query, for fluid interface
      */
-    public function filterByValue($value = null, $comparison = null)
+    public function filterByPlus($plus = null, $comparison = null)
     {
-        if (is_array($value)) {
+        if (is_array($plus)) {
             $useMinMax = false;
-            if (isset($value['min'])) {
-                $this->addUsingAlias(RatingPeer::VALUE, $value['min'], Criteria::GREATER_EQUAL);
+            if (isset($plus['min'])) {
+                $this->addUsingAlias(RatingPeer::PLUS, $plus['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
-            if (isset($value['max'])) {
-                $this->addUsingAlias(RatingPeer::VALUE, $value['max'], Criteria::LESS_EQUAL);
+            if (isset($plus['max'])) {
+                $this->addUsingAlias(RatingPeer::PLUS, $plus['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -322,7 +326,49 @@ abstract class BaseRatingQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(RatingPeer::VALUE, $value, $comparison);
+        return $this->addUsingAlias(RatingPeer::PLUS, $plus, $comparison);
+    }
+
+    /**
+     * Filter the query on the minus column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByMinus(1234); // WHERE minus = 1234
+     * $query->filterByMinus(array(12, 34)); // WHERE minus IN (12, 34)
+     * $query->filterByMinus(array('min' => 12)); // WHERE minus >= 12
+     * $query->filterByMinus(array('max' => 12)); // WHERE minus <= 12
+     * </code>
+     *
+     * @param     mixed $minus The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return RatingQuery The current query, for fluid interface
+     */
+    public function filterByMinus($minus = null, $comparison = null)
+    {
+        if (is_array($minus)) {
+            $useMinMax = false;
+            if (isset($minus['min'])) {
+                $this->addUsingAlias(RatingPeer::MINUS, $minus['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($minus['max'])) {
+                $this->addUsingAlias(RatingPeer::MINUS, $minus['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(RatingPeer::MINUS, $minus, $comparison);
     }
 
     /**

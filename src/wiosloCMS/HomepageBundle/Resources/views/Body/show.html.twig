@@ -2,8 +2,10 @@
 
 {% block body %}
 
-    {{ render(controller('HomepageBundle:Top:show')) }}
-
-    {{ render(controller('PhotoBundle:Photo:show')) }}
+    {% if id is defined and id %}
+        {{ render(controller('PhotoBundle:Photo:show', {'id': id})) }}
+    {% else %}
+        {{ render(controller('PhotoBundle:Photo:show', {'id': id})) }}
+    {% endif %}
 
 {% endblock %}

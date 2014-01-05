@@ -1,14 +1,27 @@
 {% extends "::base.html.twig" %}
 
 {% block body %}
-    <h3>Musisz się zalogować:</h3>
-    <form action="{{ path('login') }}" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="_username"/>
+    <div class="container" style="text-align: center">
+        <center>
+            <div class="formArea">
+                <h4>PUK PUK KTO TAM?</h4>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="_password"/>
+                <form action="{{ path('login') }}" method="post">
+                    <div class="form-group">
+                        <input type="text" id="username" name="_username" placeholder="Podaj nick" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" name="_password" placeholder="Podaj hasło"
+                               class="form-control"/>
+                    </div>
+                    <button type="submit" class="btn btn-default bc_blue">
+                        <span class="glyphicon c_black glyphicon-send"></span>
+                    </button>
+                </form>
+                <br>
 
-        <button type="submit">login</button>
-    </form>
+                <p><a href="password.html">Znowu zapomniałem hasła!</a></p>
+            </div>
+        </center>
+    </div>
 {% endblock %}

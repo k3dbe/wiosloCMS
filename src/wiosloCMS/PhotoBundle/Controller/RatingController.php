@@ -24,9 +24,9 @@ class RatingController extends Controller
         $rating = $photo->getRating();
 
         if ('plus' === $action) {
-            $rating->setValue($rating->getValue() + 1);
+            $rating->setPlus($rating->getPlus() + 1);
         } elseif ('minus' === $action) {
-            $rating->setValue($rating->getValue() - 1);
+            $rating->setMinus($rating->getMinus() - 1);
         } else {
             throw new \RuntimeException('Illegal action');
         }
@@ -38,6 +38,6 @@ class RatingController extends Controller
         $userRate->setPhotoId($photoId);
         $userRate->save();
 
-        return $this->redirect($this->generateUrl('homepage'));
+        return $this->render('HomepageBundle:Body:show.html.twig', ['photoId' => $photoId, 'action' => 'concrete']);
     }
 }

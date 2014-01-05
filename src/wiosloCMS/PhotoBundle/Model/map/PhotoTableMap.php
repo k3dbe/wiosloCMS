@@ -59,6 +59,7 @@ class PhotoTableMap extends TableMap
     {
         $this->addRelation('User', 'wiosloCMS\\UserBundle\\Model\\User', RelationMap::MANY_TO_ONE, array('owner_id' => 'id', ), 'CASCADE', 'CASCADE');
         $this->addRelation('Rating', 'wiosloCMS\\PhotoBundle\\Model\\Rating', RelationMap::ONE_TO_ONE, array('id' => 'photo_id', ), 'CASCADE', 'CASCADE');
+        $this->addRelation('PhotoComment', 'wiosloCMS\\PhotoBundle\\Model\\PhotoComment', RelationMap::ONE_TO_MANY, array('id' => 'photo_id', ), 'CASCADE', 'CASCADE', 'PhotoComments');
     } // buildRelations()
 
     /**

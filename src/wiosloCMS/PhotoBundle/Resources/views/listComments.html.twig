@@ -1,0 +1,14 @@
+<div class="comments">
+    {% for comment in comments %}
+        <div class="comment">
+            <div class="comentdate">{{ comment.getCreatedAt()|date("d.m.Y") }}</div>
+            <div class="username">{{ comment.getUser().getUsername() }}&nbsp</div>
+            <div class="clear"></div>
+            <ul>
+                <li>
+                    <p>{{ comment.getText() }}</p>
+                </li>
+            </ul>
+        </div>
+    {% endfor %}
+</div>

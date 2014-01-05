@@ -16,6 +16,8 @@ use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\PhotoComment;
+use wiosloCMS\PhotoBundle\Model\PhotoCommentQuery;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 use wiosloCMS\PhotoBundle\Model\Rating;
 use wiosloCMS\PhotoBundle\Model\RatingQuery;
@@ -71,40 +73,10 @@ abstract class BaseUser extends BaseObject implements Persistent
     protected $username;
 
     /**
-     * The value for the name field.
-     * @var        string
-     */
-    protected $name;
-
-    /**
-     * The value for the surname field.
-     * @var        string
-     */
-    protected $surname;
-
-    /**
      * The value for the email field.
      * @var        string
      */
     protected $email;
-
-    /**
-     * The value for the city field.
-     * @var        string
-     */
-    protected $city;
-
-    /**
-     * The value for the birthday field.
-     * @var        string
-     */
-    protected $birthday;
-
-    /**
-     * The value for the gender field.
-     * @var        int
-     */
-    protected $gender;
 
     /**
      * The value for the password field.
@@ -129,6 +101,12 @@ abstract class BaseUser extends BaseObject implements Persistent
      */
     protected $collPhotos;
     protected $collPhotosPartial;
+
+    /**
+     * @var        PropelObjectCollection|PhotoComment[] Collection to store aggregation of PhotoComment objects.
+     */
+    protected $collPhotoComments;
+    protected $collPhotoCommentsPartial;
 
     /**
      * @var        PropelObjectCollection|UserRate[] Collection to store aggregation of UserRate objects.
@@ -199,6 +177,12 @@ abstract class BaseUser extends BaseObject implements Persistent
      * An array of objects scheduled for deletion.
      * @var		PropelObjectCollection
      */
+    protected $photoCommentsScheduledForDeletion = null;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var		PropelObjectCollection
+     */
     protected $userRatesScheduledForDeletion = null;
 
     /**
@@ -241,28 +225,6 @@ abstract class BaseUser extends BaseObject implements Persistent
     }
 
     /**
-     * Get the [name] column value.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-
-        return $this->name;
-    }
-
-    /**
-     * Get the [surname] column value.
-     *
-     * @return string
-     */
-    public function getSurname()
-    {
-
-        return $this->surname;
-    }
-
-    /**
      * Get the [email] column value.
      *
      * @return string
@@ -271,68 +233,6 @@ abstract class BaseUser extends BaseObject implements Persistent
     {
 
         return $this->email;
-    }
-
-    /**
-     * Get the [city] column value.
-     *
-     * @return string
-     */
-    public function getCity()
-    {
-
-        return $this->city;
-    }
-
-    /**
-     * Get the [optionally formatted] temporal [birthday] column value.
-     *
-     *
-     * @param string $format The date/time format string (either date()-style or strftime()-style).
-     *				 If format is null, then the raw DateTime object will be returned.
-     * @return mixed Formatted date/time value as string or DateTime object (if format is null), null if column is null, and 0 if column value is 0000-00-00
-     * @throws PropelException - if unable to parse/validate the date/time value.
-     */
-    public function getBirthday($format = null)
-    {
-        if ($this->birthday === null) {
-            return null;
-        }
-
-        if ($this->birthday === '0000-00-00') {
-            // while technically this is not a default value of null,
-            // this seems to be closest in meaning.
-            return null;
-        }
-
-        try {
-            $dt = new DateTime($this->birthday);
-        } catch (Exception $x) {
-            throw new PropelException("Internally stored date/time/timestamp value could not be converted to DateTime: " . var_export($this->birthday, true), $x);
-        }
-
-        if ($format === null) {
-            // Because propel.useDateTimeClass is true, we return a DateTime object.
-            return $dt;
-        }
-
-        if (strpos($format, '%') !== false) {
-            return strftime($format, $dt->format('U'));
-        }
-
-        return $dt->format($format);
-
-    }
-
-    /**
-     * Get the [gender] column value.
-     *
-     * @return int
-     */
-    public function getGender()
-    {
-
-        return $this->gender;
     }
 
     /**
@@ -490,48 +390,6 @@ abstract class BaseUser extends BaseObject implements Persistent
     } // setUsername()
 
     /**
-     * Set the value of [name] column.
-     *
-     * @param  string $v new value
-     * @return User The current object (for fluent API support)
-     */
-    public function setName($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (string) $v;
-        }
-
-        if ($this->name !== $v) {
-            $this->name = $v;
-            $this->modifiedColumns[] = UserPeer::NAME;
-        }
-
-
-        return $this;
-    } // setName()
-
-    /**
-     * Set the value of [surname] column.
-     *
-     * @param  string $v new value
-     * @return User The current object (for fluent API support)
-     */
-    public function setSurname($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (string) $v;
-        }
-
-        if ($this->surname !== $v) {
-            $this->surname = $v;
-            $this->modifiedColumns[] = UserPeer::SURNAME;
-        }
-
-
-        return $this;
-    } // setSurname()
-
-    /**
      * Set the value of [email] column.
      *
      * @param  string $v new value
@@ -551,71 +409,6 @@ abstract class BaseUser extends BaseObject implements Persistent
 
         return $this;
     } // setEmail()
-
-    /**
-     * Set the value of [city] column.
-     *
-     * @param  string $v new value
-     * @return User The current object (for fluent API support)
-     */
-    public function setCity($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (string) $v;
-        }
-
-        if ($this->city !== $v) {
-            $this->city = $v;
-            $this->modifiedColumns[] = UserPeer::CITY;
-        }
-
-
-        return $this;
-    } // setCity()
-
-    /**
-     * Sets the value of [birthday] column to a normalized version of the date/time value specified.
-     *
-     * @param mixed $v string, integer (timestamp), or DateTime value.
-     *               Empty strings are treated as null.
-     * @return User The current object (for fluent API support)
-     */
-    public function setBirthday($v)
-    {
-        $dt = PropelDateTime::newInstance($v, null, 'DateTime');
-        if ($this->birthday !== null || $dt !== null) {
-            $currentDateAsString = ($this->birthday !== null && $tmpDt = new DateTime($this->birthday)) ? $tmpDt->format('Y-m-d') : null;
-            $newDateAsString = $dt ? $dt->format('Y-m-d') : null;
-            if ($currentDateAsString !== $newDateAsString) {
-                $this->birthday = $newDateAsString;
-                $this->modifiedColumns[] = UserPeer::BIRTHDAY;
-            }
-        } // if either are not null
-
-
-        return $this;
-    } // setBirthday()
-
-    /**
-     * Set the value of [gender] column.
-     *
-     * @param  int $v new value
-     * @return User The current object (for fluent API support)
-     */
-    public function setGender($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (int) $v;
-        }
-
-        if ($this->gender !== $v) {
-            $this->gender = $v;
-            $this->modifiedColumns[] = UserPeer::GENDER;
-        }
-
-
-        return $this;
-    } // setGender()
 
     /**
      * Set the value of [password] column.
@@ -719,15 +512,10 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->id = ($row[$startcol + 0] !== null) ? (int) $row[$startcol + 0] : null;
             $this->uri = ($row[$startcol + 1] !== null) ? (string) $row[$startcol + 1] : null;
             $this->username = ($row[$startcol + 2] !== null) ? (string) $row[$startcol + 2] : null;
-            $this->name = ($row[$startcol + 3] !== null) ? (string) $row[$startcol + 3] : null;
-            $this->surname = ($row[$startcol + 4] !== null) ? (string) $row[$startcol + 4] : null;
-            $this->email = ($row[$startcol + 5] !== null) ? (string) $row[$startcol + 5] : null;
-            $this->city = ($row[$startcol + 6] !== null) ? (string) $row[$startcol + 6] : null;
-            $this->birthday = ($row[$startcol + 7] !== null) ? (string) $row[$startcol + 7] : null;
-            $this->gender = ($row[$startcol + 8] !== null) ? (int) $row[$startcol + 8] : null;
-            $this->password = ($row[$startcol + 9] !== null) ? (string) $row[$startcol + 9] : null;
-            $this->registered_at = ($row[$startcol + 10] !== null) ? (string) $row[$startcol + 10] : null;
-            $this->updated_at = ($row[$startcol + 11] !== null) ? (string) $row[$startcol + 11] : null;
+            $this->email = ($row[$startcol + 3] !== null) ? (string) $row[$startcol + 3] : null;
+            $this->password = ($row[$startcol + 4] !== null) ? (string) $row[$startcol + 4] : null;
+            $this->registered_at = ($row[$startcol + 5] !== null) ? (string) $row[$startcol + 5] : null;
+            $this->updated_at = ($row[$startcol + 6] !== null) ? (string) $row[$startcol + 6] : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -737,7 +525,7 @@ abstract class BaseUser extends BaseObject implements Persistent
             }
             $this->postHydrate($row, $startcol, $rehydrate);
 
-            return $startcol + 12; // 12 = UserPeer::NUM_HYDRATE_COLUMNS.
+            return $startcol + 7; // 7 = UserPeer::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating User object", $e);
@@ -800,6 +588,8 @@ abstract class BaseUser extends BaseObject implements Persistent
         if ($deep) {  // also de-associate any related objects?
 
             $this->collPhotos = null;
+
+            $this->collPhotoComments = null;
 
             $this->collUserRates = null;
 
@@ -1020,6 +810,23 @@ abstract class BaseUser extends BaseObject implements Persistent
                 }
             }
 
+            if ($this->photoCommentsScheduledForDeletion !== null) {
+                if (!$this->photoCommentsScheduledForDeletion->isEmpty()) {
+                    PhotoCommentQuery::create()
+                        ->filterByPrimaryKeys($this->photoCommentsScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->photoCommentsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collPhotoComments !== null) {
+                foreach ($this->collPhotoComments as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
+            }
+
             if ($this->userRatesScheduledForDeletion !== null) {
                 if (!$this->userRatesScheduledForDeletion->isEmpty()) {
                     UserRateQuery::create()
@@ -1095,23 +902,8 @@ abstract class BaseUser extends BaseObject implements Persistent
         if ($this->isColumnModified(UserPeer::USERNAME)) {
             $modifiedColumns[':p' . $index++]  = '`username`';
         }
-        if ($this->isColumnModified(UserPeer::NAME)) {
-            $modifiedColumns[':p' . $index++]  = '`name`';
-        }
-        if ($this->isColumnModified(UserPeer::SURNAME)) {
-            $modifiedColumns[':p' . $index++]  = '`surname`';
-        }
         if ($this->isColumnModified(UserPeer::EMAIL)) {
             $modifiedColumns[':p' . $index++]  = '`email`';
-        }
-        if ($this->isColumnModified(UserPeer::CITY)) {
-            $modifiedColumns[':p' . $index++]  = '`city`';
-        }
-        if ($this->isColumnModified(UserPeer::BIRTHDAY)) {
-            $modifiedColumns[':p' . $index++]  = '`birthday`';
-        }
-        if ($this->isColumnModified(UserPeer::GENDER)) {
-            $modifiedColumns[':p' . $index++]  = '`gender`';
         }
         if ($this->isColumnModified(UserPeer::PASSWORD)) {
             $modifiedColumns[':p' . $index++]  = '`password`';
@@ -1142,23 +934,8 @@ abstract class BaseUser extends BaseObject implements Persistent
                     case '`username`':
                         $stmt->bindValue($identifier, $this->username, PDO::PARAM_STR);
                         break;
-                    case '`name`':
-                        $stmt->bindValue($identifier, $this->name, PDO::PARAM_STR);
-                        break;
-                    case '`surname`':
-                        $stmt->bindValue($identifier, $this->surname, PDO::PARAM_STR);
-                        break;
                     case '`email`':
                         $stmt->bindValue($identifier, $this->email, PDO::PARAM_STR);
-                        break;
-                    case '`city`':
-                        $stmt->bindValue($identifier, $this->city, PDO::PARAM_STR);
-                        break;
-                    case '`birthday`':
-                        $stmt->bindValue($identifier, $this->birthday, PDO::PARAM_STR);
-                        break;
-                    case '`gender`':
-                        $stmt->bindValue($identifier, $this->gender, PDO::PARAM_INT);
                         break;
                     case '`password`':
                         $stmt->bindValue($identifier, $this->password, PDO::PARAM_STR);
@@ -1276,6 +1053,14 @@ abstract class BaseUser extends BaseObject implements Persistent
                     }
                 }
 
+                if ($this->collPhotoComments !== null) {
+                    foreach ($this->collPhotoComments as $referrerFK) {
+                        if (!$referrerFK->validate($columns)) {
+                            $failureMap = array_merge($failureMap, $referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+
                 if ($this->collUserRates !== null) {
                     foreach ($this->collUserRates as $referrerFK) {
                         if (!$referrerFK->validate($columns)) {
@@ -1343,30 +1128,15 @@ abstract class BaseUser extends BaseObject implements Persistent
                 return $this->getUsername();
                 break;
             case 3:
-                return $this->getName();
-                break;
-            case 4:
-                return $this->getSurname();
-                break;
-            case 5:
                 return $this->getEmail();
                 break;
-            case 6:
-                return $this->getCity();
-                break;
-            case 7:
-                return $this->getBirthday();
-                break;
-            case 8:
-                return $this->getGender();
-                break;
-            case 9:
+            case 4:
                 return $this->getPassword();
                 break;
-            case 10:
+            case 5:
                 return $this->getRegisteredAt();
                 break;
-            case 11:
+            case 6:
                 return $this->getUpdatedAt();
                 break;
             default:
@@ -1401,15 +1171,10 @@ abstract class BaseUser extends BaseObject implements Persistent
             $keys[0] => $this->getId(),
             $keys[1] => $this->getUri(),
             $keys[2] => $this->getUsername(),
-            $keys[3] => $this->getName(),
-            $keys[4] => $this->getSurname(),
-            $keys[5] => $this->getEmail(),
-            $keys[6] => $this->getCity(),
-            $keys[7] => $this->getBirthday(),
-            $keys[8] => $this->getGender(),
-            $keys[9] => $this->getPassword(),
-            $keys[10] => $this->getRegisteredAt(),
-            $keys[11] => $this->getUpdatedAt(),
+            $keys[3] => $this->getEmail(),
+            $keys[4] => $this->getPassword(),
+            $keys[5] => $this->getRegisteredAt(),
+            $keys[6] => $this->getUpdatedAt(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1419,6 +1184,9 @@ abstract class BaseUser extends BaseObject implements Persistent
         if ($includeForeignObjects) {
             if (null !== $this->collPhotos) {
                 $result['Photos'] = $this->collPhotos->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+            }
+            if (null !== $this->collPhotoComments) {
+                $result['PhotoComments'] = $this->collPhotoComments->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
             if (null !== $this->collUserRates) {
                 $result['UserRates'] = $this->collUserRates->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
@@ -1473,30 +1241,15 @@ abstract class BaseUser extends BaseObject implements Persistent
                 $this->setUsername($value);
                 break;
             case 3:
-                $this->setName($value);
-                break;
-            case 4:
-                $this->setSurname($value);
-                break;
-            case 5:
                 $this->setEmail($value);
                 break;
-            case 6:
-                $this->setCity($value);
-                break;
-            case 7:
-                $this->setBirthday($value);
-                break;
-            case 8:
-                $this->setGender($value);
-                break;
-            case 9:
+            case 4:
                 $this->setPassword($value);
                 break;
-            case 10:
+            case 5:
                 $this->setRegisteredAt($value);
                 break;
-            case 11:
+            case 6:
                 $this->setUpdatedAt($value);
                 break;
         } // switch()
@@ -1526,15 +1279,10 @@ abstract class BaseUser extends BaseObject implements Persistent
         if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setUri($arr[$keys[1]]);
         if (array_key_exists($keys[2], $arr)) $this->setUsername($arr[$keys[2]]);
-        if (array_key_exists($keys[3], $arr)) $this->setName($arr[$keys[3]]);
-        if (array_key_exists($keys[4], $arr)) $this->setSurname($arr[$keys[4]]);
-        if (array_key_exists($keys[5], $arr)) $this->setEmail($arr[$keys[5]]);
-        if (array_key_exists($keys[6], $arr)) $this->setCity($arr[$keys[6]]);
-        if (array_key_exists($keys[7], $arr)) $this->setBirthday($arr[$keys[7]]);
-        if (array_key_exists($keys[8], $arr)) $this->setGender($arr[$keys[8]]);
-        if (array_key_exists($keys[9], $arr)) $this->setPassword($arr[$keys[9]]);
-        if (array_key_exists($keys[10], $arr)) $this->setRegisteredAt($arr[$keys[10]]);
-        if (array_key_exists($keys[11], $arr)) $this->setUpdatedAt($arr[$keys[11]]);
+        if (array_key_exists($keys[3], $arr)) $this->setEmail($arr[$keys[3]]);
+        if (array_key_exists($keys[4], $arr)) $this->setPassword($arr[$keys[4]]);
+        if (array_key_exists($keys[5], $arr)) $this->setRegisteredAt($arr[$keys[5]]);
+        if (array_key_exists($keys[6], $arr)) $this->setUpdatedAt($arr[$keys[6]]);
     }
 
     /**
@@ -1549,12 +1297,7 @@ abstract class BaseUser extends BaseObject implements Persistent
         if ($this->isColumnModified(UserPeer::ID)) $criteria->add(UserPeer::ID, $this->id);
         if ($this->isColumnModified(UserPeer::URI)) $criteria->add(UserPeer::URI, $this->uri);
         if ($this->isColumnModified(UserPeer::USERNAME)) $criteria->add(UserPeer::USERNAME, $this->username);
-        if ($this->isColumnModified(UserPeer::NAME)) $criteria->add(UserPeer::NAME, $this->name);
-        if ($this->isColumnModified(UserPeer::SURNAME)) $criteria->add(UserPeer::SURNAME, $this->surname);
         if ($this->isColumnModified(UserPeer::EMAIL)) $criteria->add(UserPeer::EMAIL, $this->email);
-        if ($this->isColumnModified(UserPeer::CITY)) $criteria->add(UserPeer::CITY, $this->city);
-        if ($this->isColumnModified(UserPeer::BIRTHDAY)) $criteria->add(UserPeer::BIRTHDAY, $this->birthday);
-        if ($this->isColumnModified(UserPeer::GENDER)) $criteria->add(UserPeer::GENDER, $this->gender);
         if ($this->isColumnModified(UserPeer::PASSWORD)) $criteria->add(UserPeer::PASSWORD, $this->password);
         if ($this->isColumnModified(UserPeer::REGISTERED_AT)) $criteria->add(UserPeer::REGISTERED_AT, $this->registered_at);
         if ($this->isColumnModified(UserPeer::UPDATED_AT)) $criteria->add(UserPeer::UPDATED_AT, $this->updated_at);
@@ -1623,12 +1366,7 @@ abstract class BaseUser extends BaseObject implements Persistent
     {
         $copyObj->setUri($this->getUri());
         $copyObj->setUsername($this->getUsername());
-        $copyObj->setName($this->getName());
-        $copyObj->setSurname($this->getSurname());
         $copyObj->setEmail($this->getEmail());
-        $copyObj->setCity($this->getCity());
-        $copyObj->setBirthday($this->getBirthday());
-        $copyObj->setGender($this->getGender());
         $copyObj->setPassword($this->getPassword());
         $copyObj->setRegisteredAt($this->getRegisteredAt());
         $copyObj->setUpdatedAt($this->getUpdatedAt());
@@ -1643,6 +1381,12 @@ abstract class BaseUser extends BaseObject implements Persistent
             foreach ($this->getPhotos() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
                     $copyObj->addPhoto($relObj->copy($deepCopy));
+                }
+            }
+
+            foreach ($this->getPhotoComments() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addPhotoComment($relObj->copy($deepCopy));
                 }
             }
 
@@ -1726,6 +1470,9 @@ abstract class BaseUser extends BaseObject implements Persistent
     {
         if ('Photo' == $relationName) {
             $this->initPhotos();
+        }
+        if ('PhotoComment' == $relationName) {
+            $this->initPhotoComments();
         }
         if ('UserRate' == $relationName) {
             $this->initUserRates();
@@ -1958,6 +1705,256 @@ abstract class BaseUser extends BaseObject implements Persistent
         }
 
         return $this;
+    }
+
+    /**
+     * Clears out the collPhotoComments collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return User The current object (for fluent API support)
+     * @see        addPhotoComments()
+     */
+    public function clearPhotoComments()
+    {
+        $this->collPhotoComments = null; // important to set this to null since that means it is uninitialized
+        $this->collPhotoCommentsPartial = null;
+
+        return $this;
+    }
+
+    /**
+     * reset is the collPhotoComments collection loaded partially
+     *
+     * @return void
+     */
+    public function resetPartialPhotoComments($v = true)
+    {
+        $this->collPhotoCommentsPartial = $v;
+    }
+
+    /**
+     * Initializes the collPhotoComments collection.
+     *
+     * By default this just sets the collPhotoComments collection to an empty array (like clearcollPhotoComments());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initPhotoComments($overrideExisting = true)
+    {
+        if (null !== $this->collPhotoComments && !$overrideExisting) {
+            return;
+        }
+        $this->collPhotoComments = new PropelObjectCollection();
+        $this->collPhotoComments->setModel('PhotoComment');
+    }
+
+    /**
+     * Gets an array of PhotoComment objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this User is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @return PropelObjectCollection|PhotoComment[] List of PhotoComment objects
+     * @throws PropelException
+     */
+    public function getPhotoComments($criteria = null, PropelPDO $con = null)
+    {
+        $partial = $this->collPhotoCommentsPartial && !$this->isNew();
+        if (null === $this->collPhotoComments || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collPhotoComments) {
+                // return empty collection
+                $this->initPhotoComments();
+            } else {
+                $collPhotoComments = PhotoCommentQuery::create(null, $criteria)
+                    ->filterByUser($this)
+                    ->find($con);
+                if (null !== $criteria) {
+                    if (false !== $this->collPhotoCommentsPartial && count($collPhotoComments)) {
+                      $this->initPhotoComments(false);
+
+                      foreach ($collPhotoComments as $obj) {
+                        if (false == $this->collPhotoComments->contains($obj)) {
+                          $this->collPhotoComments->append($obj);
+                        }
+                      }
+
+                      $this->collPhotoCommentsPartial = true;
+                    }
+
+                    $collPhotoComments->getInternalIterator()->rewind();
+
+                    return $collPhotoComments;
+                }
+
+                if ($partial && $this->collPhotoComments) {
+                    foreach ($this->collPhotoComments as $obj) {
+                        if ($obj->isNew()) {
+                            $collPhotoComments[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collPhotoComments = $collPhotoComments;
+                $this->collPhotoCommentsPartial = false;
+            }
+        }
+
+        return $this->collPhotoComments;
+    }
+
+    /**
+     * Sets a collection of PhotoComment objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param PropelCollection $photoComments A Propel collection.
+     * @param PropelPDO $con Optional connection object
+     * @return User The current object (for fluent API support)
+     */
+    public function setPhotoComments(PropelCollection $photoComments, PropelPDO $con = null)
+    {
+        $photoCommentsToDelete = $this->getPhotoComments(new Criteria(), $con)->diff($photoComments);
+
+
+        $this->photoCommentsScheduledForDeletion = $photoCommentsToDelete;
+
+        foreach ($photoCommentsToDelete as $photoCommentRemoved) {
+            $photoCommentRemoved->setUser(null);
+        }
+
+        $this->collPhotoComments = null;
+        foreach ($photoComments as $photoComment) {
+            $this->addPhotoComment($photoComment);
+        }
+
+        $this->collPhotoComments = $photoComments;
+        $this->collPhotoCommentsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related PhotoComment objects.
+     *
+     * @param Criteria $criteria
+     * @param boolean $distinct
+     * @param PropelPDO $con
+     * @return int             Count of related PhotoComment objects.
+     * @throws PropelException
+     */
+    public function countPhotoComments(Criteria $criteria = null, $distinct = false, PropelPDO $con = null)
+    {
+        $partial = $this->collPhotoCommentsPartial && !$this->isNew();
+        if (null === $this->collPhotoComments || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collPhotoComments) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getPhotoComments());
+            }
+            $query = PhotoCommentQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByUser($this)
+                ->count($con);
+        }
+
+        return count($this->collPhotoComments);
+    }
+
+    /**
+     * Method called to associate a PhotoComment object to this object
+     * through the PhotoComment foreign key attribute.
+     *
+     * @param    PhotoComment $l PhotoComment
+     * @return User The current object (for fluent API support)
+     */
+    public function addPhotoComment(PhotoComment $l)
+    {
+        if ($this->collPhotoComments === null) {
+            $this->initPhotoComments();
+            $this->collPhotoCommentsPartial = true;
+        }
+
+        if (!in_array($l, $this->collPhotoComments->getArrayCopy(), true)) { // only add it if the **same** object is not already associated
+            $this->doAddPhotoComment($l);
+
+            if ($this->photoCommentsScheduledForDeletion and $this->photoCommentsScheduledForDeletion->contains($l)) {
+                $this->photoCommentsScheduledForDeletion->remove($this->photoCommentsScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param	PhotoComment $photoComment The photoComment object to add.
+     */
+    protected function doAddPhotoComment($photoComment)
+    {
+        $this->collPhotoComments[]= $photoComment;
+        $photoComment->setUser($this);
+    }
+
+    /**
+     * @param	PhotoComment $photoComment The photoComment object to remove.
+     * @return User The current object (for fluent API support)
+     */
+    public function removePhotoComment($photoComment)
+    {
+        if ($this->getPhotoComments()->contains($photoComment)) {
+            $this->collPhotoComments->remove($this->collPhotoComments->search($photoComment));
+            if (null === $this->photoCommentsScheduledForDeletion) {
+                $this->photoCommentsScheduledForDeletion = clone $this->collPhotoComments;
+                $this->photoCommentsScheduledForDeletion->clear();
+            }
+            $this->photoCommentsScheduledForDeletion[]= clone $photoComment;
+            $photoComment->setUser(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this User is new, it will return
+     * an empty collection; or if this User has previously
+     * been saved, it will retrieve related PhotoComments from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in User.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @param string $join_behavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return PropelObjectCollection|PhotoComment[] List of PhotoComment objects
+     */
+    public function getPhotoCommentsJoinPhoto($criteria = null, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $query = PhotoCommentQuery::create(null, $criteria);
+        $query->joinWith('Photo', $join_behavior);
+
+        return $this->getPhotoComments($query, $con);
     }
 
     /**
@@ -2886,12 +2883,7 @@ abstract class BaseUser extends BaseObject implements Persistent
         $this->id = null;
         $this->uri = null;
         $this->username = null;
-        $this->name = null;
-        $this->surname = null;
         $this->email = null;
-        $this->city = null;
-        $this->birthday = null;
-        $this->gender = null;
         $this->password = null;
         $this->registered_at = null;
         $this->updated_at = null;
@@ -2919,6 +2911,11 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->alreadyInClearAllReferencesDeep = true;
             if ($this->collPhotos) {
                 foreach ($this->collPhotos as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
+            if ($this->collPhotoComments) {
+                foreach ($this->collPhotoComments as $o) {
                     $o->clearAllReferences($deep);
                 }
             }
@@ -2953,6 +2950,10 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->collPhotos->clearIterator();
         }
         $this->collPhotos = null;
+        if ($this->collPhotoComments instanceof PropelCollection) {
+            $this->collPhotoComments->clearIterator();
+        }
+        $this->collPhotoComments = null;
         if ($this->collUserRates instanceof PropelCollection) {
             $this->collUserRates->clearIterator();
         }

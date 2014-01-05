@@ -13,6 +13,7 @@ use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\PhotoComment;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 use wiosloCMS\PhotoBundle\Model\Rating;
@@ -46,6 +47,10 @@ use wiosloCMS\UserBundle\Model\User;
  * @method PhotoQuery leftJoinRating($relationAlias = null) Adds a LEFT JOIN clause to the query using the Rating relation
  * @method PhotoQuery rightJoinRating($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Rating relation
  * @method PhotoQuery innerJoinRating($relationAlias = null) Adds a INNER JOIN clause to the query using the Rating relation
+ *
+ * @method PhotoQuery leftJoinPhotoComment($relationAlias = null) Adds a LEFT JOIN clause to the query using the PhotoComment relation
+ * @method PhotoQuery rightJoinPhotoComment($relationAlias = null) Adds a RIGHT JOIN clause to the query using the PhotoComment relation
+ * @method PhotoQuery innerJoinPhotoComment($relationAlias = null) Adds a INNER JOIN clause to the query using the PhotoComment relation
  *
  * @method Photo findOne(PropelPDO $con = null) Return the first Photo matching the query
  * @method Photo findOneOrCreate(PropelPDO $con = null) Return the first Photo matching the query, or a new Photo object populated from the query conditions when no match is found
@@ -665,6 +670,80 @@ abstract class BasePhotoQuery extends ModelCriteria
         return $this
             ->joinRating($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'Rating', '\wiosloCMS\PhotoBundle\Model\RatingQuery');
+    }
+
+    /**
+     * Filter the query by a related PhotoComment object
+     *
+     * @param   PhotoComment|PropelObjectCollection $photoComment  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 PhotoQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByPhotoComment($photoComment, $comparison = null)
+    {
+        if ($photoComment instanceof PhotoComment) {
+            return $this
+                ->addUsingAlias(PhotoPeer::ID, $photoComment->getPhotoId(), $comparison);
+        } elseif ($photoComment instanceof PropelObjectCollection) {
+            return $this
+                ->usePhotoCommentQuery()
+                ->filterByPrimaryKeys($photoComment->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByPhotoComment() only accepts arguments of type PhotoComment or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the PhotoComment relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return PhotoQuery The current query, for fluid interface
+     */
+    public function joinPhotoComment($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('PhotoComment');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'PhotoComment');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the PhotoComment relation PhotoComment object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \wiosloCMS\PhotoBundle\Model\PhotoCommentQuery A secondary query class using the current class as primary query
+     */
+    public function usePhotoCommentQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinPhotoComment($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'PhotoComment', '\wiosloCMS\PhotoBundle\Model\PhotoCommentQuery');
     }
 
     /**

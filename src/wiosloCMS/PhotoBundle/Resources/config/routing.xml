@@ -8,8 +8,28 @@
 		<default key="_controller">PhotoBundle:Photo:add</default>
 	</route>
 
+	<route id="photo_next" pattern="next/{id}" methods="GET">
+		<default key="_controller">PhotoBundle:Photo:next</default>
+	</route>
+
+	<route id="photo_previous" pattern="previous/{id}" methods="GET">
+		<default key="_controller">PhotoBundle:Photo:previous</default>
+	</route>
+
+	<route id="photo_random" pattern="random" methods="GET">
+		<default key="_controller">PhotoBundle:Photo:random</default>
+	</route>
+
+	<route id="photo_show" pattern="{id}" methods="GET">
+		<default key="_controller">PhotoBundle:Photo:show</default>
+	</route>
+
 	<route id="rate" pattern="rate/{photoId}/{action}" methods="GET">
 		<default key="_controller">PhotoBundle:Rating:rate</default>
+	</route>
+
+	<route id="comment_add" pattern="comment/add/{photoId}" methods="POST">
+		<default key="_controller">PhotoBundle:PhotoComment:add</default>
 	</route>
 
 </routes>

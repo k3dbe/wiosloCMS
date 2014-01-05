@@ -6,12 +6,7 @@
 		<column name="id" phpName="Id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
 		<column name="uri" phpName="Uri" type="VARCHAR" size="250" required="true"/>
 		<column name="username" phpName="Username" type="VARCHAR" size="50" required="true"/>
-		<column name="name" phpName="Name" type="VARCHAR" size="50" required="true"/>
-		<column name="surname" phpName="Surname" type="VARCHAR" size="100" required="false"/>
 		<column name="email" phpName="Email" type="VARCHAR" size="150" required="true"/>
-		<column name="city" phpName="City" type="VARCHAR" size="500" required="false"/>
-		<column name="birthday" phpName="Birthday" type="DATE" required="false"/>
-		<column name="gender" phpName="Gender" type="TINYINT" required="false"/>
 		<column name="password" phpName="Password" type="VARCHAR" size="130" required="false"/>
 		<column name="registered_at" phpName="RegisteredAt" type="TIMESTAMP" required="true"/>
 		<column name="updated_at" phpName="UpdatedAt" type="TIMESTAMP" required="true"/>

@@ -13,6 +13,7 @@ use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\PhotoComment;
 use wiosloCMS\PhotoBundle\Model\Rating;
 use wiosloCMS\PhotoBundle\Model\UserRate;
 use wiosloCMS\UserBundle\Model\Role;
@@ -26,12 +27,7 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method UserQuery orderById($order = Criteria::ASC) Order by the id column
  * @method UserQuery orderByUri($order = Criteria::ASC) Order by the uri column
  * @method UserQuery orderByUsername($order = Criteria::ASC) Order by the username column
- * @method UserQuery orderByName($order = Criteria::ASC) Order by the name column
- * @method UserQuery orderBySurname($order = Criteria::ASC) Order by the surname column
  * @method UserQuery orderByEmail($order = Criteria::ASC) Order by the email column
- * @method UserQuery orderByCity($order = Criteria::ASC) Order by the city column
- * @method UserQuery orderByBirthday($order = Criteria::ASC) Order by the birthday column
- * @method UserQuery orderByGender($order = Criteria::ASC) Order by the gender column
  * @method UserQuery orderByPassword($order = Criteria::ASC) Order by the password column
  * @method UserQuery orderByRegisteredAt($order = Criteria::ASC) Order by the registered_at column
  * @method UserQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
@@ -39,12 +35,7 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method UserQuery groupById() Group by the id column
  * @method UserQuery groupByUri() Group by the uri column
  * @method UserQuery groupByUsername() Group by the username column
- * @method UserQuery groupByName() Group by the name column
- * @method UserQuery groupBySurname() Group by the surname column
  * @method UserQuery groupByEmail() Group by the email column
- * @method UserQuery groupByCity() Group by the city column
- * @method UserQuery groupByBirthday() Group by the birthday column
- * @method UserQuery groupByGender() Group by the gender column
  * @method UserQuery groupByPassword() Group by the password column
  * @method UserQuery groupByRegisteredAt() Group by the registered_at column
  * @method UserQuery groupByUpdatedAt() Group by the updated_at column
@@ -56,6 +47,10 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method UserQuery leftJoinPhoto($relationAlias = null) Adds a LEFT JOIN clause to the query using the Photo relation
  * @method UserQuery rightJoinPhoto($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Photo relation
  * @method UserQuery innerJoinPhoto($relationAlias = null) Adds a INNER JOIN clause to the query using the Photo relation
+ *
+ * @method UserQuery leftJoinPhotoComment($relationAlias = null) Adds a LEFT JOIN clause to the query using the PhotoComment relation
+ * @method UserQuery rightJoinPhotoComment($relationAlias = null) Adds a RIGHT JOIN clause to the query using the PhotoComment relation
+ * @method UserQuery innerJoinPhotoComment($relationAlias = null) Adds a INNER JOIN clause to the query using the PhotoComment relation
  *
  * @method UserQuery leftJoinUserRate($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserRate relation
  * @method UserQuery rightJoinUserRate($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserRate relation
@@ -74,12 +69,7 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  *
  * @method User findOneByUri(string $uri) Return the first User filtered by the uri column
  * @method User findOneByUsername(string $username) Return the first User filtered by the username column
- * @method User findOneByName(string $name) Return the first User filtered by the name column
- * @method User findOneBySurname(string $surname) Return the first User filtered by the surname column
  * @method User findOneByEmail(string $email) Return the first User filtered by the email column
- * @method User findOneByCity(string $city) Return the first User filtered by the city column
- * @method User findOneByBirthday(string $birthday) Return the first User filtered by the birthday column
- * @method User findOneByGender(int $gender) Return the first User filtered by the gender column
  * @method User findOneByPassword(string $password) Return the first User filtered by the password column
  * @method User findOneByRegisteredAt(string $registered_at) Return the first User filtered by the registered_at column
  * @method User findOneByUpdatedAt(string $updated_at) Return the first User filtered by the updated_at column
@@ -87,12 +77,7 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method array findById(int $id) Return User objects filtered by the id column
  * @method array findByUri(string $uri) Return User objects filtered by the uri column
  * @method array findByUsername(string $username) Return User objects filtered by the username column
- * @method array findByName(string $name) Return User objects filtered by the name column
- * @method array findBySurname(string $surname) Return User objects filtered by the surname column
  * @method array findByEmail(string $email) Return User objects filtered by the email column
- * @method array findByCity(string $city) Return User objects filtered by the city column
- * @method array findByBirthday(string $birthday) Return User objects filtered by the birthday column
- * @method array findByGender(int $gender) Return User objects filtered by the gender column
  * @method array findByPassword(string $password) Return User objects filtered by the password column
  * @method array findByRegisteredAt(string $registered_at) Return User objects filtered by the registered_at column
  * @method array findByUpdatedAt(string $updated_at) Return User objects filtered by the updated_at column
@@ -201,7 +186,7 @@ abstract class BaseUserQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT `id`, `uri`, `username`, `name`, `surname`, `email`, `city`, `birthday`, `gender`, `password`, `registered_at`, `updated_at` FROM `User` WHERE `id` = :p0';
+        $sql = 'SELECT `id`, `uri`, `username`, `email`, `password`, `registered_at`, `updated_at` FROM `User` WHERE `id` = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -391,64 +376,6 @@ abstract class BaseUserQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query on the name column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByName('fooValue');   // WHERE name = 'fooValue'
-     * $query->filterByName('%fooValue%'); // WHERE name LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $name The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return UserQuery The current query, for fluid interface
-     */
-    public function filterByName($name = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($name)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $name)) {
-                $name = str_replace('*', '%', $name);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(UserPeer::NAME, $name, $comparison);
-    }
-
-    /**
-     * Filter the query on the surname column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterBySurname('fooValue');   // WHERE surname = 'fooValue'
-     * $query->filterBySurname('%fooValue%'); // WHERE surname LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $surname The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return UserQuery The current query, for fluid interface
-     */
-    public function filterBySurname($surname = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($surname)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $surname)) {
-                $surname = str_replace('*', '%', $surname);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(UserPeer::SURNAME, $surname, $comparison);
-    }
-
-    /**
      * Filter the query on the email column
      *
      * Example usage:
@@ -475,120 +402,6 @@ abstract class BaseUserQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(UserPeer::EMAIL, $email, $comparison);
-    }
-
-    /**
-     * Filter the query on the city column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByCity('fooValue');   // WHERE city = 'fooValue'
-     * $query->filterByCity('%fooValue%'); // WHERE city LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $city The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return UserQuery The current query, for fluid interface
-     */
-    public function filterByCity($city = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($city)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $city)) {
-                $city = str_replace('*', '%', $city);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(UserPeer::CITY, $city, $comparison);
-    }
-
-    /**
-     * Filter the query on the birthday column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByBirthday('2011-03-14'); // WHERE birthday = '2011-03-14'
-     * $query->filterByBirthday('now'); // WHERE birthday = '2011-03-14'
-     * $query->filterByBirthday(array('max' => 'yesterday')); // WHERE birthday < '2011-03-13'
-     * </code>
-     *
-     * @param     mixed $birthday The value to use as filter.
-     *              Values can be integers (unix timestamps), DateTime objects, or strings.
-     *              Empty strings are treated as NULL.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return UserQuery The current query, for fluid interface
-     */
-    public function filterByBirthday($birthday = null, $comparison = null)
-    {
-        if (is_array($birthday)) {
-            $useMinMax = false;
-            if (isset($birthday['min'])) {
-                $this->addUsingAlias(UserPeer::BIRTHDAY, $birthday['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($birthday['max'])) {
-                $this->addUsingAlias(UserPeer::BIRTHDAY, $birthday['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserPeer::BIRTHDAY, $birthday, $comparison);
-    }
-
-    /**
-     * Filter the query on the gender column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByGender(1234); // WHERE gender = 1234
-     * $query->filterByGender(array(12, 34)); // WHERE gender IN (12, 34)
-     * $query->filterByGender(array('min' => 12)); // WHERE gender >= 12
-     * $query->filterByGender(array('max' => 12)); // WHERE gender <= 12
-     * </code>
-     *
-     * @param     mixed $gender The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return UserQuery The current query, for fluid interface
-     */
-    public function filterByGender($gender = null, $comparison = null)
-    {
-        if (is_array($gender)) {
-            $useMinMax = false;
-            if (isset($gender['min'])) {
-                $this->addUsingAlias(UserPeer::GENDER, $gender['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($gender['max'])) {
-                $this->addUsingAlias(UserPeer::GENDER, $gender['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(UserPeer::GENDER, $gender, $comparison);
     }
 
     /**
@@ -778,6 +591,80 @@ abstract class BaseUserQuery extends ModelCriteria
         return $this
             ->joinPhoto($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'Photo', '\wiosloCMS\PhotoBundle\Model\PhotoQuery');
+    }
+
+    /**
+     * Filter the query by a related PhotoComment object
+     *
+     * @param   PhotoComment|PropelObjectCollection $photoComment  the related object to use as filter
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return                 UserQuery The current query, for fluid interface
+     * @throws PropelException - if the provided filter is invalid.
+     */
+    public function filterByPhotoComment($photoComment, $comparison = null)
+    {
+        if ($photoComment instanceof PhotoComment) {
+            return $this
+                ->addUsingAlias(UserPeer::ID, $photoComment->getUserId(), $comparison);
+        } elseif ($photoComment instanceof PropelObjectCollection) {
+            return $this
+                ->usePhotoCommentQuery()
+                ->filterByPrimaryKeys($photoComment->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByPhotoComment() only accepts arguments of type PhotoComment or PropelCollection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the PhotoComment relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return UserQuery The current query, for fluid interface
+     */
+    public function joinPhotoComment($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('PhotoComment');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'PhotoComment');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the PhotoComment relation PhotoComment object
+     *
+     * @see       useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return   \wiosloCMS\PhotoBundle\Model\PhotoCommentQuery A secondary query class using the current class as primary query
+     */
+    public function usePhotoCommentQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinPhotoComment($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'PhotoComment', '\wiosloCMS\PhotoBundle\Model\PhotoCommentQuery');
     }
 
     /**

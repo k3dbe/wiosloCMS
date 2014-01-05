@@ -1,0 +1,58 @@
+{% block top %}
+    <div class="navbar navbar-inverse navbar-static-top hidden-xs">
+        <div class="container">
+            <a href="{{ path('homepage') }}" class="navbar-brand pull l">
+                <img class="img-responsive logo" src="{{ asset('/wiosloCMS/web/img/logo.png') }}" alt="logo">
+            </a>
+
+            <div class="row search">
+                <div class="input-group pull r">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button">Go!</button>
+            </span>
+                    <input type="text" class="form-control">
+                </div>
+                <!-- /input-group -->
+            </div>
+            <!-- end .row -->
+        </div>
+    </div>
+    <div class="navbar navbar-inverse navbar-static-top">
+        <div class="container">
+            <div class="log_reg navbar-brand hidden-xs hidden-sm">
+                {% if is_granted('ROLE_USER') %}
+                    Witaj {{ app.user.getUsername() }} - <a href="{{ path('logout') }}">Wyloguj się!</a>
+                {% else %}
+                    Witaj bezimienny <a href="{{ path('login') }}">Znamy się!</a> lub <a href="{{ path('register') }}">Zapoznajmy
+                    się</a>
+                {% endif %}
+            </div>
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navHeadercollapse">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+            </button>
+
+            <div class="collapse navbar-collapse navHeadercollapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <div class="row search visible-xs">
+                            <div class="input-group pull r">
+                                <input type="text" class="form-control">
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" type="button">Go!</button>
+                    </span>
+                            </div>
+                            <!-- /input-group -->
+                        </div>
+                        <!-- end .row -->
+                    </li>
+                    <li class="active"><a href="{{ path('homepage') }}"><b class="glyphicon glyphicon-home"> </b> Wiosło</a>
+                    </li>
+                    <li><a href="#"><b class="glyphicon glyphicon-info-sign"> </b> O nas</a></li>
+                    <li><a href="{{ path('photo_random') }}"><b class="glyphicon glyphicon-random"> </b> Random</a></li>
+                    <li><a href="{{ path('photo_add') }}"><b class="glyphicon glyphicon-upload"> </b> Wrzuć!</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

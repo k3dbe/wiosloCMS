@@ -13,8 +13,11 @@ use \Propel;
 use \PropelCollection;
 use \PropelDateTime;
 use \PropelException;
+use \PropelObjectCollection;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\PhotoComment;
+use wiosloCMS\PhotoBundle\Model\PhotoCommentQuery;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 use wiosloCMS\PhotoBundle\Model\Rating;
@@ -96,6 +99,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
     protected $singleRating;
 
     /**
+     * @var        PropelObjectCollection|PhotoComment[] Collection to store aggregation of PhotoComment objects.
+     */
+    protected $collPhotoComments;
+    protected $collPhotoCommentsPartial;
+
+    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      * @var        boolean
@@ -114,6 +123,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
      * @var        boolean
      */
     protected $alreadyInClearAllReferencesDeep = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var		PropelObjectCollection
+     */
+    protected $photoCommentsScheduledForDeletion = null;
 
     /**
      * Get the [id] column value.
@@ -521,6 +536,8 @@ abstract class BasePhoto extends BaseObject implements Persistent
             $this->aUser = null;
             $this->singleRating = null;
 
+            $this->collPhotoComments = null;
+
         } // if (deep)
     }
 
@@ -671,6 +688,23 @@ abstract class BasePhoto extends BaseObject implements Persistent
             if ($this->singleRating !== null) {
                 if (!$this->singleRating->isDeleted() && ($this->singleRating->isNew() || $this->singleRating->isModified())) {
                         $affectedRows += $this->singleRating->save($con);
+                }
+            }
+
+            if ($this->photoCommentsScheduledForDeletion !== null) {
+                if (!$this->photoCommentsScheduledForDeletion->isEmpty()) {
+                    PhotoCommentQuery::create()
+                        ->filterByPrimaryKeys($this->photoCommentsScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->photoCommentsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collPhotoComments !== null) {
+                foreach ($this->collPhotoComments as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
                 }
             }
 
@@ -870,6 +904,14 @@ abstract class BasePhoto extends BaseObject implements Persistent
                     }
                 }
 
+                if ($this->collPhotoComments !== null) {
+                    foreach ($this->collPhotoComments as $referrerFK) {
+                        if (!$referrerFK->validate($columns)) {
+                            $failureMap = array_merge($failureMap, $referrerFK->getValidationFailures());
+                        }
+                    }
+                }
+
 
             $this->alreadyInValidation = false;
         }
@@ -974,6 +1016,9 @@ abstract class BasePhoto extends BaseObject implements Persistent
             }
             if (null !== $this->singleRating) {
                 $result['Rating'] = $this->singleRating->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collPhotoComments) {
+                $result['PhotoComments'] = $this->collPhotoComments->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1161,6 +1206,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
                 $copyObj->setRating($relObj->copy($deepCopy));
             }
 
+            foreach ($this->getPhotoComments() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addPhotoComment($relObj->copy($deepCopy));
+                }
+            }
+
             //unflag object copy
             $this->startCopy = false;
         } // if ($deepCopy)
@@ -1274,6 +1325,9 @@ abstract class BasePhoto extends BaseObject implements Persistent
      */
     public function initRelation($relationName)
     {
+        if ('PhotoComment' == $relationName) {
+            $this->initPhotoComments();
+        }
     }
 
     /**
@@ -1313,6 +1367,256 @@ abstract class BasePhoto extends BaseObject implements Persistent
     }
 
     /**
+     * Clears out the collPhotoComments collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return Photo The current object (for fluent API support)
+     * @see        addPhotoComments()
+     */
+    public function clearPhotoComments()
+    {
+        $this->collPhotoComments = null; // important to set this to null since that means it is uninitialized
+        $this->collPhotoCommentsPartial = null;
+
+        return $this;
+    }
+
+    /**
+     * reset is the collPhotoComments collection loaded partially
+     *
+     * @return void
+     */
+    public function resetPartialPhotoComments($v = true)
+    {
+        $this->collPhotoCommentsPartial = $v;
+    }
+
+    /**
+     * Initializes the collPhotoComments collection.
+     *
+     * By default this just sets the collPhotoComments collection to an empty array (like clearcollPhotoComments());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initPhotoComments($overrideExisting = true)
+    {
+        if (null !== $this->collPhotoComments && !$overrideExisting) {
+            return;
+        }
+        $this->collPhotoComments = new PropelObjectCollection();
+        $this->collPhotoComments->setModel('PhotoComment');
+    }
+
+    /**
+     * Gets an array of PhotoComment objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this Photo is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @return PropelObjectCollection|PhotoComment[] List of PhotoComment objects
+     * @throws PropelException
+     */
+    public function getPhotoComments($criteria = null, PropelPDO $con = null)
+    {
+        $partial = $this->collPhotoCommentsPartial && !$this->isNew();
+        if (null === $this->collPhotoComments || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collPhotoComments) {
+                // return empty collection
+                $this->initPhotoComments();
+            } else {
+                $collPhotoComments = PhotoCommentQuery::create(null, $criteria)
+                    ->filterByPhoto($this)
+                    ->find($con);
+                if (null !== $criteria) {
+                    if (false !== $this->collPhotoCommentsPartial && count($collPhotoComments)) {
+                      $this->initPhotoComments(false);
+
+                      foreach ($collPhotoComments as $obj) {
+                        if (false == $this->collPhotoComments->contains($obj)) {
+                          $this->collPhotoComments->append($obj);
+                        }
+                      }
+
+                      $this->collPhotoCommentsPartial = true;
+                    }
+
+                    $collPhotoComments->getInternalIterator()->rewind();
+
+                    return $collPhotoComments;
+                }
+
+                if ($partial && $this->collPhotoComments) {
+                    foreach ($this->collPhotoComments as $obj) {
+                        if ($obj->isNew()) {
+                            $collPhotoComments[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collPhotoComments = $collPhotoComments;
+                $this->collPhotoCommentsPartial = false;
+            }
+        }
+
+        return $this->collPhotoComments;
+    }
+
+    /**
+     * Sets a collection of PhotoComment objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param PropelCollection $photoComments A Propel collection.
+     * @param PropelPDO $con Optional connection object
+     * @return Photo The current object (for fluent API support)
+     */
+    public function setPhotoComments(PropelCollection $photoComments, PropelPDO $con = null)
+    {
+        $photoCommentsToDelete = $this->getPhotoComments(new Criteria(), $con)->diff($photoComments);
+
+
+        $this->photoCommentsScheduledForDeletion = $photoCommentsToDelete;
+
+        foreach ($photoCommentsToDelete as $photoCommentRemoved) {
+            $photoCommentRemoved->setPhoto(null);
+        }
+
+        $this->collPhotoComments = null;
+        foreach ($photoComments as $photoComment) {
+            $this->addPhotoComment($photoComment);
+        }
+
+        $this->collPhotoComments = $photoComments;
+        $this->collPhotoCommentsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related PhotoComment objects.
+     *
+     * @param Criteria $criteria
+     * @param boolean $distinct
+     * @param PropelPDO $con
+     * @return int             Count of related PhotoComment objects.
+     * @throws PropelException
+     */
+    public function countPhotoComments(Criteria $criteria = null, $distinct = false, PropelPDO $con = null)
+    {
+        $partial = $this->collPhotoCommentsPartial && !$this->isNew();
+        if (null === $this->collPhotoComments || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collPhotoComments) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getPhotoComments());
+            }
+            $query = PhotoCommentQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByPhoto($this)
+                ->count($con);
+        }
+
+        return count($this->collPhotoComments);
+    }
+
+    /**
+     * Method called to associate a PhotoComment object to this object
+     * through the PhotoComment foreign key attribute.
+     *
+     * @param    PhotoComment $l PhotoComment
+     * @return Photo The current object (for fluent API support)
+     */
+    public function addPhotoComment(PhotoComment $l)
+    {
+        if ($this->collPhotoComments === null) {
+            $this->initPhotoComments();
+            $this->collPhotoCommentsPartial = true;
+        }
+
+        if (!in_array($l, $this->collPhotoComments->getArrayCopy(), true)) { // only add it if the **same** object is not already associated
+            $this->doAddPhotoComment($l);
+
+            if ($this->photoCommentsScheduledForDeletion and $this->photoCommentsScheduledForDeletion->contains($l)) {
+                $this->photoCommentsScheduledForDeletion->remove($this->photoCommentsScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param	PhotoComment $photoComment The photoComment object to add.
+     */
+    protected function doAddPhotoComment($photoComment)
+    {
+        $this->collPhotoComments[]= $photoComment;
+        $photoComment->setPhoto($this);
+    }
+
+    /**
+     * @param	PhotoComment $photoComment The photoComment object to remove.
+     * @return Photo The current object (for fluent API support)
+     */
+    public function removePhotoComment($photoComment)
+    {
+        if ($this->getPhotoComments()->contains($photoComment)) {
+            $this->collPhotoComments->remove($this->collPhotoComments->search($photoComment));
+            if (null === $this->photoCommentsScheduledForDeletion) {
+                $this->photoCommentsScheduledForDeletion = clone $this->collPhotoComments;
+                $this->photoCommentsScheduledForDeletion->clear();
+            }
+            $this->photoCommentsScheduledForDeletion[]= clone $photoComment;
+            $photoComment->setPhoto(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Photo is new, it will return
+     * an empty collection; or if this Photo has previously
+     * been saved, it will retrieve related PhotoComments from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Photo.
+     *
+     * @param Criteria $criteria optional Criteria object to narrow the query
+     * @param PropelPDO $con optional connection object
+     * @param string $join_behavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return PropelObjectCollection|PhotoComment[] List of PhotoComment objects
+     */
+    public function getPhotoCommentsJoinUser($criteria = null, $con = null, $join_behavior = Criteria::LEFT_JOIN)
+    {
+        $query = PhotoCommentQuery::create(null, $criteria);
+        $query->joinWith('User', $join_behavior);
+
+        return $this->getPhotoComments($query, $con);
+    }
+
+    /**
      * Clears the current object and sets all attributes to their default values
      */
     public function clear()
@@ -1349,6 +1653,11 @@ abstract class BasePhoto extends BaseObject implements Persistent
             if ($this->singleRating) {
                 $this->singleRating->clearAllReferences($deep);
             }
+            if ($this->collPhotoComments) {
+                foreach ($this->collPhotoComments as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
             if ($this->aUser instanceof Persistent) {
               $this->aUser->clearAllReferences($deep);
             }
@@ -1360,6 +1669,10 @@ abstract class BasePhoto extends BaseObject implements Persistent
             $this->singleRating->clearIterator();
         }
         $this->singleRating = null;
+        if ($this->collPhotoComments instanceof PropelCollection) {
+            $this->collPhotoComments->clearIterator();
+        }
+        $this->collPhotoComments = null;
         $this->aUser = null;
     }
 

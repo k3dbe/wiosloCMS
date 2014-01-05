@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>{% block title %}Hello - wioslo.pl{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
-    </head>
-    <body>
-        {% block top %}{% endblock %}
-        {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
-    </body>
+<head>
+    <meta charset="UTF-8"/>
+    <title>{% block title %}Hello - wioslo.pl{% endblock %}</title>
+    {% block stylesheets %}
+        <link href="{{ asset('/wiosloCMS/web/css/bootstrap.min.css') }}" rel="stylesheet"/>
+        <link href="{{ asset('/wiosloCMS/web/css/bootstrapEdits.css') }}" rel="stylesheet"/>
+        <link href="{{ asset('/wiosloCMS/web/css/style.css') }}" rel="stylesheet"/>
+    {% endblock %}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}"/>
+</head>
+<body>
+{% block top %} {{ render(controller('HomepageBundle:Header:top')) }} {% endblock %}
+{% block body %}{% endblock %}
+{% block footer %} {{ render(controller('HomepageBundle:Header:footer')) }} {% endblock %}
+{% block javascripts %}
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="{{ asset('/wiosloCMS/web/js/bootstrap.min.js') }}"></script>
+{% endblock %}
+
+</body>
 </html>

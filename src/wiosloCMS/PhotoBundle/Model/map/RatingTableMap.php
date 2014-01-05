@@ -43,7 +43,8 @@ class RatingTableMap extends TableMap
         $this->setUseIdGenerator(false);
         // columns
         $this->addForeignPrimaryKey('photo_id', 'PhotoId', 'INTEGER' , 'Photo', 'id', true, null, null);
-        $this->addColumn('value', 'Value', 'INTEGER', true, 10, null);
+        $this->addColumn('plus', 'Plus', 'INTEGER', true, 10, null);
+        $this->addColumn('minus', 'Minus', 'INTEGER', true, 10, null);
         // validators
     } // initialize()
 

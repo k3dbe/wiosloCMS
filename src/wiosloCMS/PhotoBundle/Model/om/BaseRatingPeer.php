@@ -31,19 +31,22 @@ abstract class BaseRatingPeer
     const TM_CLASS = 'wiosloCMS\\PhotoBundle\\Model\\map\\RatingTableMap';
 
     /** The total number of columns. */
-    const NUM_COLUMNS = 2;
+    const NUM_COLUMNS = 3;
 
     /** The number of lazy-loaded columns. */
     const NUM_LAZY_LOAD_COLUMNS = 0;
 
     /** The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS) */
-    const NUM_HYDRATE_COLUMNS = 2;
+    const NUM_HYDRATE_COLUMNS = 3;
 
     /** the column name for the photo_id field */
     const PHOTO_ID = 'PhotoRating.photo_id';
 
-    /** the column name for the value field */
-    const VALUE = 'PhotoRating.value';
+    /** the column name for the plus field */
+    const PLUS = 'PhotoRating.plus';
+
+    /** the column name for the minus field */
+    const MINUS = 'PhotoRating.minus';
 
     /** The default string format for model objects of the related table **/
     const DEFAULT_STRING_FORMAT = 'YAML';
@@ -64,12 +67,12 @@ abstract class BaseRatingPeer
      * e.g. RatingPeer::$fieldNames[RatingPeer::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        BasePeer::TYPE_PHPNAME => array ('PhotoId', 'Value', ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('photoId', 'value', ),
-        BasePeer::TYPE_COLNAME => array (RatingPeer::PHOTO_ID, RatingPeer::VALUE, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('PHOTO_ID', 'VALUE', ),
-        BasePeer::TYPE_FIELDNAME => array ('photo_id', 'value', ),
-        BasePeer::TYPE_NUM => array (0, 1, )
+        BasePeer::TYPE_PHPNAME => array ('PhotoId', 'Plus', 'Minus', ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('photoId', 'plus', 'minus', ),
+        BasePeer::TYPE_COLNAME => array (RatingPeer::PHOTO_ID, RatingPeer::PLUS, RatingPeer::MINUS, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('PHOTO_ID', 'PLUS', 'MINUS', ),
+        BasePeer::TYPE_FIELDNAME => array ('photo_id', 'plus', 'minus', ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, )
     );
 
     /**
@@ -79,12 +82,12 @@ abstract class BaseRatingPeer
      * e.g. RatingPeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        BasePeer::TYPE_PHPNAME => array ('PhotoId' => 0, 'Value' => 1, ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('photoId' => 0, 'value' => 1, ),
-        BasePeer::TYPE_COLNAME => array (RatingPeer::PHOTO_ID => 0, RatingPeer::VALUE => 1, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('PHOTO_ID' => 0, 'VALUE' => 1, ),
-        BasePeer::TYPE_FIELDNAME => array ('photo_id' => 0, 'value' => 1, ),
-        BasePeer::TYPE_NUM => array (0, 1, )
+        BasePeer::TYPE_PHPNAME => array ('PhotoId' => 0, 'Plus' => 1, 'Minus' => 2, ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('photoId' => 0, 'plus' => 1, 'minus' => 2, ),
+        BasePeer::TYPE_COLNAME => array (RatingPeer::PHOTO_ID => 0, RatingPeer::PLUS => 1, RatingPeer::MINUS => 2, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('PHOTO_ID' => 0, 'PLUS' => 1, 'MINUS' => 2, ),
+        BasePeer::TYPE_FIELDNAME => array ('photo_id' => 0, 'plus' => 1, 'minus' => 2, ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, )
     );
 
     /**
@@ -159,10 +162,12 @@ abstract class BaseRatingPeer
     {
         if (null === $alias) {
             $criteria->addSelectColumn(RatingPeer::PHOTO_ID);
-            $criteria->addSelectColumn(RatingPeer::VALUE);
+            $criteria->addSelectColumn(RatingPeer::PLUS);
+            $criteria->addSelectColumn(RatingPeer::MINUS);
         } else {
             $criteria->addSelectColumn($alias . '.photo_id');
-            $criteria->addSelectColumn($alias . '.value');
+            $criteria->addSelectColumn($alias . '.plus');
+            $criteria->addSelectColumn($alias . '.minus');
         }
     }
 

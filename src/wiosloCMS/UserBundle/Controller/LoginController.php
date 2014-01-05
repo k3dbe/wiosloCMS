@@ -19,6 +19,10 @@ class LoginController extends Controller
      */
     public function loginAction()
     {
+        if ($this->get('security.context')->isGranted('ROLE_USER')) {
+            return $this->redirect('HomepageBundle:Body:show');
+        }
+
         return $this->render('UserBundle::login.html.twig');
     }
 }

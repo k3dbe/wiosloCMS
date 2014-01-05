@@ -1,11 +1,31 @@
 {% extends "::base.html.twig" %}
 
 {% block body %}
-    <form method="POST">
-        <fieldset>
+    <div class="container" style="text-align: center">
+        <center>
+            <div class="formArea">
+                <!-- login form -->
+                <form method="POST">
+                    <fieldset>
+                        {{ form_row(form.username) }}
+                        <br />
+                        {{ form_row(form.email) }}
+                        <br />
+                        {{ form_row(form.password) }}
+                        <br />
+                        <p>Wysyłając ten formularz zgadzam się na wszystkie warunki i przysięgam przestrzegać zasad
+                            Wiosłostrady. Tak sięgam już ponad stół! Ja tubylec społeczności wioslo.pl obiecuje być
+                            grzeczny
+                            i tyle ! </p>
 
-            {{ form_widget(form) }}
+                        <button type="submit" class="btn btn-default bc_blue">
+                            <span class="glyphicon c_black glyphicon-send"></span>
+                        </button>
 
-        </fieldset>
-    </form>
+                        {{ form_widget(form._token) }}
+                    </fieldset>
+                </form>
+            </div>
+        </center>
+    </div>
 {% endblock %}

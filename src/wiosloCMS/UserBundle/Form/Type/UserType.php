@@ -17,25 +17,18 @@ class UserType extends BaseAbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('username', 'text', ['label' => 'Username: ']);
-        $builder->add('name', 'text', ['label' => 'Name: ']);
-        $builder->add('surname', 'text', ['label' => 'Surname: ']);
-        $builder->add('email', 'text', ['label' => 'Email: ']);
-        $builder->add('city', 'text', ['label' => 'City: ']);
-        $builder->add('birthday', 'birthday', ['format' => 'yyyy-MM-dd', 'label' => 'Birthday: ']);
-        $builder->add('gender', 'choice', ['choices' => ['female' => 'Female', 'male' => 'Male'], 'label' => 'Gender: ']);
+        $builder->add('username', 'text', ['label' => 'Wybierz nick', 'attr' => ['class' => 'form-control', 'placeholder' => 'nick']]);
+        $builder->add('email', 'text', ['label' => 'Podaj email', 'attr' => ['class' => 'form-control', 'placeholder' => 'jan.kowalski@gmail.com']]);
         $builder->add('password', 'repeated',
             [
                 'type' => 'password',
                 'invalid_message' => 'The password fields must match.',
-                'options' => array('attr' => array('class' => 'password-field')),
+                'options' => array('attr' => array('class' => 'password-field form-control')),
                 'required' => true,
-                'first_options' => array('label' => 'Password: '),
-                'second_options' => array('label' => 'Repeat Password: '),
+                'first_options' => array('label' => 'Hasło', 'attr' => ['placeholder' => 'hasło', 'class' => 'password-field form-control']),
+                'second_options' => array('label' => 'Powtórz hasło', 'attr' => ['placeholder' => 'powtórz hasło', 'class' => 'password-field form-control']),
             ]
         );
-
-        $builder->add('Register', 'submit');
     }
 
     public function getName()

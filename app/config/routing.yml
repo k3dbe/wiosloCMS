@@ -1,15 +1,3 @@
-user:
-    resource: "@UserBundle/Resources/config/routing.xml"
-    prefix:   /user/
-
-homepage:
-    resource: "@HomepageBundle/Resources/config/routing.xml"
-    prefix:   /
-
-photo:
-    resource: "@PhotoBundle/Resources/config/routing.xml"
-    prefix:   /photo/
-
 register:
     pattern:  /register
     defaults:
@@ -22,3 +10,15 @@ login:
 
 logout:
     pattern:  /logout
+
+user:
+    resource: "@UserBundle/Resources/config/routing.xml"
+    prefix:   /user/
+
+homepage:
+    resource: "@HomepageBundle/Resources/config/routing.xml"
+    prefix:   /
+
+photo:
+    resource: "@PhotoBundle/Resources/config/routing.xml"
+    prefix:   /photo/

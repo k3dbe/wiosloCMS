@@ -12,7 +12,8 @@ class Photo extends BasePhoto
 
         if (!$rating instanceof Rating) {
             $rating = new Rating();
-            $rating->setValue(0);
+            $rating->setPlus(0);
+            $rating->setMinus(0);
             parent::setRating($rating);
         }
 

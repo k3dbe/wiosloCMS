@@ -10,6 +10,7 @@ use \Propel;
 use \PropelException;
 use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\PhotoCommentPeer;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
 use wiosloCMS\PhotoBundle\Model\RatingPeer;
 use wiosloCMS\PhotoBundle\Model\map\PhotoTableMap;
@@ -395,6 +396,9 @@ abstract class BasePhotoPeer
         // Invalidate objects in RatingPeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
         RatingPeer::clearInstancePool();
+        // Invalidate objects in PhotoCommentPeer instance pool,
+        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
+        PhotoCommentPeer::clearInstancePool();
     }
 
     /**
@@ -972,6 +976,12 @@ abstract class BasePhotoPeer
 
             $criteria->add(RatingPeer::PHOTO_ID, $obj->getId());
             $affectedRows += RatingPeer::doDelete($criteria, $con);
+
+            // delete related PhotoComment objects
+            $criteria = new Criteria(PhotoCommentPeer::DATABASE_NAME);
+
+            $criteria->add(PhotoCommentPeer::PHOTO_ID, $obj->getId());
+            $affectedRows += PhotoCommentPeer::doDelete($criteria, $con);
         }
 
         return $affectedRows;

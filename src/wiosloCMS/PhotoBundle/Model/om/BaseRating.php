@@ -51,10 +51,16 @@ abstract class BaseRating extends BaseObject implements Persistent
     protected $photo_id;
 
     /**
-     * The value for the value field.
+     * The value for the plus field.
      * @var        int
      */
-    protected $value;
+    protected $plus;
+
+    /**
+     * The value for the minus field.
+     * @var        int
+     */
+    protected $minus;
 
     /**
      * @var        Photo
@@ -116,14 +122,25 @@ abstract class BaseRating extends BaseObject implements Persistent
     }
 
     /**
-     * Get the [value] column value.
+     * Get the [plus] column value.
      *
      * @return int
      */
-    public function getValue()
+    public function getPlus()
     {
 
-        return $this->value;
+        return $this->plus;
+    }
+
+    /**
+     * Get the [minus] column value.
+     *
+     * @return int
+     */
+    public function getMinus()
+    {
+
+        return $this->minus;
     }
 
     /**
@@ -152,25 +169,46 @@ abstract class BaseRating extends BaseObject implements Persistent
     } // setPhotoId()
 
     /**
-     * Set the value of [value] column.
+     * Set the value of [plus] column.
      *
      * @param  int $v new value
      * @return Rating The current object (for fluent API support)
      */
-    public function setValue($v)
+    public function setPlus($v)
     {
         if ($v !== null && is_numeric($v)) {
             $v = (int) $v;
         }
 
-        if ($this->value !== $v) {
-            $this->value = $v;
-            $this->modifiedColumns[] = RatingPeer::VALUE;
+        if ($this->plus !== $v) {
+            $this->plus = $v;
+            $this->modifiedColumns[] = RatingPeer::PLUS;
         }
 
 
         return $this;
-    } // setValue()
+    } // setPlus()
+
+    /**
+     * Set the value of [minus] column.
+     *
+     * @param  int $v new value
+     * @return Rating The current object (for fluent API support)
+     */
+    public function setMinus($v)
+    {
+        if ($v !== null && is_numeric($v)) {
+            $v = (int) $v;
+        }
+
+        if ($this->minus !== $v) {
+            $this->minus = $v;
+            $this->modifiedColumns[] = RatingPeer::MINUS;
+        }
+
+
+        return $this;
+    } // setMinus()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -205,7 +243,8 @@ abstract class BaseRating extends BaseObject implements Persistent
         try {
 
             $this->photo_id = ($row[$startcol + 0] !== null) ? (int) $row[$startcol + 0] : null;
-            $this->value = ($row[$startcol + 1] !== null) ? (int) $row[$startcol + 1] : null;
+            $this->plus = ($row[$startcol + 1] !== null) ? (int) $row[$startcol + 1] : null;
+            $this->minus = ($row[$startcol + 2] !== null) ? (int) $row[$startcol + 2] : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -215,7 +254,7 @@ abstract class BaseRating extends BaseObject implements Persistent
             }
             $this->postHydrate($row, $startcol, $rehydrate);
 
-            return $startcol + 2; // 2 = RatingPeer::NUM_HYDRATE_COLUMNS.
+            return $startcol + 3; // 3 = RatingPeer::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating Rating object", $e);
@@ -488,8 +527,11 @@ abstract class BaseRating extends BaseObject implements Persistent
         if ($this->isColumnModified(RatingPeer::PHOTO_ID)) {
             $modifiedColumns[':p' . $index++]  = '`photo_id`';
         }
-        if ($this->isColumnModified(RatingPeer::VALUE)) {
-            $modifiedColumns[':p' . $index++]  = '`value`';
+        if ($this->isColumnModified(RatingPeer::PLUS)) {
+            $modifiedColumns[':p' . $index++]  = '`plus`';
+        }
+        if ($this->isColumnModified(RatingPeer::MINUS)) {
+            $modifiedColumns[':p' . $index++]  = '`minus`';
         }
 
         $sql = sprintf(
@@ -505,8 +547,11 @@ abstract class BaseRating extends BaseObject implements Persistent
                     case '`photo_id`':
                         $stmt->bindValue($identifier, $this->photo_id, PDO::PARAM_INT);
                         break;
-                    case '`value`':
-                        $stmt->bindValue($identifier, $this->value, PDO::PARAM_INT);
+                    case '`plus`':
+                        $stmt->bindValue($identifier, $this->plus, PDO::PARAM_INT);
+                        break;
+                    case '`minus`':
+                        $stmt->bindValue($identifier, $this->minus, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -659,7 +704,10 @@ abstract class BaseRating extends BaseObject implements Persistent
                 return $this->getPhotoId();
                 break;
             case 1:
-                return $this->getValue();
+                return $this->getPlus();
+                break;
+            case 2:
+                return $this->getMinus();
                 break;
             default:
                 return null;
@@ -691,7 +739,8 @@ abstract class BaseRating extends BaseObject implements Persistent
         $keys = RatingPeer::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getPhotoId(),
-            $keys[1] => $this->getValue(),
+            $keys[1] => $this->getPlus(),
+            $keys[2] => $this->getMinus(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -743,7 +792,10 @@ abstract class BaseRating extends BaseObject implements Persistent
                 $this->setPhotoId($value);
                 break;
             case 1:
-                $this->setValue($value);
+                $this->setPlus($value);
+                break;
+            case 2:
+                $this->setMinus($value);
                 break;
         } // switch()
     }
@@ -770,7 +822,8 @@ abstract class BaseRating extends BaseObject implements Persistent
         $keys = RatingPeer::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) $this->setPhotoId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setValue($arr[$keys[1]]);
+        if (array_key_exists($keys[1], $arr)) $this->setPlus($arr[$keys[1]]);
+        if (array_key_exists($keys[2], $arr)) $this->setMinus($arr[$keys[2]]);
     }
 
     /**
@@ -783,7 +836,8 @@ abstract class BaseRating extends BaseObject implements Persistent
         $criteria = new Criteria(RatingPeer::DATABASE_NAME);
 
         if ($this->isColumnModified(RatingPeer::PHOTO_ID)) $criteria->add(RatingPeer::PHOTO_ID, $this->photo_id);
-        if ($this->isColumnModified(RatingPeer::VALUE)) $criteria->add(RatingPeer::VALUE, $this->value);
+        if ($this->isColumnModified(RatingPeer::PLUS)) $criteria->add(RatingPeer::PLUS, $this->plus);
+        if ($this->isColumnModified(RatingPeer::MINUS)) $criteria->add(RatingPeer::MINUS, $this->minus);
 
         return $criteria;
     }
@@ -847,7 +901,8 @@ abstract class BaseRating extends BaseObject implements Persistent
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setValue($this->getValue());
+        $copyObj->setPlus($this->getPlus());
+        $copyObj->setMinus($this->getMinus());
 
         if ($deepCopy && !$this->startCopy) {
             // important: temporarily setNew(false) because this affects the behavior of
@@ -1426,7 +1481,8 @@ abstract class BaseRating extends BaseObject implements Persistent
     public function clear()
     {
         $this->photo_id = null;
-        $this->value = null;
+        $this->plus = null;
+        $this->minus = null;
         $this->alreadyInSave = false;
         $this->alreadyInValidation = false;
         $this->alreadyInClearAllReferencesDeep = false;

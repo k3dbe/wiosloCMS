@@ -1,17 +1,51 @@
-{% extends "::base.html.twig" %}
-
 {% block body %}
-    <span>
-        {% for photo in photos %}
-            <hr>
-            <h1>{{ photo.getName() }}</h1>
-            <h3>{{ photo.getDescription() }}</h3>
-            <img src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
-            <div>
-                <a href="{{ path('rate', {'photoId' : photo.getId(), 'action' : 'minus'})  }}">MINUS</a>
-                {{ photo.getRating().getValue() }}
-                <a href="{{ path('rate', {'photoId' : photo.getId(), 'action' : 'plus'})  }}">PLUS</a>
+
+    <div class="container" style="text-align: center">
+        <center>
+            <div class="imgArea">
+                <h1 class="pOpisZdjecia">{{ photo.getName() }}</h1>
+
+                <div class="img">
+                    <img id="image" src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
+
+                    <div class="btn-panel">
+                        {% if hasPrevious %}
+                            <a href="{{ path('photo_previous', {'id' : photo.getId()}) }}">
+                                <button type="button" class="btn btn-default btn-lg imgBtnLeft">
+                                    <span class="glyphicon glyphicon-chevron-left"></span> Prev
+                                </button>
+                            </a>
+                        {% endif %}
+                        {% if hasNext %}
+                            <a href="{{ path('photo_next', {'id' : photo.getId()}) }}">
+                                <button type="button" class="btn btn-default btn-lg imgBtnRight">
+                                    Next <span class="glyphicon glyphicon-chevron-right"></span>
+                                </button>
+                            </a>
+                        {% endif %}
+                        <a href="{{ path('rate', {'photoId' : photo.getId(), 'action' : 'minus'}) }}">
+                            <button type="button" class="btn btn-default btn-lg imgBtnLeft  vote-down">
+                                <span class="glyphicon glyphicon-thumbs-down"></span> {{ photo.getRating().getMinus() }}
+                            </button>
+                        </a>
+                        <a href="{{ path('rate', {'photoId' : photo.getId(), 'action' : 'plus'}) }}">
+                            <button type="button" class="btn btn-default btn-lg imgBtnRight vote-up">
+                                <span class="glyphicon glyphicon-thumbs-up"></span> {{ photo.getRating().getPlus() }}
+                            </button>
+                        </a>
+                    </div>
+                </div>
+
+                <button type="coments" class="btn btn-info btn-lg" data-toggle="collapse"
+                        data-target=".onButtonPressShowComents1">
+                    Comentarze <span class="glyphicon glyphicon-chevron-down"></span>
+                </button>
+
+                <div id="comentys" class="collapse onButtonPressShowComents1">
+                    {{ render(controller('PhotoBundle:PhotoComment:add', {'photoId': photo.getId()})) }}
+                    {{ render(controller('PhotoBundle:PhotoComment:getList', {'photo': photo})) }}
+                </div>
             </div>
-        {% endfor %}
-    </span>
+        </center>
+    </div>
 {% endblock %}

@@ -1,0 +1,9 @@
+<form action="{{ path('comment_add', {'photoId': photoId}) }}" method="POST">
+    <fieldset>
+        {{ form_widget(form.text) }}
+        <button id="photoComment_Add"  type="submit" class="btn btn-default w100prc">
+            <span class="glyphicon glyphicon-send"></span>
+        </button>
+        {{ form_widget(form._token) }}
+    </fieldset>
+</form>

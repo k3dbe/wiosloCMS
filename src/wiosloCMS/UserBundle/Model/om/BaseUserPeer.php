@@ -9,6 +9,7 @@ use \PDOStatement;
 use \Propel;
 use \PropelException;
 use \PropelPDO;
+use wiosloCMS\PhotoBundle\Model\PhotoCommentPeer;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
 use wiosloCMS\PhotoBundle\Model\UserRatePeer;
 use wiosloCMS\UserBundle\Model\User;
@@ -33,13 +34,13 @@ abstract class BaseUserPeer
     const TM_CLASS = 'wiosloCMS\\UserBundle\\Model\\map\\UserTableMap';
 
     /** The total number of columns. */
-    const NUM_COLUMNS = 12;
+    const NUM_COLUMNS = 7;
 
     /** The number of lazy-loaded columns. */
     const NUM_LAZY_LOAD_COLUMNS = 0;
 
     /** The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS) */
-    const NUM_HYDRATE_COLUMNS = 12;
+    const NUM_HYDRATE_COLUMNS = 7;
 
     /** the column name for the id field */
     const ID = 'User.id';
@@ -50,23 +51,8 @@ abstract class BaseUserPeer
     /** the column name for the username field */
     const USERNAME = 'User.username';
 
-    /** the column name for the name field */
-    const NAME = 'User.name';
-
-    /** the column name for the surname field */
-    const SURNAME = 'User.surname';
-
     /** the column name for the email field */
     const EMAIL = 'User.email';
-
-    /** the column name for the city field */
-    const CITY = 'User.city';
-
-    /** the column name for the birthday field */
-    const BIRTHDAY = 'User.birthday';
-
-    /** the column name for the gender field */
-    const GENDER = 'User.gender';
 
     /** the column name for the password field */
     const PASSWORD = 'User.password';
@@ -96,12 +82,12 @@ abstract class BaseUserPeer
      * e.g. UserPeer::$fieldNames[UserPeer::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        BasePeer::TYPE_PHPNAME => array ('Id', 'Uri', 'Username', 'Name', 'Surname', 'Email', 'City', 'Birthday', 'Gender', 'Password', 'RegisteredAt', 'UpdatedAt', ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'uri', 'username', 'name', 'surname', 'email', 'city', 'birthday', 'gender', 'password', 'registeredAt', 'updatedAt', ),
-        BasePeer::TYPE_COLNAME => array (UserPeer::ID, UserPeer::URI, UserPeer::USERNAME, UserPeer::NAME, UserPeer::SURNAME, UserPeer::EMAIL, UserPeer::CITY, UserPeer::BIRTHDAY, UserPeer::GENDER, UserPeer::PASSWORD, UserPeer::REGISTERED_AT, UserPeer::UPDATED_AT, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'URI', 'USERNAME', 'NAME', 'SURNAME', 'EMAIL', 'CITY', 'BIRTHDAY', 'GENDER', 'PASSWORD', 'REGISTERED_AT', 'UPDATED_AT', ),
-        BasePeer::TYPE_FIELDNAME => array ('id', 'uri', 'username', 'name', 'surname', 'email', 'city', 'birthday', 'gender', 'password', 'registered_at', 'updated_at', ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        BasePeer::TYPE_PHPNAME => array ('Id', 'Uri', 'Username', 'Email', 'Password', 'RegisteredAt', 'UpdatedAt', ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'uri', 'username', 'email', 'password', 'registeredAt', 'updatedAt', ),
+        BasePeer::TYPE_COLNAME => array (UserPeer::ID, UserPeer::URI, UserPeer::USERNAME, UserPeer::EMAIL, UserPeer::PASSWORD, UserPeer::REGISTERED_AT, UserPeer::UPDATED_AT, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'URI', 'USERNAME', 'EMAIL', 'PASSWORD', 'REGISTERED_AT', 'UPDATED_AT', ),
+        BasePeer::TYPE_FIELDNAME => array ('id', 'uri', 'username', 'email', 'password', 'registered_at', 'updated_at', ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -111,12 +97,12 @@ abstract class BaseUserPeer
      * e.g. UserPeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Uri' => 1, 'Username' => 2, 'Name' => 3, 'Surname' => 4, 'Email' => 5, 'City' => 6, 'Birthday' => 7, 'Gender' => 8, 'Password' => 9, 'RegisteredAt' => 10, 'UpdatedAt' => 11, ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'uri' => 1, 'username' => 2, 'name' => 3, 'surname' => 4, 'email' => 5, 'city' => 6, 'birthday' => 7, 'gender' => 8, 'password' => 9, 'registeredAt' => 10, 'updatedAt' => 11, ),
-        BasePeer::TYPE_COLNAME => array (UserPeer::ID => 0, UserPeer::URI => 1, UserPeer::USERNAME => 2, UserPeer::NAME => 3, UserPeer::SURNAME => 4, UserPeer::EMAIL => 5, UserPeer::CITY => 6, UserPeer::BIRTHDAY => 7, UserPeer::GENDER => 8, UserPeer::PASSWORD => 9, UserPeer::REGISTERED_AT => 10, UserPeer::UPDATED_AT => 11, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'URI' => 1, 'USERNAME' => 2, 'NAME' => 3, 'SURNAME' => 4, 'EMAIL' => 5, 'CITY' => 6, 'BIRTHDAY' => 7, 'GENDER' => 8, 'PASSWORD' => 9, 'REGISTERED_AT' => 10, 'UPDATED_AT' => 11, ),
-        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'uri' => 1, 'username' => 2, 'name' => 3, 'surname' => 4, 'email' => 5, 'city' => 6, 'birthday' => 7, 'gender' => 8, 'password' => 9, 'registered_at' => 10, 'updated_at' => 11, ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, )
+        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Uri' => 1, 'Username' => 2, 'Email' => 3, 'Password' => 4, 'RegisteredAt' => 5, 'UpdatedAt' => 6, ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'uri' => 1, 'username' => 2, 'email' => 3, 'password' => 4, 'registeredAt' => 5, 'updatedAt' => 6, ),
+        BasePeer::TYPE_COLNAME => array (UserPeer::ID => 0, UserPeer::URI => 1, UserPeer::USERNAME => 2, UserPeer::EMAIL => 3, UserPeer::PASSWORD => 4, UserPeer::REGISTERED_AT => 5, UserPeer::UPDATED_AT => 6, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'URI' => 1, 'USERNAME' => 2, 'EMAIL' => 3, 'PASSWORD' => 4, 'REGISTERED_AT' => 5, 'UPDATED_AT' => 6, ),
+        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'uri' => 1, 'username' => 2, 'email' => 3, 'password' => 4, 'registered_at' => 5, 'updated_at' => 6, ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
     );
 
     /**
@@ -193,12 +179,7 @@ abstract class BaseUserPeer
             $criteria->addSelectColumn(UserPeer::ID);
             $criteria->addSelectColumn(UserPeer::URI);
             $criteria->addSelectColumn(UserPeer::USERNAME);
-            $criteria->addSelectColumn(UserPeer::NAME);
-            $criteria->addSelectColumn(UserPeer::SURNAME);
             $criteria->addSelectColumn(UserPeer::EMAIL);
-            $criteria->addSelectColumn(UserPeer::CITY);
-            $criteria->addSelectColumn(UserPeer::BIRTHDAY);
-            $criteria->addSelectColumn(UserPeer::GENDER);
             $criteria->addSelectColumn(UserPeer::PASSWORD);
             $criteria->addSelectColumn(UserPeer::REGISTERED_AT);
             $criteria->addSelectColumn(UserPeer::UPDATED_AT);
@@ -206,12 +187,7 @@ abstract class BaseUserPeer
             $criteria->addSelectColumn($alias . '.id');
             $criteria->addSelectColumn($alias . '.uri');
             $criteria->addSelectColumn($alias . '.username');
-            $criteria->addSelectColumn($alias . '.name');
-            $criteria->addSelectColumn($alias . '.surname');
             $criteria->addSelectColumn($alias . '.email');
-            $criteria->addSelectColumn($alias . '.city');
-            $criteria->addSelectColumn($alias . '.birthday');
-            $criteria->addSelectColumn($alias . '.gender');
             $criteria->addSelectColumn($alias . '.password');
             $criteria->addSelectColumn($alias . '.registered_at');
             $criteria->addSelectColumn($alias . '.updated_at');
@@ -422,6 +398,9 @@ abstract class BaseUserPeer
         // Invalidate objects in PhotoPeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
         PhotoPeer::clearInstancePool();
+        // Invalidate objects in PhotoCommentPeer instance pool,
+        // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
+        PhotoCommentPeer::clearInstancePool();
         // Invalidate objects in UserRatePeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
         UserRatePeer::clearInstancePool();
@@ -770,6 +749,12 @@ abstract class BaseUserPeer
 
             $criteria->add(PhotoPeer::OWNER_ID, $obj->getId());
             $affectedRows += PhotoPeer::doDelete($criteria, $con);
+
+            // delete related PhotoComment objects
+            $criteria = new Criteria(PhotoCommentPeer::DATABASE_NAME);
+
+            $criteria->add(PhotoCommentPeer::USER_ID, $obj->getId());
+            $affectedRows += PhotoCommentPeer::doDelete($criteria, $con);
 
             // delete related UserRate objects
             $criteria = new Criteria(UserRatePeer::DATABASE_NAME);

@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use wiosloCMS\PhotoBundle\Form\Type\PhotoType;
 use wiosloCMS\PhotoBundle\Model\Photo;
+use wiosloCMS\PhotoBundle\Model\PhotoComment;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 
 class PhotoController extends Controller
@@ -31,12 +32,36 @@ class PhotoController extends Controller
         return $this->render('PhotoBundle::add.html.twig', ['form' => $photoForm->createView()]);
     }
 
-    public function showAction()
+    public function showAction(Photo $photo = null)
     {
-        $photos = PhotoQuery::create()
-            ->orderByCreatedAt(\Criteria::DESC)
-            ->find();
+        if (!$photo instanceof Photo) {
+            $photo = PhotoQuery::create()->orderById(\Criteria::DESC)->limit(1)->findOne();
+        }
 
-        return $this->render('PhotoBundle::show.html.twig', ['photos' => $photos]);
+        $hasNext = PhotoQuery::create()->filterById($photo->getId(), \Criteria::LESS_THAN)->exists();
+        $hasPrevious = PhotoQuery::create()->filterById($photo->getId(), \Criteria::GREATER_THAN)->exists();
+
+        return $this->render('PhotoBundle::show.html.twig', ['photo' => $photo, 'hasNext' => $hasNext, 'hasPrevious' => $hasPrevious]);
+    }
+
+    public function nextAction(Photo $photo)
+    {
+        $nextPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::LESS_THAN)->orderById(\Criteria::DESC)->limit(1)->findOne();
+
+        return $this->redirect($this->generateUrl('homepage_photo', ['id' => $nextPhoto->getId()]));
+    }
+
+    public function previousAction(Photo $photo)
+    {
+        $previousPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::GREATER_THAN)->orderById(\Criteria::DESC)->limit(1)->findOne();
+
+        return $this->redirect($this->generateUrl('homepage_photo', ['id' => $previousPhoto->getId()]));
+    }
+
+    public function randomAction()
+    {
+        $previousPhoto = PhotoQuery::create()->addAscendingOrderByColumn('rand()')->findOne();
+
+        return $this->redirect($this->generateUrl('homepage_photo', ['id' => $previousPhoto->getId()]));
     }
 }
