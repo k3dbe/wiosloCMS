@@ -2,7 +2,13 @@
 
     <div class="container" style="text-align: center">
         <center>
+
             <div class="imgArea">
+
+                {% for flashMessage in app.session.flashbag.get('error') %}
+                    {{ flashMessage }}
+                {% endfor %}
+
                 <h1 class="pOpisZdjecia">{{ photo.getName() }}</h1>
 
                 <div class="img">

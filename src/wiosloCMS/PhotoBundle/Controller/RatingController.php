@@ -3,6 +3,7 @@
 namespace wiosloCMS\PhotoBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 use wiosloCMS\PhotoBundle\Model\UserRate;
@@ -17,7 +18,10 @@ class RatingController extends Controller
         }
 
         if (UserRateQuery::create()->filterByUser($this->getUser())->filterByPhotoId($photoId)->exists()) {
-            throw new \RuntimeException('User already voted for this photo');
+            /** @var Session $session */
+            $session = $this->get('session');
+            $session->getFlashBag()->add('error',"You already voted for this photo!");
+            return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photoId]));
         }
 
         $photo = PhotoQuery::create()->findPk($photoId);
@@ -38,6 +42,6 @@ class RatingController extends Controller
         $userRate->setPhotoId($photoId);
         $userRate->save();
 
-        return $this->render('HomepageBundle:Body:show.html.twig', ['photoId' => $photoId, 'action' => 'concrete']);
+        return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photoId]));
     }
 }
