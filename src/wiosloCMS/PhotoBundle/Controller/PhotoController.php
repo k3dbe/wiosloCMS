@@ -53,7 +53,7 @@ class PhotoController extends Controller
 
     public function previousAction(Photo $photo)
     {
-        $previousPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::GREATER_THAN)->orderById(\Criteria::DESC)->limit(1)->findOne();
+        $previousPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::GREATER_THAN)->orderById()->limit(1)->findOne();
 
         return $this->redirect($this->generateUrl('homepage_photo', ['id' => $previousPhoto->getId()]));
     }
