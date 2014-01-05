@@ -5,7 +5,7 @@
     {% if id is defined and id %}
         {{ render(controller('PhotoBundle:Photo:show', {'id': id})) }}
     {% else %}
-        {{ render(controller('PhotoBundle:Photo:show', {'id': id})) }}
+        {{ render(controller('PhotoBundle:Photo:show')) }}
     {% endif %}
 
 {% endblock %}
