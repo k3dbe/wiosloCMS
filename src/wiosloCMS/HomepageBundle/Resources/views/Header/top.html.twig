@@ -31,23 +31,13 @@
 
             <div class="collapse navbar-collapse navHeadercollapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <div class="row search visible-xs">
-                            <div class="input-group pull r">
-                                <input type="text" class="form-control">
-                    <span class="input-group-btn">
-                      <button class="btn btn-default" type="button">Go!</button>
-                    </span>
-                            </div>
-                            <!-- /input-group -->
-                        </div>
-                        <!-- end .row -->
-                    </li>
-                    <li class="active"><a href="{{ path('homepage') }}"><b class="glyphicon glyphicon-home"> </b> Wiosło</a>
+                    <li class="active"><a href="{{ path('homepage') }}"><b class="glyphicon glyphicon-home"></b> Wiosło</a>
                     </li>
                     <li><a href="{{ path('photo_random') }}"><b class="glyphicon glyphicon-random"> </b> Random</a></li>
                     <li><a href="{{ path('photo_add') }}"><b class="glyphicon glyphicon-upload"> </b> Wrzuć!</a></li>
-
+                    {% if is_granted('ROLE_USER') and app.user.hasRole('admin') %}
+                        DUPA!
+                    {% endif %}
                 </ul>
             </div>
         </div>

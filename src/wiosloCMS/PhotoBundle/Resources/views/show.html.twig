@@ -12,7 +12,7 @@
                 <h1 class="pOpisZdjecia">{{ photo.getName() }}</h1>
 
                 <div class="img">
-                    <img id="image" src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
+                    <img class="img-responsive" src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
 
                     <div class="btn-panel">
                         {% if hasPrevious %}

@@ -38,6 +38,13 @@ class User extends BaseUser implements UserInterface
         return $this->roles;
     }
 
+    public function hasRole($role)
+    {
+        $roles = $this->getRoles();
+
+        return in_array($role, $roles);
+    }
+
     public function eraseCredentials()
     {
         return;
