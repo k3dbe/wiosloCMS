@@ -4,6 +4,7 @@ namespace wiosloCMS\PhotoBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use wiosloCMS\PhotoBundle\Form\Type\PhotoType;
 use wiosloCMS\PhotoBundle\Model\Photo;
@@ -46,22 +47,36 @@ class PhotoController extends Controller
 
     public function nextAction(Photo $photo)
     {
-        $nextPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::LESS_THAN)->orderById(\Criteria::DESC)->limit(1)->findOne();
+        $nextPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::LESS_THAN)->orderById(\Criteria::DESC)->findOne();
 
         return $this->redirect($this->generateUrl('homepage_photo', ['id' => $nextPhoto->getId()]));
     }
 
     public function previousAction(Photo $photo)
     {
-        $previousPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::GREATER_THAN)->orderById()->limit(1)->findOne();
+        $previousPhoto = PhotoQuery::create()->filterById($photo->getId(), \Criteria::GREATER_THAN)->orderById()->findOne();
 
         return $this->redirect($this->generateUrl('homepage_photo', ['id' => $previousPhoto->getId()]));
     }
 
     public function randomAction()
     {
-        $previousPhoto = PhotoQuery::create()->addAscendingOrderByColumn('rand()')->findOne();
+        $photo = PhotoQuery::create()->addAscendingOrderByColumn('rand()')->findOne();
 
-        return $this->redirect($this->generateUrl('homepage_photo', ['id' => $previousPhoto->getId()]));
+        return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photo->getId()]));
+    }
+
+    public function searchAction()
+    {
+        $phrase = $this->getRequest()->get('phrase');
+        $photo = PhotoQuery::create()->findOneByName('%' . $phrase . '%');
+
+        if (!$photo instanceof Photo) {
+            /** @var Session $session */
+            $session = $this->get('session');
+            $session->getFlashBag()->add('error',"Image not found");
+        }
+
+        return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photo->getId()]));
     }
 }

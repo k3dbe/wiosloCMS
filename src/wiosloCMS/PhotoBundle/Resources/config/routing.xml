@@ -20,6 +20,10 @@
 		<default key="_controller">PhotoBundle:Photo:random</default>
 	</route>
 
+	<route id="photo_search" pattern="search" methods="GET">
+		<default key="_controller">PhotoBundle:Photo:search</default>
+	</route>
+
 	<route id="photo_show" pattern="{id}" methods="GET">
 		<default key="_controller">PhotoBundle:Photo:show</default>
 	</route>
