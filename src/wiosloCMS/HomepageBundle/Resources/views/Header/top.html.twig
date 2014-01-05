@@ -5,13 +5,13 @@
                 <img class="img-responsive logo" src="{{ asset('/wiosloCMS/web/img/logo.png') }}" alt="logo">
             </a>
 
-            <div class="row search">
-                <div class="input-group pull r">
-            <span class="input-group-btn">
-              <button class="btn btn-default" type="button">Go!</button>
-            </span>
-                    <input type="text" class="form-control">
-                </div>
+            <div class="row search input-group pull r">
+                <form method="GET" action="{{ path('photo_search') }}">
+                    <fieldset>
+                        <input name="phrase" type="text" class="form-control">
+                        <button class="btn btn-default" type="submit">Go!</button>
+                    </fieldset>
+                </form>
             </div>
         </div>
     </div>
@@ -21,7 +21,7 @@
                 {% if is_granted('ROLE_USER') %}
                     Witaj {{ app.user.getUsername() }} - <a href="{{ path('logout') }}">Wyloguj się!</a>
                 {% else %}
-                    Witaj bezimienny <a href="{{ path('login') }}">Znamy się2!</a> lub <a href="{{ path('register') }}">Zapoznajmy
+                    Witaj bezimienny <a href="{{ path('login') }}">Znamy się!</a> lub <a href="{{ path('register') }}">Zapoznajmy
                     się</a>
                 {% endif %}
             </div>
@@ -32,12 +32,16 @@
             <div class="collapse navbar-collapse navHeadercollapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <form method="GET" action="{{ path('photo_search') }}">
-                            <fieldset>
-                                <input name="phrase" type="text" class="form-control">
-                                <button class="btn btn-default" type="submit">Go!</button>
-                            </fieldset>
-                        </form>
+                        <div class="row search visible-xs">
+                            <div class="input-group pull r">
+                                <input type="text" class="form-control">
+                    <span class="input-group-btn">
+                      <button class="btn btn-default" type="button">Go!</button>
+                    </span>
+                            </div>
+                            <!-- /input-group -->
+                        </div>
+                        <!-- end .row -->
                     </li>
                     <li class="active"><a href="{{ path('homepage') }}"><b class="glyphicon glyphicon-home"> </b> Wiosło</a>
                     </li>

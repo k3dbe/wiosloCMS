@@ -75,6 +75,7 @@ class PhotoController extends Controller
             /** @var Session $session */
             $session = $this->get('session');
             $session->getFlashBag()->add('error',"Image not found");
+            return $this->redirect($this->generateUrl('homepage'));
         }
 
         return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photo->getId()]));
