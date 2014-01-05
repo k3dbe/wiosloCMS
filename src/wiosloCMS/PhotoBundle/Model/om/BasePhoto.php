@@ -65,12 +65,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
     protected $name;
 
     /**
-     * The value for the description field.
-     * @var        string
-     */
-    protected $description;
-
-    /**
      * The value for the owner_id field.
      * @var        int
      */
@@ -161,17 +155,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
     {
 
         return $this->name;
-    }
-
-    /**
-     * Get the [description] column value.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-
-        return $this->description;
     }
 
     /**
@@ -329,27 +312,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
     } // setName()
 
     /**
-     * Set the value of [description] column.
-     *
-     * @param  string $v new value
-     * @return Photo The current object (for fluent API support)
-     */
-    public function setDescription($v)
-    {
-        if ($v !== null && is_numeric($v)) {
-            $v = (string) $v;
-        }
-
-        if ($this->description !== $v) {
-            $this->description = $v;
-            $this->modifiedColumns[] = PhotoPeer::DESCRIPTION;
-        }
-
-
-        return $this;
-    } // setDescription()
-
-    /**
      * Set the value of [owner_id] column.
      *
      * @param  int $v new value
@@ -455,10 +417,9 @@ abstract class BasePhoto extends BaseObject implements Persistent
             $this->id = ($row[$startcol + 0] !== null) ? (int) $row[$startcol + 0] : null;
             $this->uri = ($row[$startcol + 1] !== null) ? (string) $row[$startcol + 1] : null;
             $this->name = ($row[$startcol + 2] !== null) ? (string) $row[$startcol + 2] : null;
-            $this->description = ($row[$startcol + 3] !== null) ? (string) $row[$startcol + 3] : null;
-            $this->owner_id = ($row[$startcol + 4] !== null) ? (int) $row[$startcol + 4] : null;
-            $this->created_at = ($row[$startcol + 5] !== null) ? (string) $row[$startcol + 5] : null;
-            $this->updated_at = ($row[$startcol + 6] !== null) ? (string) $row[$startcol + 6] : null;
+            $this->owner_id = ($row[$startcol + 3] !== null) ? (int) $row[$startcol + 3] : null;
+            $this->created_at = ($row[$startcol + 4] !== null) ? (string) $row[$startcol + 4] : null;
+            $this->updated_at = ($row[$startcol + 5] !== null) ? (string) $row[$startcol + 5] : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -468,7 +429,7 @@ abstract class BasePhoto extends BaseObject implements Persistent
             }
             $this->postHydrate($row, $startcol, $rehydrate);
 
-            return $startcol + 7; // 7 = PhotoPeer::NUM_HYDRATE_COLUMNS.
+            return $startcol + 6; // 6 = PhotoPeer::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating Photo object", $e);
@@ -743,9 +704,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
         if ($this->isColumnModified(PhotoPeer::NAME)) {
             $modifiedColumns[':p' . $index++]  = '`name`';
         }
-        if ($this->isColumnModified(PhotoPeer::DESCRIPTION)) {
-            $modifiedColumns[':p' . $index++]  = '`description`';
-        }
         if ($this->isColumnModified(PhotoPeer::OWNER_ID)) {
             $modifiedColumns[':p' . $index++]  = '`owner_id`';
         }
@@ -774,9 +732,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
                         break;
                     case '`name`':
                         $stmt->bindValue($identifier, $this->name, PDO::PARAM_STR);
-                        break;
-                    case '`description`':
-                        $stmt->bindValue($identifier, $this->description, PDO::PARAM_STR);
                         break;
                     case '`owner_id`':
                         $stmt->bindValue($identifier, $this->owner_id, PDO::PARAM_INT);
@@ -957,15 +912,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
                 return $this->getName();
                 break;
             case 3:
-                return $this->getDescription();
-                break;
-            case 4:
                 return $this->getOwnerId();
                 break;
-            case 5:
+            case 4:
                 return $this->getCreatedAt();
                 break;
-            case 6:
+            case 5:
                 return $this->getUpdatedAt();
                 break;
             default:
@@ -1000,10 +952,9 @@ abstract class BasePhoto extends BaseObject implements Persistent
             $keys[0] => $this->getId(),
             $keys[1] => $this->getUri(),
             $keys[2] => $this->getName(),
-            $keys[3] => $this->getDescription(),
-            $keys[4] => $this->getOwnerId(),
-            $keys[5] => $this->getCreatedAt(),
-            $keys[6] => $this->getUpdatedAt(),
+            $keys[3] => $this->getOwnerId(),
+            $keys[4] => $this->getCreatedAt(),
+            $keys[5] => $this->getUpdatedAt(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -1064,15 +1015,12 @@ abstract class BasePhoto extends BaseObject implements Persistent
                 $this->setName($value);
                 break;
             case 3:
-                $this->setDescription($value);
-                break;
-            case 4:
                 $this->setOwnerId($value);
                 break;
-            case 5:
+            case 4:
                 $this->setCreatedAt($value);
                 break;
-            case 6:
+            case 5:
                 $this->setUpdatedAt($value);
                 break;
         } // switch()
@@ -1102,10 +1050,9 @@ abstract class BasePhoto extends BaseObject implements Persistent
         if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setUri($arr[$keys[1]]);
         if (array_key_exists($keys[2], $arr)) $this->setName($arr[$keys[2]]);
-        if (array_key_exists($keys[3], $arr)) $this->setDescription($arr[$keys[3]]);
-        if (array_key_exists($keys[4], $arr)) $this->setOwnerId($arr[$keys[4]]);
-        if (array_key_exists($keys[5], $arr)) $this->setCreatedAt($arr[$keys[5]]);
-        if (array_key_exists($keys[6], $arr)) $this->setUpdatedAt($arr[$keys[6]]);
+        if (array_key_exists($keys[3], $arr)) $this->setOwnerId($arr[$keys[3]]);
+        if (array_key_exists($keys[4], $arr)) $this->setCreatedAt($arr[$keys[4]]);
+        if (array_key_exists($keys[5], $arr)) $this->setUpdatedAt($arr[$keys[5]]);
     }
 
     /**
@@ -1120,7 +1067,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
         if ($this->isColumnModified(PhotoPeer::ID)) $criteria->add(PhotoPeer::ID, $this->id);
         if ($this->isColumnModified(PhotoPeer::URI)) $criteria->add(PhotoPeer::URI, $this->uri);
         if ($this->isColumnModified(PhotoPeer::NAME)) $criteria->add(PhotoPeer::NAME, $this->name);
-        if ($this->isColumnModified(PhotoPeer::DESCRIPTION)) $criteria->add(PhotoPeer::DESCRIPTION, $this->description);
         if ($this->isColumnModified(PhotoPeer::OWNER_ID)) $criteria->add(PhotoPeer::OWNER_ID, $this->owner_id);
         if ($this->isColumnModified(PhotoPeer::CREATED_AT)) $criteria->add(PhotoPeer::CREATED_AT, $this->created_at);
         if ($this->isColumnModified(PhotoPeer::UPDATED_AT)) $criteria->add(PhotoPeer::UPDATED_AT, $this->updated_at);
@@ -1189,7 +1135,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
     {
         $copyObj->setUri($this->getUri());
         $copyObj->setName($this->getName());
-        $copyObj->setDescription($this->getDescription());
         $copyObj->setOwnerId($this->getOwnerId());
         $copyObj->setCreatedAt($this->getCreatedAt());
         $copyObj->setUpdatedAt($this->getUpdatedAt());
@@ -1624,7 +1569,6 @@ abstract class BasePhoto extends BaseObject implements Persistent
         $this->id = null;
         $this->uri = null;
         $this->name = null;
-        $this->description = null;
         $this->owner_id = null;
         $this->created_at = null;
         $this->updated_at = null;

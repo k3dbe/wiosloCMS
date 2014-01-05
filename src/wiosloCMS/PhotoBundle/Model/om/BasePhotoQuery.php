@@ -23,7 +23,6 @@ use wiosloCMS\UserBundle\Model\User;
  * @method PhotoQuery orderById($order = Criteria::ASC) Order by the id column
  * @method PhotoQuery orderByUri($order = Criteria::ASC) Order by the uri column
  * @method PhotoQuery orderByName($order = Criteria::ASC) Order by the name column
- * @method PhotoQuery orderByDescription($order = Criteria::ASC) Order by the description column
  * @method PhotoQuery orderByOwnerId($order = Criteria::ASC) Order by the owner_id column
  * @method PhotoQuery orderByCreatedAt($order = Criteria::ASC) Order by the created_at column
  * @method PhotoQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
@@ -31,7 +30,6 @@ use wiosloCMS\UserBundle\Model\User;
  * @method PhotoQuery groupById() Group by the id column
  * @method PhotoQuery groupByUri() Group by the uri column
  * @method PhotoQuery groupByName() Group by the name column
- * @method PhotoQuery groupByDescription() Group by the description column
  * @method PhotoQuery groupByOwnerId() Group by the owner_id column
  * @method PhotoQuery groupByCreatedAt() Group by the created_at column
  * @method PhotoQuery groupByUpdatedAt() Group by the updated_at column
@@ -57,7 +55,6 @@ use wiosloCMS\UserBundle\Model\User;
  *
  * @method Photo findOneByUri(string $uri) Return the first Photo filtered by the uri column
  * @method Photo findOneByName(string $name) Return the first Photo filtered by the name column
- * @method Photo findOneByDescription(string $description) Return the first Photo filtered by the description column
  * @method Photo findOneByOwnerId(int $owner_id) Return the first Photo filtered by the owner_id column
  * @method Photo findOneByCreatedAt(string $created_at) Return the first Photo filtered by the created_at column
  * @method Photo findOneByUpdatedAt(string $updated_at) Return the first Photo filtered by the updated_at column
@@ -65,7 +62,6 @@ use wiosloCMS\UserBundle\Model\User;
  * @method array findById(int $id) Return Photo objects filtered by the id column
  * @method array findByUri(string $uri) Return Photo objects filtered by the uri column
  * @method array findByName(string $name) Return Photo objects filtered by the name column
- * @method array findByDescription(string $description) Return Photo objects filtered by the description column
  * @method array findByOwnerId(int $owner_id) Return Photo objects filtered by the owner_id column
  * @method array findByCreatedAt(string $created_at) Return Photo objects filtered by the created_at column
  * @method array findByUpdatedAt(string $updated_at) Return Photo objects filtered by the updated_at column
@@ -174,7 +170,7 @@ abstract class BasePhotoQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT `id`, `uri`, `name`, `description`, `owner_id`, `created_at`, `updated_at` FROM `Photo` WHERE `id` = :p0';
+        $sql = 'SELECT `id`, `uri`, `name`, `owner_id`, `created_at`, `updated_at` FROM `Photo` WHERE `id` = :p0';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
@@ -361,35 +357,6 @@ abstract class BasePhotoQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(PhotoPeer::NAME, $name, $comparison);
-    }
-
-    /**
-     * Filter the query on the description column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByDescription('fooValue');   // WHERE description = 'fooValue'
-     * $query->filterByDescription('%fooValue%'); // WHERE description LIKE '%fooValue%'
-     * </code>
-     *
-     * @param     string $description The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return PhotoQuery The current query, for fluid interface
-     */
-    public function filterByDescription($description = null, $comparison = null)
-    {
-        if (null === $comparison) {
-            if (is_array($description)) {
-                $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $description)) {
-                $description = str_replace('*', '%', $description);
-                $comparison = Criteria::LIKE;
-            }
-        }
-
-        return $this->addUsingAlias(PhotoPeer::DESCRIPTION, $description, $comparison);
     }
 
     /**

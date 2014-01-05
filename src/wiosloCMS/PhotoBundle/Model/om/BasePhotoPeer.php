@@ -32,13 +32,13 @@ abstract class BasePhotoPeer
     const TM_CLASS = 'wiosloCMS\\PhotoBundle\\Model\\map\\PhotoTableMap';
 
     /** The total number of columns. */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 6;
 
     /** The number of lazy-loaded columns. */
     const NUM_LAZY_LOAD_COLUMNS = 0;
 
     /** The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS) */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 6;
 
     /** the column name for the id field */
     const ID = 'Photo.id';
@@ -48,9 +48,6 @@ abstract class BasePhotoPeer
 
     /** the column name for the name field */
     const NAME = 'Photo.name';
-
-    /** the column name for the description field */
-    const DESCRIPTION = 'Photo.description';
 
     /** the column name for the owner_id field */
     const OWNER_ID = 'Photo.owner_id';
@@ -80,12 +77,12 @@ abstract class BasePhotoPeer
      * e.g. PhotoPeer::$fieldNames[PhotoPeer::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        BasePeer::TYPE_PHPNAME => array ('Id', 'Uri', 'Name', 'Description', 'OwnerId', 'CreatedAt', 'UpdatedAt', ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'uri', 'name', 'description', 'ownerId', 'createdAt', 'updatedAt', ),
-        BasePeer::TYPE_COLNAME => array (PhotoPeer::ID, PhotoPeer::URI, PhotoPeer::NAME, PhotoPeer::DESCRIPTION, PhotoPeer::OWNER_ID, PhotoPeer::CREATED_AT, PhotoPeer::UPDATED_AT, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'URI', 'NAME', 'DESCRIPTION', 'OWNER_ID', 'CREATED_AT', 'UPDATED_AT', ),
-        BasePeer::TYPE_FIELDNAME => array ('id', 'uri', 'name', 'description', 'owner_id', 'created_at', 'updated_at', ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
+        BasePeer::TYPE_PHPNAME => array ('Id', 'Uri', 'Name', 'OwnerId', 'CreatedAt', 'UpdatedAt', ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('id', 'uri', 'name', 'ownerId', 'createdAt', 'updatedAt', ),
+        BasePeer::TYPE_COLNAME => array (PhotoPeer::ID, PhotoPeer::URI, PhotoPeer::NAME, PhotoPeer::OWNER_ID, PhotoPeer::CREATED_AT, PhotoPeer::UPDATED_AT, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('ID', 'URI', 'NAME', 'OWNER_ID', 'CREATED_AT', 'UPDATED_AT', ),
+        BasePeer::TYPE_FIELDNAME => array ('id', 'uri', 'name', 'owner_id', 'created_at', 'updated_at', ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -95,12 +92,12 @@ abstract class BasePhotoPeer
      * e.g. PhotoPeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Uri' => 1, 'Name' => 2, 'Description' => 3, 'OwnerId' => 4, 'CreatedAt' => 5, 'UpdatedAt' => 6, ),
-        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'uri' => 1, 'name' => 2, 'description' => 3, 'ownerId' => 4, 'createdAt' => 5, 'updatedAt' => 6, ),
-        BasePeer::TYPE_COLNAME => array (PhotoPeer::ID => 0, PhotoPeer::URI => 1, PhotoPeer::NAME => 2, PhotoPeer::DESCRIPTION => 3, PhotoPeer::OWNER_ID => 4, PhotoPeer::CREATED_AT => 5, PhotoPeer::UPDATED_AT => 6, ),
-        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'URI' => 1, 'NAME' => 2, 'DESCRIPTION' => 3, 'OWNER_ID' => 4, 'CREATED_AT' => 5, 'UPDATED_AT' => 6, ),
-        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'uri' => 1, 'name' => 2, 'description' => 3, 'owner_id' => 4, 'created_at' => 5, 'updated_at' => 6, ),
-        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, 6, )
+        BasePeer::TYPE_PHPNAME => array ('Id' => 0, 'Uri' => 1, 'Name' => 2, 'OwnerId' => 3, 'CreatedAt' => 4, 'UpdatedAt' => 5, ),
+        BasePeer::TYPE_STUDLYPHPNAME => array ('id' => 0, 'uri' => 1, 'name' => 2, 'ownerId' => 3, 'createdAt' => 4, 'updatedAt' => 5, ),
+        BasePeer::TYPE_COLNAME => array (PhotoPeer::ID => 0, PhotoPeer::URI => 1, PhotoPeer::NAME => 2, PhotoPeer::OWNER_ID => 3, PhotoPeer::CREATED_AT => 4, PhotoPeer::UPDATED_AT => 5, ),
+        BasePeer::TYPE_RAW_COLNAME => array ('ID' => 0, 'URI' => 1, 'NAME' => 2, 'OWNER_ID' => 3, 'CREATED_AT' => 4, 'UPDATED_AT' => 5, ),
+        BasePeer::TYPE_FIELDNAME => array ('id' => 0, 'uri' => 1, 'name' => 2, 'owner_id' => 3, 'created_at' => 4, 'updated_at' => 5, ),
+        BasePeer::TYPE_NUM => array (0, 1, 2, 3, 4, 5, )
     );
 
     /**
@@ -177,7 +174,6 @@ abstract class BasePhotoPeer
             $criteria->addSelectColumn(PhotoPeer::ID);
             $criteria->addSelectColumn(PhotoPeer::URI);
             $criteria->addSelectColumn(PhotoPeer::NAME);
-            $criteria->addSelectColumn(PhotoPeer::DESCRIPTION);
             $criteria->addSelectColumn(PhotoPeer::OWNER_ID);
             $criteria->addSelectColumn(PhotoPeer::CREATED_AT);
             $criteria->addSelectColumn(PhotoPeer::UPDATED_AT);
@@ -185,7 +181,6 @@ abstract class BasePhotoPeer
             $criteria->addSelectColumn($alias . '.id');
             $criteria->addSelectColumn($alias . '.uri');
             $criteria->addSelectColumn($alias . '.name');
-            $criteria->addSelectColumn($alias . '.description');
             $criteria->addSelectColumn($alias . '.owner_id');
             $criteria->addSelectColumn($alias . '.created_at');
             $criteria->addSelectColumn($alias . '.updated_at');

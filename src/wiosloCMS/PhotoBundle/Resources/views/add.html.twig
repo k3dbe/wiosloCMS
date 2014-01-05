@@ -1,11 +1,17 @@
 {% extends "::base.html.twig" %}
 
 {% block body %}
-    <form method="POST">
-        <fieldset>
-
-            {{ form_widget(form) }}
-
-        </fieldset>
-    </form>
-{% endblock %}
+    <div class="container" style="text-align: center">
+        <center>
+            <div class="formArea">
+                <form method="POST">
+                    {{ form_widget(form) }}
+                    <br />
+                    <button type="submit" class="btn btn-default bc_blue">
+                        <span class="glyphicon c_black glyphicon-send"></span>
+                    </button>
+                </form>
+            </div>
+        </center>
+    </div>
+{% endblock  %}

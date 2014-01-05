@@ -45,7 +45,6 @@ class PhotoTableMap extends TableMap
         $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
         $this->addColumn('uri', 'Uri', 'VARCHAR', true, 250, null);
         $this->addColumn('name', 'Name', 'VARCHAR', true, 50, null);
-        $this->addColumn('description', 'Description', 'VARCHAR', false, 500, null);
         $this->addForeignKey('owner_id', 'OwnerId', 'INTEGER', 'User', 'id', true, null, null);
         $this->addColumn('created_at', 'CreatedAt', 'TIMESTAMP', true, null, null);
         $this->addColumn('updated_at', 'UpdatedAt', 'TIMESTAMP', true, null, null);

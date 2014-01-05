@@ -17,11 +17,8 @@ class PhotoType extends BaseAbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name', 'text', ['label' => 'Title: ', 'required' => true]);
-        $builder->add('description', 'textarea', ['label' => 'Description: ']);
-        $builder->add('uri', 'text', ['label' => 'URL: ']);
-
-        $builder->add('Upload', 'submit');
+        $builder->add('name', 'text', ['label' => 'Title: ', 'required' => true, 'attr' => ['class' => "form-control", 'placeholder' => "Tytuł zdjęcia"]]);
+        $builder->add('uri', 'text', ['label' => 'URL: ', 'attr' => ['class' => "form-control", 'placeholder' => "Ścieżka"]]);
     }
 
     public function getName()
