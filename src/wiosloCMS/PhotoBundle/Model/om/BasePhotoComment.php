@@ -489,6 +489,10 @@ abstract class BasePhotoComment extends BaseObject implements Persistent
             $ret = $this->preSave($con);
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
+                // timestampable behavior
+                if (!$this->isColumnModified(PhotoCommentPeer::CREATED_AT)) {
+                    $this->setCreatedAt(time());
+                }
             } else {
                 $ret = $ret && $this->preUpdate($con);
             }

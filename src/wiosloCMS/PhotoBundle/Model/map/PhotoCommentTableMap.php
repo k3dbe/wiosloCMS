@@ -59,4 +59,21 @@ class PhotoCommentTableMap extends TableMap
         $this->addRelation('Photo', 'wiosloCMS\\PhotoBundle\\Model\\Photo', RelationMap::MANY_TO_ONE, array('photo_id' => 'id', ), 'CASCADE', 'CASCADE');
     } // buildRelations()
 
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'timestampable' =>  array (
+  'create_column' => 'created_at',
+  'update_column' => 'updated_at',
+  'disable_updated_at' => 'true',
+),
+        );
+    } // getBehaviors()
+
 } // PhotoCommentTableMap

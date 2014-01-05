@@ -53,18 +53,26 @@
 		<column name="photo_id" phpName="PhotoId" type="INTEGER" required="true"/>
 		<column name="text" phpName="Text" type="VARCHAR" size="500" required="true"/>
 		<column name="created_at" phpName="CreatedAt" type="TIMESTAMP" required="true"/>
+
 		<foreign-key foreignTable="User" name="PhotoComment_User" onDelete="CASCADE" onUpdate="CASCADE">
 			<reference local="user_id" foreign="id"/>
 		</foreign-key>
 		<foreign-key foreignTable="Photo" name="PhotoComment_Photo" onDelete="CASCADE" onUpdate="CASCADE">
 			<reference local="photo_id" foreign="id"/>
 		</foreign-key>
+
 		<index name="user_id">
 			<index-column name="user_id"/>
 		</index>
 		<index name="photo_id">
 			<index-column name="photo_id"/>
 		</index>
+
+		<behavior name="timestampable">
+			<parameter name="create_column" value="created_at" />
+			<parameter name="disable_updated_at" value="true" />
+		</behavior>
+
 		<vendor type="mysql">
 			<parameter name="Engine" value="InnoDB"/>
 		</vendor>
