@@ -4,15 +4,7 @@
             <a href="{{ path('homepage') }}" class="navbar-brand pull l">
                 <img class="img-responsive logo" src="{{ asset('/wiosloCMS/web/img/logo.png') }}" alt="logo">
             </a>
-
-            <div class="row search input-group pull r">
-                <form method="GET" action="{{ path('photo_search') }}">
-                    <fieldset>
-                        <input name="phrase" type="text" class="form-control">
-                        <button class="btn btn-default" type="submit">Go!</button>
-                    </fieldset>
-                </form>
-            </div>
+            <div class="row search"> <form class="navbar-form navbar-left" role="search" method="GET" action="{{ path('photo_search') }}"> <div class="input-group pull r"> <span class="input-group-btn"> <button type="submit" class="btn btn-default" type="button">Go!</button> </span> <input type="text" class="form-control"> </div><!-- /input-group --> </form> </div> <!-- end .row -->
         </div>
     </div>
     <div class="navbar navbar-inverse navbar-static-top">
@@ -35,8 +27,18 @@
                     </li>
                     <li><a href="{{ path('photo_random') }}"><b class="glyphicon glyphicon-random"> </b> Random</a></li>
                     <li><a href="{{ path('photo_add') }}"><b class="glyphicon glyphicon-upload"> </b> Wrzuć!</a></li>
-                    {% if is_granted('ROLE_USER') and app.user.hasRole('admin') %}
-                        DUPA!
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                <b class="glyphicon glyphicon-chevron-down"></b>
+                                Kradniemy
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ path('crawler_kwejk') }}"><b class="glyphicon glyphicon-upload"> </b>
+                                        Kwejk</a></li>
+                            </ul>
+                        </li>
+
                     {% endif %}
                 </ul>
             </div>

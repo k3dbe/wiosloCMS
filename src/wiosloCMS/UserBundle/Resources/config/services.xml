@@ -4,4 +4,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
+	<services>
+		<service id="admin_voter" class="wiosloCMS\UserBundle\Voter\AdminVoter" public="false">
+			<tag name="security.voter"/>
+		</service>
+	</services>
+
 </container>

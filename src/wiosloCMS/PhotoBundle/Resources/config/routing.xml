@@ -36,4 +36,8 @@
 		<default key="_controller">PhotoBundle:PhotoComment:add</default>
 	</route>
 
+	<route id="crawler_kwejk" pattern="crawler/kwejk">
+		<default key="_controller">PhotoBundle:Crawler:kwejk</default>
+	</route>
+
 </routes>
