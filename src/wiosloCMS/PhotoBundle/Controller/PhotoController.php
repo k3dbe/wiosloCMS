@@ -43,6 +43,20 @@ class PhotoController extends Controller
         return $this->render('PhotoBundle::add.html.twig', ['form' => $photoForm->createView()]);
     }
 
+    public function deleteAction(Photo $photo)
+    {
+        /** @var Session $session */
+        $session = $this->get('session');
+        if ($photo->getUser() !== $this->getUser() && !$this->getUser()->hasRole('admin')) {
+            $session->getFlashBag()->add('error', "Nie możesz usunąć tego zdjęcia");
+            return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photo->getId()]));
+        }
+
+        $photo->delete();
+        $session->getFlashBag()->add('error', "Zdjęcie zostało usunięte");
+        return $this->redirect($this->generateUrl('homepage'));
+    }
+
     public function showAction(Photo $photo = null)
     {
         if (!$photo instanceof Photo) {

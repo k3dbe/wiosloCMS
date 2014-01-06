@@ -8,6 +8,10 @@
 		<default key="_controller">PhotoBundle:Photo:add</default>
 	</route>
 
+	<route id="photo_delete" pattern="delete/{id}">
+		<default key="_controller">PhotoBundle:Photo:delete</default>
+	</route>
+
 	<route id="photo_next" pattern="next/{id}" methods="GET">
 		<default key="_controller">PhotoBundle:Photo:next</default>
 	</route>

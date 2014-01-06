@@ -268,6 +268,7 @@ button.vote-down:hover > .glyphicon {
 		margin-left: -23px; }
 
 	.imgArea {
+		position: relative;
 		max-width: 100%;
 		margin: 0px 0px; }
 
@@ -444,6 +445,56 @@ button.vote-down:hover > .glyphicon {
 	list-style-type: none;
 	margin: 2px;
 	color: white; }
+center{
+	width: 100%;
+}
+.my{
+
+	max-width: 200px;
+}
+.miejsce{
+	padding-top: 40px;
+}
+.demotivator{
+	padding: 25px 10px;
+
+}
+
 .bg-black{
 	background-color: #000;
+}
+
+.deletebutton{
+	max-width: 48px;
+	min-width: 60px;
+	max-height: 48px;
+	min-height: 60px;
+	background-color: red!important;
+	color: white;
+	padding: 10px 0px!important;
+	border: none!important;
+}
+.mar{
+	padding: 5px;
+}
+.wrapimg{
+	position: relative;
+}
+.wrapimg .buttondelete{
+	position: absolute;
+	right:0px;
+	top:0px;
+	margin: 0px;
+	padding: 0px;
+	width: 20px!important;
+	height: 20px!important;
+	background-color: red!important;
+}
+.comment .buttondelete{
+	float: right;
+	margin: 0px;
+	padding: 0px;
+	width: 20px!important;
+	height: 20px!important;
+	background-color: red!important;
 }
