@@ -15,6 +15,8 @@ class PhotoController extends Controller
 {
     public function addAction(Request $request)
     {
+        $type = ['jpg', 'jpeg', 'png'];
+
         if (!$this->get('security.context')->isGranted('ROLE_USER')) {
             throw new AccessDeniedException();
         }
@@ -26,6 +28,14 @@ class PhotoController extends Controller
         $photoForm->handleRequest($request);
 
         if ($photoForm->isValid()) {
+            $extension = explode(".", $photo->getUri());
+            if (!is_array($extension) || count($extension) < 1 || !(in_array(array_pop($extension), $type))) {
+                /** @var Session $session */
+                $session = $this->get('session');
+                $session->getFlashBag()->add('error', "Invalid format of image");
+                return $this->redirect($this->generateUrl('homepage'));
+            }
+
             $photo->save();
             return $this->redirect($this->generateUrl('homepage'));
         }
@@ -78,7 +88,7 @@ class PhotoController extends Controller
         if (!$photo instanceof Photo) {
             /** @var Session $session */
             $session = $this->get('session');
-            $session->getFlashBag()->add('error',"Image not found");
+            $session->getFlashBag()->add('error', "Image not found");
             return $this->redirect($this->generateUrl('homepage'));
         }
 
