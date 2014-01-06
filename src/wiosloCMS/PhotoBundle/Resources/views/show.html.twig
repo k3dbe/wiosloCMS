@@ -22,7 +22,7 @@
                                 </button>
                             </a>
                         {% endif %}
-                        {% if not hasPrevious and app.user.hasWhiteTemplate %}
+                        {% if not hasPrevious and app.user and app.user.hasWhiteTemplate %}
                             <a href="{{ path('photo_previous', {'id' : photo.getId()}) }}">
                                 <button type="button" disabled="disabled" class="btn btn-default btn-lg imgBtnLeft">
                                     <span class="glyphicon glyphicon-chevron-left"></span> Prev
@@ -36,7 +36,7 @@
                                 </button>
                             </a>
                         {% endif %}
-                        {% if not hasNext and app.user.hasWhiteTemplate %}
+                        {% if not hasNext and app.user and app.user.hasWhiteTemplate %}
                             <a href="{{ path('photo_next', {'id' : photo.getId()}) }}">
                                 <button type="button" disabled="disabled" class="btn btn-default btn-lg imgBtnRight">
                                     Next <span class="glyphicon glyphicon-chevron-right"></span>
