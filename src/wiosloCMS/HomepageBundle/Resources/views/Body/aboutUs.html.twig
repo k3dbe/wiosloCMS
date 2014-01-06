@@ -1,0 +1,86 @@
+{% extends "::base.html.twig" %}
+
+{% block body %}
+
+    <div class="container bg-black">
+        <center>
+            <div class="row">
+                <div class="col-sm-3">
+                    <img src="{{ asset('/wiosloCMS/web/img/owners/Wiktor.jpg') }}" style="max-width:200px;" alt="Wiktor"
+                         class="img-circle img-responsive">
+
+                    <p>Wiktor / Web Designer (Terminator)</p>
+                </div>
+                <div class="col-sm-3">
+                    <img src="{{ asset('/wiosloCMS/web/img/owners/Przemek.jpg') }}" style="max-width:200px;"
+                         alt="Przemek"
+                         class="img-circle img-responsive">
+
+                    <p>Przemek / Android Developer (Superman)</p>
+                </div>
+                <div class="col-sm-3">
+                    <img src="{{ asset('/wiosloCMS/web/img/owners/Wojtek.jpg') }}" style="max-width:200px;" alt="Wojtek"
+                         class="img-circle img-responsive">
+
+                    <p>Wojtek / HeadManager (Barman)</p>
+                </div>
+                <div class="col-sm-3">
+                    <img src="{{ asset('/wiosloCMS/web/img/owners/Lukasz.jpg') }}" style="max-width:200px;" alt="Łukasz"
+                         class="img-circle img-responsive">
+
+                    <p>Łukasz / Senior Developer (Hulk)</p>
+                </div>
+            </div>
+        </center>
+        <div class="row">
+            <center>
+                <div class="col-sm-3">
+                    <img src="{{ asset('/wiosloCMS/web/img/owners/Tomek.jpg') }}" style="max-width:200px;" alt="Tomek"
+                         class="img-circle img-responsive">
+
+                    <p>Tomek / PHP Developer (Kapitan Ameryka)</p>
+                </div>
+            </center>
+            <div class="col-sm-6">
+                <center><h2>O Projekcie</h2></center>
+
+                <p>Projekt powstał na zlecenie ćwiczeń CMS. Miał on odzwierciedlać prawdziwą sztukę noweczesnego
+                    interfejsu użytkownika. Projekt uwzględnia wymogi rynkowe oraz rosnącą liczbę
+                    urządzeń mobilnych. Technologie użyte w tym projekcie to PHP5, Symfony2, Twig, Bootstrap3,
+                    JavaScript, MariaDB</p>
+            </div>
+            <div class="col-sm-3">
+                <h3>Kontakt?</h3>
+                <h4>Misja Wiosła: "Zabić Cię śmiechem!"</h4>
+
+                <p>
+                    666 69 ul Narwana.<br>
+                    Pensynwania, R 1<br>
+                </p>
+
+                <p><i class="fa fa-phone"></i> <abbr title="Phone">P</abbr>: (000) 000-0000</p>
+
+                <p><i class="fa fa-envelope-o"></i> <abbr title="Email">E</abbr>: <a href="mailto:wiosło@wiosło.com">wiosło@wiosło.com</a>
+                </p>
+
+                <p><i class="fa fa-clock-o"></i> <abbr titlae="Hours">H</abbr>: Poniedziałek - Piątek: 1:00 to 23:00</p>
+                <ul class="list-unstyled list-inline list-social-icons">
+                    <li class="tooltip-social facebook-link"><a href="#facebook-page" data-toggle="tooltip"
+                                                                data-placement="top" title=""
+                                                                data-original-title="Facebook"><i
+                                    class="fa fa-facebook-square fa-2x"></i></a></li>
+                    <li class="tooltip-social linkedin-link"><a href="#linkedin-company-page" data-toggle="tooltip"
+                                                                data-placement="top" title="LinkedIn"><i
+                                    class="fa fa-linkedin-square fa-2x"></i></a></li>
+                    <li class="tooltip-social twitter-link"><a href="#twitter-profile" data-toggle="tooltip"
+                                                               data-placement="top" title="Twitter"><i
+                                    class="fa fa-twitter-square fa-2x"></i></a></li>
+                    <li class="tooltip-social google-plus-link"><a href="#google-plus-page" data-toggle="tooltip"
+                                                                   data-placement="top" title="Google+"><i
+                                    class="fa fa-google-plus-square fa-2x"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

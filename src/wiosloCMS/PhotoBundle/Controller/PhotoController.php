@@ -4,11 +4,11 @@ namespace wiosloCMS\PhotoBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use wiosloCMS\PhotoBundle\Form\Type\PhotoType;
 use wiosloCMS\PhotoBundle\Model\Photo;
-use wiosloCMS\PhotoBundle\Model\PhotoComment;
 use wiosloCMS\PhotoBundle\Model\PhotoQuery;
 
 class PhotoController extends Controller
@@ -37,6 +37,10 @@ class PhotoController extends Controller
     {
         if (!$photo instanceof Photo) {
             $photo = PhotoQuery::create()->orderById(\Criteria::DESC)->limit(1)->findOne();
+        }
+
+        if (!$photo instanceof Photo) {
+            return new Response();
         }
 
         $hasNext = PhotoQuery::create()->filterById($photo->getId(), \Criteria::LESS_THAN)->exists();
