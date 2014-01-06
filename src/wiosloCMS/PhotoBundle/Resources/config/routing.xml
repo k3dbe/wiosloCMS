@@ -44,4 +44,8 @@
 		<default key="_controller">PhotoBundle:Crawler:wiocha</default>
 	</route>
 
+	<route id="crawler_hardcorowo" pattern="crawler/hardcorowo">
+		<default key="_controller">PhotoBundle:Crawler:hardcorowo</default>
+	</route>
+
 </routes>
