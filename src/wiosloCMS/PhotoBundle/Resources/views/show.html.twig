@@ -66,7 +66,7 @@
                     {{ render(controller('PhotoBundle:PhotoComment:getList', {'photo': photo})) }}
                 </div>
 
-                <iframe src="//www.facebook.com/plugins/like.php?href={{ app.request.getSchemeAndHttpHost() ~ path('homepage_photo', {'id': photo.getId()}) }}&amp;width&amp;layout=button&amp;action=like&amp;show_faces=false&amp;share=true&amp;height=35&amp;appId=175778759265236" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:35px;" allowTransparency="true"></iframe>
+                <iframe src="//www.facebook.com/plugins/like.php?href={{ app.request.getSchemeAndHttpHost() ~ path('homepage_photo', {'id': photo.getId()}) }}&amp;width&amp;layout=button&amp;action=like&amp;show_faces=false&amp;share=true&amp;height=35&amp;appId=175778759265236" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:35px; width: 147px; margin: 20px 0 0 0;" allowTransparency="true"></iframe>
 
             </div>
         </center>
