@@ -3,6 +3,7 @@
 namespace wiosloCMS\PhotoBundle\Model;
 
 use wiosloCMS\PhotoBundle\Model\om\BasePhoto;
+use wiosloCMS\UserBundle\Model\User;
 
 class Photo extends BasePhoto
 {
@@ -18,5 +19,12 @@ class Photo extends BasePhoto
         }
 
         return $rating;
+    }
+
+    public function isOwner(User $user)
+    {
+        $owner = $this->getUser();
+
+        return $user === $owner;
     }
 }

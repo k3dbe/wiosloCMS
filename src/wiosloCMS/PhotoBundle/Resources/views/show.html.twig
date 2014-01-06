@@ -12,7 +12,16 @@
                 <h1 class="pOpisZdjecia">{{ photo.getName() }}</h1>
 
                 <div class="img">
-                    <img class="img-responsive" src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
+                    <div class="wrapimg">
+                        <img class="img-responsive" src="{{ photo.getUri() }}" alt="{{ photo.getName() }}"/>
+                        {% if is_granted('ROLE_USER') and (is_granted('ROLE_ADMIN') or photo.isOwner(app.user)) %}
+                            <a href="{{ path('photo_delete', {'id' : photo.getId()}) }}">
+                                <button type="button" class="btn buttondelete">
+                                    <span class="glyphicon glyphicon-remove-circle"></span>
+                                </button>
+                            </a>
+                        {% endif %}
+                    </div>
 
                     <div class="btn-panel">
                         {% if hasPrevious %}
@@ -66,7 +75,10 @@
                     {{ render(controller('PhotoBundle:PhotoComment:getList', {'photo': photo})) }}
                 </div>
 
-                <iframe src="//www.facebook.com/plugins/like.php?href={{ app.request.getSchemeAndHttpHost() ~ path('homepage_photo', {'id': photo.getId()}) }}&amp;width&amp;layout=button&amp;action=like&amp;show_faces=false&amp;share=true&amp;height=35&amp;appId=175778759265236" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:35px;" allowTransparency="true"></iframe>
+                <iframe src="//www.facebook.com/plugins/like.php?href={{ app.request.getSchemeAndHttpHost() ~ path('homepage_photo', {'id': photo.getId()}) }}&amp;width&amp;layout=button&amp;action=like&amp;show_faces=false&amp;share=true&amp;height=35&amp;appId=175778759265236"
+                        scrolling="no" frameborder="0"
+                        style="border:none; overflow:hidden; height:35px; width: 147px; margin: 20px 0 0 0;"
+                        allowTransparency="true"></iframe>
 
             </div>
         </center>

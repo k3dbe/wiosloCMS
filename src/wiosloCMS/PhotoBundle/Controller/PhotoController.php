@@ -32,7 +32,7 @@ class PhotoController extends Controller
             if (!is_array($extension) || count($extension) < 1 || !(in_array(array_pop($extension), $type))) {
                 /** @var Session $session */
                 $session = $this->get('session');
-                $session->getFlashBag()->add('error', "Invalid format of image");
+                $session->getFlashBag()->add('error', "Zły format zdjęcia");
                 return $this->redirect($this->generateUrl('homepage'));
             }
 
@@ -41,6 +41,20 @@ class PhotoController extends Controller
         }
 
         return $this->render('PhotoBundle::add.html.twig', ['form' => $photoForm->createView()]);
+    }
+
+    public function deleteAction(Photo $photo)
+    {
+        /** @var Session $session */
+        $session = $this->get('session');
+        if ($photo->getUser() !== $this->getUser() && !$this->getUser()->hasRole('admin')) {
+            $session->getFlashBag()->add('error', "Nie możesz usunąć tego zdjęcia");
+            return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photo->getId()]));
+        }
+
+        $photo->delete();
+        $session->getFlashBag()->add('error', "Zdjęcie zostało usunięte");
+        return $this->redirect($this->generateUrl('homepage'));
     }
 
     public function showAction(Photo $photo = null)
@@ -88,7 +102,7 @@ class PhotoController extends Controller
         if (!$photo instanceof Photo) {
             /** @var Session $session */
             $session = $this->get('session');
-            $session->getFlashBag()->add('error', "Image not found");
+            $session->getFlashBag()->add('error', "Zdjęcie nie zostało znalezione");
             return $this->redirect($this->generateUrl('homepage'));
         }
 
