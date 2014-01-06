@@ -488,8 +488,12 @@ center{
 	padding: 0px;
 	width: 20px!important;
 	height: 20px!important;
-	background-color: red!important;
 }
+
+.wrapimg .buttondelete:hover {
+    background-color: white;
+}
+
 .comment .buttondelete{
 	float: right;
 	margin: 0px;
