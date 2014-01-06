@@ -5,13 +5,13 @@
     <title>{% block title %}Hello - wioslo.pl{% endblock %}</title>
     {% block stylesheets %}
         {% if is_granted('ROLE_USER') and app.user.hasWhiteTemplate %}
-            <link href="{{ asset('/wiosloCMS/web/css/bootstrapWhite.min.css') }}" rel="stylesheet"/>
-            <link href="{{ asset('/wiosloCMS/web/css/bootstrapEditsWhite.css') }}" rel="stylesheet"/>
-            <link href="{{ asset('/wiosloCMS/web/css/styleWhite.css') }}" rel="stylesheet"/>
+            <link href="{{ asset('css/bootstrapWhite.min.css') }}" rel="stylesheet"/>
+            <link href="{{ asset('css/bootstrapEditsWhite.css') }}" rel="stylesheet"/>
+            <link href="{{ asset('css/styleWhite.css') }}" rel="stylesheet"/>
         {% else %}
-            <link href="{{ asset('/wiosloCMS/web/css/bootstrap.min.css') }}" rel="stylesheet"/>
-            <link href="{{ asset('/wiosloCMS/web/css/bootstrapEdits.css') }}" rel="stylesheet"/>
-            <link href="{{ asset('/wiosloCMS/web/css/style.css') }}" rel="stylesheet"/>
+            <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet"/>
+            <link href="{{ asset('css/bootstrapEdits.css') }}" rel="stylesheet"/>
+            <link href="{{ asset('css/style.css') }}" rel="stylesheet"/>
         {% endif %}
     {% endblock %}
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}"/>
@@ -22,7 +22,7 @@
 {% block footer %} {{ render(controller('HomepageBundle:Header:footer')) }} {% endblock %}
 {% block javascripts %}
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="{{ asset('/wiosloCMS/web/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('js/bootstrap.min.js') }}"></script>
 {% endblock %}
 
 </body>

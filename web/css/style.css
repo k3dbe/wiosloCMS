@@ -42,10 +42,10 @@ imput[myselector="comentFormUnderThePicture"]:hover {
 
 /*END COMENTS*/
 .back, .imgArea {
-	background-image: url("/wiosloCMS/web/img/b3.png"); }
+	background-image: url("../img/b3.png"); }
 
 body {
-	background-image: url("/wiosloCMS/web/img/wioslo2.jpg");
+	background-image: url("../img/wioslo2.jpg");
 	background-repeat: repeat;
 	color: white;
 	/*text color on the page*/
