@@ -20,7 +20,7 @@ class RatingController extends Controller
         if (UserRateQuery::create()->filterByUser($this->getUser())->filterByPhotoId($photoId)->exists()) {
             /** @var Session $session */
             $session = $this->get('session');
-            $session->getFlashBag()->add('error',"You already voted for this photo!");
+            $session->getFlashBag()->add('error',"Już głosowałeś na to zdjęcie");
             return $this->redirect($this->generateUrl('homepage_photo', ['id' => $photoId]));
         }
 

@@ -32,7 +32,7 @@ class PhotoController extends Controller
             if (!is_array($extension) || count($extension) < 1 || !(in_array(array_pop($extension), $type))) {
                 /** @var Session $session */
                 $session = $this->get('session');
-                $session->getFlashBag()->add('error', "Invalid format of image");
+                $session->getFlashBag()->add('error', "Zły format zdjęcia");
                 return $this->redirect($this->generateUrl('homepage'));
             }
 
@@ -88,7 +88,7 @@ class PhotoController extends Controller
         if (!$photo instanceof Photo) {
             /** @var Session $session */
             $session = $this->get('session');
-            $session->getFlashBag()->add('error', "Image not found");
+            $session->getFlashBag()->add('error', "Zdjęcie nie zostało znalezione");
             return $this->redirect($this->generateUrl('homepage'));
         }
 
