@@ -40,4 +40,8 @@
 		<default key="_controller">PhotoBundle:Crawler:kwejk</default>
 	</route>
 
+	<route id="crawler_wiocha" pattern="crawler/wiocha">
+		<default key="_controller">PhotoBundle:Crawler:wiocha</default>
+	</route>
+
 </routes>
