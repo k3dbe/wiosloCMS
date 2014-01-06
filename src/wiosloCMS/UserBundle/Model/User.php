@@ -45,6 +45,25 @@ class User extends BaseUser implements UserInterface
         return in_array($role, $roles);
     }
 
+    public function getSettings(\PropelPDO $con = null)
+    {
+        $settings = parent::getSettings($con);
+
+        if ($settings instanceof Settings) {
+            return $settings;
+        }
+
+        $settings = new Settings();
+        $this->setSettings($settings);
+
+        return $settings;
+    }
+
+    public function hasWhiteTemplate()
+    {
+        return $this->getSettings()->get('white_tpl', false);
+    }
+
     public function eraseCredentials()
     {
         return;

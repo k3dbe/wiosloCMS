@@ -12,42 +12,42 @@ use \PropelCollection;
 use \PropelException;
 use \PropelObjectCollection;
 use \PropelPDO;
+use wiosloCMS\UserBundle\Model\Settings;
+use wiosloCMS\UserBundle\Model\SettingsPeer;
+use wiosloCMS\UserBundle\Model\SettingsQuery;
 use wiosloCMS\UserBundle\Model\User;
-use wiosloCMS\UserBundle\Model\UserSettings;
-use wiosloCMS\UserBundle\Model\UserSettingsPeer;
-use wiosloCMS\UserBundle\Model\UserSettingsQuery;
 
 /**
- * @method UserSettingsQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
- * @method UserSettingsQuery orderBySettings($order = Criteria::ASC) Order by the settings column
- * @method UserSettingsQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
+ * @method SettingsQuery orderByUserId($order = Criteria::ASC) Order by the user_id column
+ * @method SettingsQuery orderBySettings($order = Criteria::ASC) Order by the settings column
+ * @method SettingsQuery orderByUpdatedAt($order = Criteria::ASC) Order by the updated_at column
  *
- * @method UserSettingsQuery groupByUserId() Group by the user_id column
- * @method UserSettingsQuery groupBySettings() Group by the settings column
- * @method UserSettingsQuery groupByUpdatedAt() Group by the updated_at column
+ * @method SettingsQuery groupByUserId() Group by the user_id column
+ * @method SettingsQuery groupBySettings() Group by the settings column
+ * @method SettingsQuery groupByUpdatedAt() Group by the updated_at column
  *
- * @method UserSettingsQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
- * @method UserSettingsQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
- * @method UserSettingsQuery innerJoin($relation) Adds a INNER JOIN clause to the query
+ * @method SettingsQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
+ * @method SettingsQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
+ * @method SettingsQuery innerJoin($relation) Adds a INNER JOIN clause to the query
  *
- * @method UserSettingsQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
- * @method UserSettingsQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
- * @method UserSettingsQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
+ * @method SettingsQuery leftJoinUser($relationAlias = null) Adds a LEFT JOIN clause to the query using the User relation
+ * @method SettingsQuery rightJoinUser($relationAlias = null) Adds a RIGHT JOIN clause to the query using the User relation
+ * @method SettingsQuery innerJoinUser($relationAlias = null) Adds a INNER JOIN clause to the query using the User relation
  *
- * @method UserSettings findOne(PropelPDO $con = null) Return the first UserSettings matching the query
- * @method UserSettings findOneOrCreate(PropelPDO $con = null) Return the first UserSettings matching the query, or a new UserSettings object populated from the query conditions when no match is found
+ * @method Settings findOne(PropelPDO $con = null) Return the first Settings matching the query
+ * @method Settings findOneOrCreate(PropelPDO $con = null) Return the first Settings matching the query, or a new Settings object populated from the query conditions when no match is found
  *
- * @method UserSettings findOneBySettings(string $settings) Return the first UserSettings filtered by the settings column
- * @method UserSettings findOneByUpdatedAt(string $updated_at) Return the first UserSettings filtered by the updated_at column
+ * @method Settings findOneBySettings(string $settings) Return the first Settings filtered by the settings column
+ * @method Settings findOneByUpdatedAt(string $updated_at) Return the first Settings filtered by the updated_at column
  *
- * @method array findByUserId(int $user_id) Return UserSettings objects filtered by the user_id column
- * @method array findBySettings(string $settings) Return UserSettings objects filtered by the settings column
- * @method array findByUpdatedAt(string $updated_at) Return UserSettings objects filtered by the updated_at column
+ * @method array findByUserId(int $user_id) Return Settings objects filtered by the user_id column
+ * @method array findBySettings(string $settings) Return Settings objects filtered by the settings column
+ * @method array findByUpdatedAt(string $updated_at) Return Settings objects filtered by the updated_at column
  */
-abstract class BaseUserSettingsQuery extends ModelCriteria
+abstract class BaseSettingsQuery extends ModelCriteria
 {
     /**
-     * Initializes internal state of BaseUserSettingsQuery object.
+     * Initializes internal state of BaseSettingsQuery object.
      *
      * @param     string $dbName The dabase name
      * @param     string $modelName The phpName of a model, e.g. 'Book'
@@ -59,25 +59,25 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
             $dbName = 'main';
         }
         if (null === $modelName) {
-            $modelName = 'wiosloCMS\\UserBundle\\Model\\UserSettings';
+            $modelName = 'wiosloCMS\\UserBundle\\Model\\Settings';
         }
         parent::__construct($dbName, $modelName, $modelAlias);
     }
 
     /**
-     * Returns a new UserSettingsQuery object.
+     * Returns a new SettingsQuery object.
      *
      * @param     string $modelAlias The alias of a model in the query
-     * @param   UserSettingsQuery|Criteria $criteria Optional Criteria to build the query from
+     * @param   SettingsQuery|Criteria $criteria Optional Criteria to build the query from
      *
-     * @return UserSettingsQuery
+     * @return SettingsQuery
      */
     public static function create($modelAlias = null, $criteria = null)
     {
-        if ($criteria instanceof UserSettingsQuery) {
+        if ($criteria instanceof SettingsQuery) {
             return $criteria;
         }
-        $query = new UserSettingsQuery(null, null, $modelAlias);
+        $query = new SettingsQuery(null, null, $modelAlias);
 
         if ($criteria instanceof Criteria) {
             $query->mergeWith($criteria);
@@ -98,19 +98,19 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      * @param mixed $key Primary key to use for the query
      * @param     PropelPDO $con an optional connection object
      *
-     * @return   UserSettings|UserSettings[]|mixed the result, formatted by the current formatter
+     * @return   Settings|Settings[]|mixed the result, formatted by the current formatter
      */
     public function findPk($key, $con = null)
     {
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = UserSettingsPeer::getInstanceFromPool((string) $key))) && !$this->formatter) {
+        if ((null !== ($obj = SettingsPeer::getInstanceFromPool((string) $key))) && !$this->formatter) {
             // the object is already in the instance pool
             return $obj;
         }
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
         $this->basePreSelect($con);
         if ($this->formatter || $this->modelAlias || $this->with || $this->select
@@ -128,7 +128,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     PropelPDO $con A connection object
      *
-     * @return                 UserSettings A model object, or null if the key is not found
+     * @return                 Settings A model object, or null if the key is not found
      * @throws PropelException
      */
      public function findOneByUserId($key, $con = null)
@@ -143,7 +143,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     PropelPDO $con A connection object
      *
-     * @return                 UserSettings A model object, or null if the key is not found
+     * @return                 Settings A model object, or null if the key is not found
      * @throws PropelException
      */
     protected function findPkSimple($key, $con)
@@ -159,9 +159,9 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
         }
         $obj = null;
         if ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $obj = new UserSettings();
+            $obj = new Settings();
             $obj->hydrate($row);
-            UserSettingsPeer::addInstanceToPool($obj, (string) $key);
+            SettingsPeer::addInstanceToPool($obj, (string) $key);
         }
         $stmt->closeCursor();
 
@@ -174,7 +174,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      * @param     mixed $key Primary key to use for the query
      * @param     PropelPDO $con A connection object
      *
-     * @return UserSettings|UserSettings[]|mixed the result, formatted by the current formatter
+     * @return Settings|Settings[]|mixed the result, formatted by the current formatter
      */
     protected function findPkComplex($key, $con)
     {
@@ -195,7 +195,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      * @param     array $keys Primary keys to use for the query
      * @param     PropelPDO $con an optional connection object
      *
-     * @return PropelObjectCollection|UserSettings[]|mixed the list of results, formatted by the current formatter
+     * @return PropelObjectCollection|Settings[]|mixed the list of results, formatted by the current formatter
      */
     public function findPks($keys, $con = null)
     {
@@ -216,12 +216,12 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      *
      * @param     mixed $key Primary key to use for the query
      *
-     * @return UserSettingsQuery The current query, for fluid interface
+     * @return SettingsQuery The current query, for fluid interface
      */
     public function filterByPrimaryKey($key)
     {
 
-        return $this->addUsingAlias(UserSettingsPeer::USER_ID, $key, Criteria::EQUAL);
+        return $this->addUsingAlias(SettingsPeer::USER_ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -229,12 +229,12 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      *
      * @param     array $keys The list of primary key to use for the query
      *
-     * @return UserSettingsQuery The current query, for fluid interface
+     * @return SettingsQuery The current query, for fluid interface
      */
     public function filterByPrimaryKeys($keys)
     {
 
-        return $this->addUsingAlias(UserSettingsPeer::USER_ID, $keys, Criteria::IN);
+        return $this->addUsingAlias(SettingsPeer::USER_ID, $keys, Criteria::IN);
     }
 
     /**
@@ -256,18 +256,18 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return UserSettingsQuery The current query, for fluid interface
+     * @return SettingsQuery The current query, for fluid interface
      */
     public function filterByUserId($userId = null, $comparison = null)
     {
         if (is_array($userId)) {
             $useMinMax = false;
             if (isset($userId['min'])) {
-                $this->addUsingAlias(UserSettingsPeer::USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(SettingsPeer::USER_ID, $userId['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($userId['max'])) {
-                $this->addUsingAlias(UserSettingsPeer::USER_ID, $userId['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(SettingsPeer::USER_ID, $userId['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -278,7 +278,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(UserSettingsPeer::USER_ID, $userId, $comparison);
+        return $this->addUsingAlias(SettingsPeer::USER_ID, $userId, $comparison);
     }
 
     /**
@@ -294,7 +294,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return UserSettingsQuery The current query, for fluid interface
+     * @return SettingsQuery The current query, for fluid interface
      */
     public function filterBySettings($settings = null, $comparison = null)
     {
@@ -307,7 +307,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(UserSettingsPeer::SETTINGS, $settings, $comparison);
+        return $this->addUsingAlias(SettingsPeer::SETTINGS, $settings, $comparison);
     }
 
     /**
@@ -328,18 +328,18 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return UserSettingsQuery The current query, for fluid interface
+     * @return SettingsQuery The current query, for fluid interface
      */
     public function filterByUpdatedAt($updatedAt = null, $comparison = null)
     {
         if (is_array($updatedAt)) {
             $useMinMax = false;
             if (isset($updatedAt['min'])) {
-                $this->addUsingAlias(UserSettingsPeer::UPDATED_AT, $updatedAt['min'], Criteria::GREATER_EQUAL);
+                $this->addUsingAlias(SettingsPeer::UPDATED_AT, $updatedAt['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
             if (isset($updatedAt['max'])) {
-                $this->addUsingAlias(UserSettingsPeer::UPDATED_AT, $updatedAt['max'], Criteria::LESS_EQUAL);
+                $this->addUsingAlias(SettingsPeer::UPDATED_AT, $updatedAt['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -350,7 +350,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(UserSettingsPeer::UPDATED_AT, $updatedAt, $comparison);
+        return $this->addUsingAlias(SettingsPeer::UPDATED_AT, $updatedAt, $comparison);
     }
 
     /**
@@ -359,21 +359,21 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      * @param   User|PropelObjectCollection $user The related object(s) to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
-     * @return                 UserSettingsQuery The current query, for fluid interface
+     * @return                 SettingsQuery The current query, for fluid interface
      * @throws PropelException - if the provided filter is invalid.
      */
     public function filterByUser($user, $comparison = null)
     {
         if ($user instanceof User) {
             return $this
-                ->addUsingAlias(UserSettingsPeer::USER_ID, $user->getId(), $comparison);
+                ->addUsingAlias(SettingsPeer::USER_ID, $user->getId(), $comparison);
         } elseif ($user instanceof PropelObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(UserSettingsPeer::USER_ID, $user->toKeyValue('PrimaryKey', 'Id'), $comparison);
+                ->addUsingAlias(SettingsPeer::USER_ID, $user->toKeyValue('PrimaryKey', 'Id'), $comparison);
         } else {
             throw new PropelException('filterByUser() only accepts arguments of type User or PropelCollection');
         }
@@ -385,7 +385,7 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return UserSettingsQuery The current query, for fluid interface
+     * @return SettingsQuery The current query, for fluid interface
      */
     public function joinUser($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
@@ -432,14 +432,14 @@ abstract class BaseUserSettingsQuery extends ModelCriteria
     /**
      * Exclude object from result
      *
-     * @param   UserSettings $userSettings Object to remove from the list of results
+     * @param   Settings $settings Object to remove from the list of results
      *
-     * @return UserSettingsQuery The current query, for fluid interface
+     * @return SettingsQuery The current query, for fluid interface
      */
-    public function prune($userSettings = null)
+    public function prune($settings = null)
     {
-        if ($userSettings) {
-            $this->addUsingAlias(UserSettingsPeer::USER_ID, $userSettings->getUserId(), Criteria::NOT_EQUAL);
+        if ($settings) {
+            $this->addUsingAlias(SettingsPeer::USER_ID, $settings->getUserId(), Criteria::NOT_EQUAL);
         }
 
         return $this;

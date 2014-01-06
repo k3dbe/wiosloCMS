@@ -12,6 +12,10 @@
 		<default key="_controller">HomepageBundle:Body:regulations</default>
 	</route>
 
+	<route id="change_template" pattern="change_template">
+		<default key="_controller">HomepageBundle:Body:changeTemplate</default>
+	</route>
+
 	<route id="homepage_photo" pattern="{id}">
 		<default key="_controller">HomepageBundle:Body:show</default>
 	</route>

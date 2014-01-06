@@ -12,10 +12,10 @@ use \PropelPDO;
 use wiosloCMS\PhotoBundle\Model\PhotoCommentPeer;
 use wiosloCMS\PhotoBundle\Model\PhotoPeer;
 use wiosloCMS\PhotoBundle\Model\UserRatePeer;
+use wiosloCMS\UserBundle\Model\SettingsPeer;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserPeer;
 use wiosloCMS\UserBundle\Model\UserRolePeer;
-use wiosloCMS\UserBundle\Model\UserSettingsPeer;
 use wiosloCMS\UserBundle\Model\map\UserTableMap;
 
 abstract class BaseUserPeer
@@ -404,9 +404,9 @@ abstract class BaseUserPeer
         // Invalidate objects in UserRatePeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
         UserRatePeer::clearInstancePool();
-        // Invalidate objects in UserSettingsPeer instance pool,
+        // Invalidate objects in SettingsPeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
-        UserSettingsPeer::clearInstancePool();
+        SettingsPeer::clearInstancePool();
         // Invalidate objects in UserRolePeer instance pool,
         // since one or more of them may be deleted by ON DELETE CASCADE/SETNULL rule.
         UserRolePeer::clearInstancePool();
@@ -762,11 +762,11 @@ abstract class BaseUserPeer
             $criteria->add(UserRatePeer::USER_ID, $obj->getId());
             $affectedRows += UserRatePeer::doDelete($criteria, $con);
 
-            // delete related UserSettings objects
-            $criteria = new Criteria(UserSettingsPeer::DATABASE_NAME);
+            // delete related Settings objects
+            $criteria = new Criteria(SettingsPeer::DATABASE_NAME);
 
-            $criteria->add(UserSettingsPeer::USER_ID, $obj->getId());
-            $affectedRows += UserSettingsPeer::doDelete($criteria, $con);
+            $criteria->add(SettingsPeer::USER_ID, $obj->getId());
+            $affectedRows += SettingsPeer::doDelete($criteria, $con);
 
             // delete related UserRole objects
             $criteria = new Criteria(UserRolePeer::DATABASE_NAME);

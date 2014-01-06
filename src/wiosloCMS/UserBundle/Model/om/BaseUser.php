@@ -25,13 +25,13 @@ use wiosloCMS\PhotoBundle\Model\UserRate;
 use wiosloCMS\PhotoBundle\Model\UserRateQuery;
 use wiosloCMS\UserBundle\Model\Role;
 use wiosloCMS\UserBundle\Model\RoleQuery;
+use wiosloCMS\UserBundle\Model\Settings;
+use wiosloCMS\UserBundle\Model\SettingsQuery;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserPeer;
 use wiosloCMS\UserBundle\Model\UserQuery;
 use wiosloCMS\UserBundle\Model\UserRole;
 use wiosloCMS\UserBundle\Model\UserRoleQuery;
-use wiosloCMS\UserBundle\Model\UserSettings;
-use wiosloCMS\UserBundle\Model\UserSettingsQuery;
 
 abstract class BaseUser extends BaseObject implements Persistent
 {
@@ -115,9 +115,9 @@ abstract class BaseUser extends BaseObject implements Persistent
     protected $collUserRatesPartial;
 
     /**
-     * @var        UserSettings one-to-one related UserSettings object
+     * @var        Settings one-to-one related Settings object
      */
-    protected $singleUserSettings;
+    protected $singleSettings;
 
     /**
      * @var        PropelObjectCollection|UserRole[] Collection to store aggregation of UserRole objects.
@@ -593,7 +593,7 @@ abstract class BaseUser extends BaseObject implements Persistent
 
             $this->collUserRates = null;
 
-            $this->singleUserSettings = null;
+            $this->singleSettings = null;
 
             $this->collUserRoles = null;
 
@@ -844,9 +844,9 @@ abstract class BaseUser extends BaseObject implements Persistent
                 }
             }
 
-            if ($this->singleUserSettings !== null) {
-                if (!$this->singleUserSettings->isDeleted() && ($this->singleUserSettings->isNew() || $this->singleUserSettings->isModified())) {
-                        $affectedRows += $this->singleUserSettings->save($con);
+            if ($this->singleSettings !== null) {
+                if (!$this->singleSettings->isDeleted() && ($this->singleSettings->isNew() || $this->singleSettings->isModified())) {
+                        $affectedRows += $this->singleSettings->save($con);
                 }
             }
 
@@ -1069,9 +1069,9 @@ abstract class BaseUser extends BaseObject implements Persistent
                     }
                 }
 
-                if ($this->singleUserSettings !== null) {
-                    if (!$this->singleUserSettings->validate($columns)) {
-                        $failureMap = array_merge($failureMap, $this->singleUserSettings->getValidationFailures());
+                if ($this->singleSettings !== null) {
+                    if (!$this->singleSettings->validate($columns)) {
+                        $failureMap = array_merge($failureMap, $this->singleSettings->getValidationFailures());
                     }
                 }
 
@@ -1191,8 +1191,8 @@ abstract class BaseUser extends BaseObject implements Persistent
             if (null !== $this->collUserRates) {
                 $result['UserRates'] = $this->collUserRates->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
-            if (null !== $this->singleUserSettings) {
-                $result['UserSettings'] = $this->singleUserSettings->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
+            if (null !== $this->singleSettings) {
+                $result['Settings'] = $this->singleSettings->toArray($keyType, $includeLazyLoadColumns, $alreadyDumpedObjects, true);
             }
             if (null !== $this->collUserRoles) {
                 $result['UserRoles'] = $this->collUserRoles->toArray(null, true, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
@@ -1396,9 +1396,9 @@ abstract class BaseUser extends BaseObject implements Persistent
                 }
             }
 
-            $relObj = $this->getUserSettings();
+            $relObj = $this->getSettings();
             if ($relObj) {
-                $copyObj->setUserSettings($relObj->copy($deepCopy));
+                $copyObj->setSettings($relObj->copy($deepCopy));
             }
 
             foreach ($this->getUserRoles() as $relObj) {
@@ -2211,34 +2211,34 @@ abstract class BaseUser extends BaseObject implements Persistent
     }
 
     /**
-     * Gets a single UserSettings object, which is related to this object by a one-to-one relationship.
+     * Gets a single Settings object, which is related to this object by a one-to-one relationship.
      *
      * @param PropelPDO $con optional connection object
-     * @return UserSettings
+     * @return Settings
      * @throws PropelException
      */
-    public function getUserSettings(PropelPDO $con = null)
+    public function getSettings(PropelPDO $con = null)
     {
 
-        if ($this->singleUserSettings === null && !$this->isNew()) {
-            $this->singleUserSettings = UserSettingsQuery::create()->findPk($this->getPrimaryKey(), $con);
+        if ($this->singleSettings === null && !$this->isNew()) {
+            $this->singleSettings = SettingsQuery::create()->findPk($this->getPrimaryKey(), $con);
         }
 
-        return $this->singleUserSettings;
+        return $this->singleSettings;
     }
 
     /**
-     * Sets a single UserSettings object as related to this object by a one-to-one relationship.
+     * Sets a single Settings object as related to this object by a one-to-one relationship.
      *
-     * @param                  UserSettings $v UserSettings
+     * @param                  Settings $v Settings
      * @return User The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setUserSettings(UserSettings $v = null)
+    public function setSettings(Settings $v = null)
     {
-        $this->singleUserSettings = $v;
+        $this->singleSettings = $v;
 
-        // Make sure that that the passed-in UserSettings isn't already associated with this object
+        // Make sure that that the passed-in Settings isn't already associated with this object
         if ($v !== null && $v->getUser(null, false) === null) {
             $v->setUser($this);
         }
@@ -2924,8 +2924,8 @@ abstract class BaseUser extends BaseObject implements Persistent
                     $o->clearAllReferences($deep);
                 }
             }
-            if ($this->singleUserSettings) {
-                $this->singleUserSettings->clearAllReferences($deep);
+            if ($this->singleSettings) {
+                $this->singleSettings->clearAllReferences($deep);
             }
             if ($this->collUserRoles) {
                 foreach ($this->collUserRoles as $o) {
@@ -2958,10 +2958,10 @@ abstract class BaseUser extends BaseObject implements Persistent
             $this->collUserRates->clearIterator();
         }
         $this->collUserRates = null;
-        if ($this->singleUserSettings instanceof PropelCollection) {
-            $this->singleUserSettings->clearIterator();
+        if ($this->singleSettings instanceof PropelCollection) {
+            $this->singleSettings->clearIterator();
         }
-        $this->singleUserSettings = null;
+        $this->singleSettings = null;
         if ($this->collUserRoles instanceof PropelCollection) {
             $this->collUserRoles->clearIterator();
         }

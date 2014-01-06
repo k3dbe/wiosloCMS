@@ -13,24 +13,24 @@ use \Propel;
 use \PropelDateTime;
 use \PropelException;
 use \PropelPDO;
+use wiosloCMS\UserBundle\Model\Settings;
+use wiosloCMS\UserBundle\Model\SettingsPeer;
+use wiosloCMS\UserBundle\Model\SettingsQuery;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserQuery;
-use wiosloCMS\UserBundle\Model\UserSettings;
-use wiosloCMS\UserBundle\Model\UserSettingsPeer;
-use wiosloCMS\UserBundle\Model\UserSettingsQuery;
 
-abstract class BaseUserSettings extends BaseObject implements Persistent
+abstract class BaseSettings extends BaseObject implements Persistent
 {
     /**
      * Peer class name
      */
-    const PEER = 'wiosloCMS\\UserBundle\\Model\\UserSettingsPeer';
+    const PEER = 'wiosloCMS\\UserBundle\\Model\\SettingsPeer';
 
     /**
      * The Peer class.
      * Instance provides a convenient way of calling static methods on a class
      * that calling code may not be able to identify.
-     * @var        UserSettingsPeer
+     * @var        SettingsPeer
      */
     protected static $peer;
 
@@ -149,7 +149,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      * Set the value of [user_id] column.
      *
      * @param  int $v new value
-     * @return UserSettings The current object (for fluent API support)
+     * @return Settings The current object (for fluent API support)
      */
     public function setUserId($v)
     {
@@ -159,7 +159,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
 
         if ($this->user_id !== $v) {
             $this->user_id = $v;
-            $this->modifiedColumns[] = UserSettingsPeer::USER_ID;
+            $this->modifiedColumns[] = SettingsPeer::USER_ID;
         }
 
         if ($this->aUser !== null && $this->aUser->getId() !== $v) {
@@ -174,7 +174,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      * Set the value of [settings] column.
      *
      * @param  string $v new value
-     * @return UserSettings The current object (for fluent API support)
+     * @return Settings The current object (for fluent API support)
      */
     public function setSettings($v)
     {
@@ -184,7 +184,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
 
         if ($this->settings !== $v) {
             $this->settings = $v;
-            $this->modifiedColumns[] = UserSettingsPeer::SETTINGS;
+            $this->modifiedColumns[] = SettingsPeer::SETTINGS;
         }
 
 
@@ -196,7 +196,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      *
      * @param mixed $v string, integer (timestamp), or DateTime value.
      *               Empty strings are treated as null.
-     * @return UserSettings The current object (for fluent API support)
+     * @return Settings The current object (for fluent API support)
      */
     public function setUpdatedAt($v)
     {
@@ -206,7 +206,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
             $newDateAsString = $dt ? $dt->format('Y-m-d H:i:s') : null;
             if ($currentDateAsString !== $newDateAsString) {
                 $this->updated_at = $newDateAsString;
-                $this->modifiedColumns[] = UserSettingsPeer::UPDATED_AT;
+                $this->modifiedColumns[] = SettingsPeer::UPDATED_AT;
             }
         } // if either are not null
 
@@ -258,10 +258,10 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
             }
             $this->postHydrate($row, $startcol, $rehydrate);
 
-            return $startcol + 3; // 3 = UserSettingsPeer::NUM_HYDRATE_COLUMNS.
+            return $startcol + 3; // 3 = SettingsPeer::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException("Error populating UserSettings object", $e);
+            throw new PropelException("Error populating Settings object", $e);
         }
     }
 
@@ -307,13 +307,13 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $stmt = UserSettingsPeer::doSelectStmt($this->buildPkeyCriteria(), $con);
+        $stmt = SettingsPeer::doSelectStmt($this->buildPkeyCriteria(), $con);
         $row = $stmt->fetch(PDO::FETCH_NUM);
         $stmt->closeCursor();
         if (!$row) {
@@ -344,12 +344,12 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         $con->beginTransaction();
         try {
-            $deleteQuery = UserSettingsQuery::create()
+            $deleteQuery = SettingsQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -387,7 +387,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         $con->beginTransaction();
@@ -407,7 +407,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                UserSettingsPeer::addInstanceToPool($this);
+                SettingsPeer::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -482,13 +482,13 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
 
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(UserSettingsPeer::USER_ID)) {
+        if ($this->isColumnModified(SettingsPeer::USER_ID)) {
             $modifiedColumns[':p' . $index++]  = '`user_id`';
         }
-        if ($this->isColumnModified(UserSettingsPeer::SETTINGS)) {
+        if ($this->isColumnModified(SettingsPeer::SETTINGS)) {
             $modifiedColumns[':p' . $index++]  = '`settings`';
         }
-        if ($this->isColumnModified(UserSettingsPeer::UPDATED_AT)) {
+        if ($this->isColumnModified(SettingsPeer::UPDATED_AT)) {
             $modifiedColumns[':p' . $index++]  = '`updated_at`';
         }
 
@@ -610,7 +610,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
             }
 
 
-            if (($retval = UserSettingsPeer::doValidate($this, $columns)) !== true) {
+            if (($retval = SettingsPeer::doValidate($this, $columns)) !== true) {
                 $failureMap = array_merge($failureMap, $retval);
             }
 
@@ -634,7 +634,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      */
     public function getByName($name, $type = BasePeer::TYPE_PHPNAME)
     {
-        $pos = UserSettingsPeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
+        $pos = SettingsPeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -682,11 +682,11 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      */
     public function toArray($keyType = BasePeer::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
-        if (isset($alreadyDumpedObjects['UserSettings'][$this->getPrimaryKey()])) {
+        if (isset($alreadyDumpedObjects['Settings'][$this->getPrimaryKey()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['UserSettings'][$this->getPrimaryKey()] = true;
-        $keys = UserSettingsPeer::getFieldNames($keyType);
+        $alreadyDumpedObjects['Settings'][$this->getPrimaryKey()] = true;
+        $keys = SettingsPeer::getFieldNames($keyType);
         $result = array(
             $keys[0] => $this->getUserId(),
             $keys[1] => $this->getSettings(),
@@ -719,7 +719,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      */
     public function setByName($name, $value, $type = BasePeer::TYPE_PHPNAME)
     {
-        $pos = UserSettingsPeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
+        $pos = SettingsPeer::translateFieldName($name, $type, BasePeer::TYPE_NUM);
 
         $this->setByPosition($pos, $value);
     }
@@ -766,7 +766,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      */
     public function fromArray($arr, $keyType = BasePeer::TYPE_PHPNAME)
     {
-        $keys = UserSettingsPeer::getFieldNames($keyType);
+        $keys = SettingsPeer::getFieldNames($keyType);
 
         if (array_key_exists($keys[0], $arr)) $this->setUserId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setSettings($arr[$keys[1]]);
@@ -780,11 +780,11 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(UserSettingsPeer::DATABASE_NAME);
+        $criteria = new Criteria(SettingsPeer::DATABASE_NAME);
 
-        if ($this->isColumnModified(UserSettingsPeer::USER_ID)) $criteria->add(UserSettingsPeer::USER_ID, $this->user_id);
-        if ($this->isColumnModified(UserSettingsPeer::SETTINGS)) $criteria->add(UserSettingsPeer::SETTINGS, $this->settings);
-        if ($this->isColumnModified(UserSettingsPeer::UPDATED_AT)) $criteria->add(UserSettingsPeer::UPDATED_AT, $this->updated_at);
+        if ($this->isColumnModified(SettingsPeer::USER_ID)) $criteria->add(SettingsPeer::USER_ID, $this->user_id);
+        if ($this->isColumnModified(SettingsPeer::SETTINGS)) $criteria->add(SettingsPeer::SETTINGS, $this->settings);
+        if ($this->isColumnModified(SettingsPeer::UPDATED_AT)) $criteria->add(SettingsPeer::UPDATED_AT, $this->updated_at);
 
         return $criteria;
     }
@@ -799,8 +799,8 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      */
     public function buildPkeyCriteria()
     {
-        $criteria = new Criteria(UserSettingsPeer::DATABASE_NAME);
-        $criteria->add(UserSettingsPeer::USER_ID, $this->user_id);
+        $criteria = new Criteria(SettingsPeer::DATABASE_NAME);
+        $criteria->add(SettingsPeer::USER_ID, $this->user_id);
 
         return $criteria;
     }
@@ -841,7 +841,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param object $copyObj An object of UserSettings (or compatible) type.
+     * @param object $copyObj An object of Settings (or compatible) type.
      * @param boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
@@ -882,7 +882,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      * objects.
      *
      * @param boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return UserSettings Clone of current object.
+     * @return Settings Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -902,12 +902,12 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      * same instance for all member of this class. The method could therefore
      * be static, but this would prevent one from overriding the behavior.
      *
-     * @return UserSettingsPeer
+     * @return SettingsPeer
      */
     public function getPeer()
     {
         if (self::$peer === null) {
-            self::$peer = new UserSettingsPeer();
+            self::$peer = new SettingsPeer();
         }
 
         return self::$peer;
@@ -917,7 +917,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      * Declares an association between this object and a User object.
      *
      * @param                  User $v
-     * @return UserSettings The current object (for fluent API support)
+     * @return Settings The current object (for fluent API support)
      * @throws PropelException
      */
     public function setUser(User $v = null)
@@ -932,7 +932,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
 
         // Add binding for other direction of this 1:1 relationship.
         if ($v !== null) {
-            $v->setUserSettings($this);
+            $v->setSettings($this);
         }
 
 
@@ -953,7 +953,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
         if ($this->aUser === null && ($this->user_id !== null) && $doQuery) {
             $this->aUser = UserQuery::create()->findPk($this->user_id, $con);
             // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
-            $this->aUser->setUserSettings($this);
+            $this->aUser->setSettings($this);
         }
 
         return $this->aUser;
@@ -1006,7 +1006,7 @@ abstract class BaseUserSettings extends BaseObject implements Persistent
      */
     public function __toString()
     {
-        return (string) $this->exportTo(UserSettingsPeer::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(SettingsPeer::DEFAULT_STRING_FORMAT);
     }
 
     /**

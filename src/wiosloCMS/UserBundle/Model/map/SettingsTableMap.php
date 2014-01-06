@@ -18,13 +18,13 @@ use \TableMap;
  *
  * @package    propel.generator.src.wiosloCMS.UserBundle.Model.map
  */
-class UserSettingsTableMap extends TableMap
+class SettingsTableMap extends TableMap
 {
 
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'src.wiosloCMS.UserBundle.Model.map.UserSettingsTableMap';
+    const CLASS_NAME = 'src.wiosloCMS.UserBundle.Model.map.SettingsTableMap';
 
     /**
      * Initialize the table attributes, columns and validators
@@ -37,8 +37,8 @@ class UserSettingsTableMap extends TableMap
     {
         // attributes
         $this->setName('UserSettings');
-        $this->setPhpName('UserSettings');
-        $this->setClassname('wiosloCMS\\UserBundle\\Model\\UserSettings');
+        $this->setPhpName('Settings');
+        $this->setClassname('wiosloCMS\\UserBundle\\Model\\Settings');
         $this->setPackage('src.wiosloCMS.UserBundle.Model');
         $this->setUseIdGenerator(false);
         // columns
@@ -56,4 +56,4 @@ class UserSettingsTableMap extends TableMap
         $this->addRelation('User', 'wiosloCMS\\UserBundle\\Model\\User', RelationMap::MANY_TO_ONE, array('user_id' => 'id', ), 'CASCADE', 'CASCADE');
     } // buildRelations()
 
-} // UserSettingsTableMap
+} // SettingsTableMap

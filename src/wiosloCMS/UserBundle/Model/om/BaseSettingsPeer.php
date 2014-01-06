@@ -9,12 +9,12 @@ use \PDOStatement;
 use \Propel;
 use \PropelException;
 use \PropelPDO;
+use wiosloCMS\UserBundle\Model\Settings;
+use wiosloCMS\UserBundle\Model\SettingsPeer;
 use wiosloCMS\UserBundle\Model\UserPeer;
-use wiosloCMS\UserBundle\Model\UserSettings;
-use wiosloCMS\UserBundle\Model\UserSettingsPeer;
-use wiosloCMS\UserBundle\Model\map\UserSettingsTableMap;
+use wiosloCMS\UserBundle\Model\map\SettingsTableMap;
 
-abstract class BaseUserSettingsPeer
+abstract class BaseSettingsPeer
 {
 
     /** the default database name for this class */
@@ -24,10 +24,10 @@ abstract class BaseUserSettingsPeer
     const TABLE_NAME = 'UserSettings';
 
     /** the related Propel class for this table */
-    const OM_CLASS = 'wiosloCMS\\UserBundle\\Model\\UserSettings';
+    const OM_CLASS = 'wiosloCMS\\UserBundle\\Model\\Settings';
 
     /** the related TableMap class for this table */
-    const TM_CLASS = 'wiosloCMS\\UserBundle\\Model\\map\\UserSettingsTableMap';
+    const TM_CLASS = 'wiosloCMS\\UserBundle\\Model\\map\\SettingsTableMap';
 
     /** The total number of columns. */
     const NUM_COLUMNS = 3;
@@ -51,10 +51,10 @@ abstract class BaseUserSettingsPeer
     const DEFAULT_STRING_FORMAT = 'YAML';
 
     /**
-     * An identity map to hold any loaded instances of UserSettings objects.
+     * An identity map to hold any loaded instances of Settings objects.
      * This must be public so that other peer classes can access this when hydrating from JOIN
      * queries.
-     * @var        array UserSettings[]
+     * @var        array Settings[]
      */
     public static $instances = array();
 
@@ -63,12 +63,12 @@ abstract class BaseUserSettingsPeer
      * holds an array of fieldnames
      *
      * first dimension keys are the type constants
-     * e.g. UserSettingsPeer::$fieldNames[UserSettingsPeer::TYPE_PHPNAME][0] = 'Id'
+     * e.g. SettingsPeer::$fieldNames[SettingsPeer::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
         BasePeer::TYPE_PHPNAME => array ('UserId', 'Settings', 'UpdatedAt', ),
         BasePeer::TYPE_STUDLYPHPNAME => array ('userId', 'settings', 'updatedAt', ),
-        BasePeer::TYPE_COLNAME => array (UserSettingsPeer::USER_ID, UserSettingsPeer::SETTINGS, UserSettingsPeer::UPDATED_AT, ),
+        BasePeer::TYPE_COLNAME => array (SettingsPeer::USER_ID, SettingsPeer::SETTINGS, SettingsPeer::UPDATED_AT, ),
         BasePeer::TYPE_RAW_COLNAME => array ('USER_ID', 'SETTINGS', 'UPDATED_AT', ),
         BasePeer::TYPE_FIELDNAME => array ('user_id', 'settings', 'updated_at', ),
         BasePeer::TYPE_NUM => array (0, 1, 2, )
@@ -78,12 +78,12 @@ abstract class BaseUserSettingsPeer
      * holds an array of keys for quick access to the fieldnames array
      *
      * first dimension keys are the type constants
-     * e.g. UserSettingsPeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
+     * e.g. SettingsPeer::$fieldNames[BasePeer::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
         BasePeer::TYPE_PHPNAME => array ('UserId' => 0, 'Settings' => 1, 'UpdatedAt' => 2, ),
         BasePeer::TYPE_STUDLYPHPNAME => array ('userId' => 0, 'settings' => 1, 'updatedAt' => 2, ),
-        BasePeer::TYPE_COLNAME => array (UserSettingsPeer::USER_ID => 0, UserSettingsPeer::SETTINGS => 1, UserSettingsPeer::UPDATED_AT => 2, ),
+        BasePeer::TYPE_COLNAME => array (SettingsPeer::USER_ID => 0, SettingsPeer::SETTINGS => 1, SettingsPeer::UPDATED_AT => 2, ),
         BasePeer::TYPE_RAW_COLNAME => array ('USER_ID' => 0, 'SETTINGS' => 1, 'UPDATED_AT' => 2, ),
         BasePeer::TYPE_FIELDNAME => array ('user_id' => 0, 'settings' => 1, 'updated_at' => 2, ),
         BasePeer::TYPE_NUM => array (0, 1, 2, )
@@ -101,10 +101,10 @@ abstract class BaseUserSettingsPeer
      */
     public static function translateFieldName($name, $fromType, $toType)
     {
-        $toNames = UserSettingsPeer::getFieldNames($toType);
-        $key = isset(UserSettingsPeer::$fieldKeys[$fromType][$name]) ? UserSettingsPeer::$fieldKeys[$fromType][$name] : null;
+        $toNames = SettingsPeer::getFieldNames($toType);
+        $key = isset(SettingsPeer::$fieldKeys[$fromType][$name]) ? SettingsPeer::$fieldKeys[$fromType][$name] : null;
         if ($key === null) {
-            throw new PropelException("'$name' could not be found in the field names of type '$fromType'. These are: " . print_r(UserSettingsPeer::$fieldKeys[$fromType], true));
+            throw new PropelException("'$name' could not be found in the field names of type '$fromType'. These are: " . print_r(SettingsPeer::$fieldKeys[$fromType], true));
         }
 
         return $toNames[$key];
@@ -121,11 +121,11 @@ abstract class BaseUserSettingsPeer
      */
     public static function getFieldNames($type = BasePeer::TYPE_PHPNAME)
     {
-        if (!array_key_exists($type, UserSettingsPeer::$fieldNames)) {
+        if (!array_key_exists($type, SettingsPeer::$fieldNames)) {
             throw new PropelException('Method getFieldNames() expects the parameter $type to be one of the class constants BasePeer::TYPE_PHPNAME, BasePeer::TYPE_STUDLYPHPNAME, BasePeer::TYPE_COLNAME, BasePeer::TYPE_FIELDNAME, BasePeer::TYPE_NUM. ' . $type . ' was given.');
         }
 
-        return UserSettingsPeer::$fieldNames[$type];
+        return SettingsPeer::$fieldNames[$type];
     }
 
     /**
@@ -137,12 +137,12 @@ abstract class BaseUserSettingsPeer
      *		$c->addJoin(TablePeer::alias("alias1", TablePeer::PRIMARY_KEY_COLUMN), TablePeer::PRIMARY_KEY_COLUMN);
      * </code>
      * @param      string $alias The alias for the current table.
-     * @param      string $column The column name for current table. (i.e. UserSettingsPeer::COLUMN_NAME).
+     * @param      string $column The column name for current table. (i.e. SettingsPeer::COLUMN_NAME).
      * @return string
      */
     public static function alias($alias, $column)
     {
-        return str_replace(UserSettingsPeer::TABLE_NAME.'.', $alias.'.', $column);
+        return str_replace(SettingsPeer::TABLE_NAME.'.', $alias.'.', $column);
     }
 
     /**
@@ -160,9 +160,9 @@ abstract class BaseUserSettingsPeer
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(UserSettingsPeer::USER_ID);
-            $criteria->addSelectColumn(UserSettingsPeer::SETTINGS);
-            $criteria->addSelectColumn(UserSettingsPeer::UPDATED_AT);
+            $criteria->addSelectColumn(SettingsPeer::USER_ID);
+            $criteria->addSelectColumn(SettingsPeer::SETTINGS);
+            $criteria->addSelectColumn(SettingsPeer::UPDATED_AT);
         } else {
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.settings');
@@ -186,21 +186,21 @@ abstract class BaseUserSettingsPeer
         // We need to set the primary table name, since in the case that there are no WHERE columns
         // it will be impossible for the BasePeer::createSelectSql() method to determine which
         // tables go into the FROM clause.
-        $criteria->setPrimaryTableName(UserSettingsPeer::TABLE_NAME);
+        $criteria->setPrimaryTableName(SettingsPeer::TABLE_NAME);
 
         if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
             $criteria->setDistinct();
         }
 
         if (!$criteria->hasSelectClause()) {
-            UserSettingsPeer::addSelectColumns($criteria);
+            SettingsPeer::addSelectColumns($criteria);
         }
 
         $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
-        $criteria->setDbName(UserSettingsPeer::DATABASE_NAME); // Set the correct dbName
+        $criteria->setDbName(SettingsPeer::DATABASE_NAME); // Set the correct dbName
 
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
         // BasePeer returns a PDOStatement
         $stmt = BasePeer::doCount($criteria, $con);
@@ -219,7 +219,7 @@ abstract class BaseUserSettingsPeer
      *
      * @param      Criteria $criteria object used to create the SELECT statement.
      * @param      PropelPDO $con
-     * @return UserSettings
+     * @return Settings
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
@@ -227,7 +227,7 @@ abstract class BaseUserSettingsPeer
     {
         $critcopy = clone $criteria;
         $critcopy->setLimit(1);
-        $objects = UserSettingsPeer::doSelect($critcopy, $con);
+        $objects = SettingsPeer::doSelect($critcopy, $con);
         if ($objects) {
             return $objects[0];
         }
@@ -245,7 +245,7 @@ abstract class BaseUserSettingsPeer
      */
     public static function doSelect(Criteria $criteria, PropelPDO $con = null)
     {
-        return UserSettingsPeer::populateObjects(UserSettingsPeer::doSelectStmt($criteria, $con));
+        return SettingsPeer::populateObjects(SettingsPeer::doSelectStmt($criteria, $con));
     }
     /**
      * Prepares the Criteria object and uses the parent doSelect() method to execute a PDOStatement.
@@ -263,16 +263,16 @@ abstract class BaseUserSettingsPeer
     public static function doSelectStmt(Criteria $criteria, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
         if (!$criteria->hasSelectClause()) {
             $criteria = clone $criteria;
-            UserSettingsPeer::addSelectColumns($criteria);
+            SettingsPeer::addSelectColumns($criteria);
         }
 
         // Set the correct dbName
-        $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+        $criteria->setDbName(SettingsPeer::DATABASE_NAME);
 
         // BasePeer returns a PDOStatement
         return BasePeer::doSelect($criteria, $con);
@@ -286,7 +286,7 @@ abstract class BaseUserSettingsPeer
      * to the cache in order to ensure that the same objects are always returned by doSelect*()
      * and retrieveByPK*() calls.
      *
-     * @param UserSettings $obj A UserSettings object.
+     * @param Settings $obj A Settings object.
      * @param      string $key (optional) key to use for instance map (for performance boost if key was already calculated externally).
      */
     public static function addInstanceToPool($obj, $key = null)
@@ -295,7 +295,7 @@ abstract class BaseUserSettingsPeer
             if ($key === null) {
                 $key = (string) $obj->getUserId();
             } // if key === null
-            UserSettingsPeer::$instances[$key] = $obj;
+            SettingsPeer::$instances[$key] = $obj;
         }
     }
 
@@ -307,7 +307,7 @@ abstract class BaseUserSettingsPeer
      * methods in your stub classes -- you may need to explicitly remove objects
      * from the cache in order to prevent returning objects that no longer exist.
      *
-     * @param      mixed $value A UserSettings object or a primary key value.
+     * @param      mixed $value A Settings object or a primary key value.
      *
      * @return void
      * @throws PropelException - if the value is invalid.
@@ -315,17 +315,17 @@ abstract class BaseUserSettingsPeer
     public static function removeInstanceFromPool($value)
     {
         if (Propel::isInstancePoolingEnabled() && $value !== null) {
-            if (is_object($value) && $value instanceof UserSettings) {
+            if (is_object($value) && $value instanceof Settings) {
                 $key = (string) $value->getUserId();
             } elseif (is_scalar($value)) {
                 // assume we've been passed a primary key
                 $key = (string) $value;
             } else {
-                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or UserSettings object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value,true)));
+                $e = new PropelException("Invalid value passed to removeInstanceFromPool().  Expected primary key or Settings object; got " . (is_object($value) ? get_class($value) . ' object.' : var_export($value,true)));
                 throw $e;
             }
 
-            unset(UserSettingsPeer::$instances[$key]);
+            unset(SettingsPeer::$instances[$key]);
         }
     } // removeInstanceFromPool()
 
@@ -336,14 +336,14 @@ abstract class BaseUserSettingsPeer
      * a multi-column primary key, a serialize()d version of the primary key will be returned.
      *
      * @param      string $key The key (@see getPrimaryKeyHash()) for this instance.
-     * @return UserSettings Found object or null if 1) no instance exists for specified key or 2) instance pooling has been disabled.
+     * @return Settings Found object or null if 1) no instance exists for specified key or 2) instance pooling has been disabled.
      * @see        getPrimaryKeyHash()
      */
     public static function getInstanceFromPool($key)
     {
         if (Propel::isInstancePoolingEnabled()) {
-            if (isset(UserSettingsPeer::$instances[$key])) {
-                return UserSettingsPeer::$instances[$key];
+            if (isset(SettingsPeer::$instances[$key])) {
+                return SettingsPeer::$instances[$key];
             }
         }
 
@@ -358,11 +358,11 @@ abstract class BaseUserSettingsPeer
     public static function clearInstancePool($and_clear_all_references = false)
     {
       if ($and_clear_all_references) {
-        foreach (UserSettingsPeer::$instances as $instance) {
+        foreach (SettingsPeer::$instances as $instance) {
           $instance->clearAllReferences(true);
         }
       }
-        UserSettingsPeer::$instances = array();
+        SettingsPeer::$instances = array();
     }
 
     /**
@@ -420,11 +420,11 @@ abstract class BaseUserSettingsPeer
         $results = array();
 
         // set the class once to avoid overhead in the loop
-        $cls = UserSettingsPeer::getOMClass();
+        $cls = SettingsPeer::getOMClass();
         // populate the object(s)
         while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $key = UserSettingsPeer::getPrimaryKeyHashFromRow($row, 0);
-            if (null !== ($obj = UserSettingsPeer::getInstanceFromPool($key))) {
+            $key = SettingsPeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj = SettingsPeer::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
@@ -433,7 +433,7 @@ abstract class BaseUserSettingsPeer
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                UserSettingsPeer::addInstanceToPool($obj, $key);
+                SettingsPeer::addInstanceToPool($obj, $key);
             } // if key exists
         }
         $stmt->closeCursor();
@@ -447,21 +447,21 @@ abstract class BaseUserSettingsPeer
      * @param      int $startcol The 0-based offset for reading from the resultset row.
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
-     * @return array (UserSettings object, last column rank)
+     * @return array (Settings object, last column rank)
      */
     public static function populateObject($row, $startcol = 0)
     {
-        $key = UserSettingsPeer::getPrimaryKeyHashFromRow($row, $startcol);
-        if (null !== ($obj = UserSettingsPeer::getInstanceFromPool($key))) {
+        $key = SettingsPeer::getPrimaryKeyHashFromRow($row, $startcol);
+        if (null !== ($obj = SettingsPeer::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $startcol, true); // rehydrate
-            $col = $startcol + UserSettingsPeer::NUM_HYDRATE_COLUMNS;
+            $col = $startcol + SettingsPeer::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = UserSettingsPeer::OM_CLASS;
+            $cls = SettingsPeer::OM_CLASS;
             $obj = new $cls();
             $col = $obj->hydrate($row, $startcol);
-            UserSettingsPeer::addInstanceToPool($obj, $key);
+            SettingsPeer::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -485,26 +485,26 @@ abstract class BaseUserSettingsPeer
         // We need to set the primary table name, since in the case that there are no WHERE columns
         // it will be impossible for the BasePeer::createSelectSql() method to determine which
         // tables go into the FROM clause.
-        $criteria->setPrimaryTableName(UserSettingsPeer::TABLE_NAME);
+        $criteria->setPrimaryTableName(SettingsPeer::TABLE_NAME);
 
         if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
             $criteria->setDistinct();
         }
 
         if (!$criteria->hasSelectClause()) {
-            UserSettingsPeer::addSelectColumns($criteria);
+            SettingsPeer::addSelectColumns($criteria);
         }
 
         $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
 
         // Set the correct dbName
-        $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+        $criteria->setDbName(SettingsPeer::DATABASE_NAME);
 
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(UserSettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(SettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -520,11 +520,11 @@ abstract class BaseUserSettingsPeer
 
 
     /**
-     * Selects a collection of UserSettings objects pre-filled with their User objects.
+     * Selects a collection of Settings objects pre-filled with their User objects.
      * @param      Criteria  $criteria
      * @param      PropelPDO $con
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
-     * @return array           Array of UserSettings objects.
+     * @return array           Array of Settings objects.
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
@@ -534,31 +534,31 @@ abstract class BaseUserSettingsPeer
 
         // Set the correct dbName if it has not been overridden
         if ($criteria->getDbName() == Propel::getDefaultDB()) {
-            $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+            $criteria->setDbName(SettingsPeer::DATABASE_NAME);
         }
 
-        UserSettingsPeer::addSelectColumns($criteria);
-        $startcol = UserSettingsPeer::NUM_HYDRATE_COLUMNS;
+        SettingsPeer::addSelectColumns($criteria);
+        $startcol = SettingsPeer::NUM_HYDRATE_COLUMNS;
         UserPeer::addSelectColumns($criteria);
 
-        $criteria->addJoin(UserSettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(SettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
 
         while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $key1 = UserSettingsPeer::getPrimaryKeyHashFromRow($row, 0);
-            if (null !== ($obj1 = UserSettingsPeer::getInstanceFromPool($key1))) {
+            $key1 = SettingsPeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = SettingsPeer::getInstanceFromPool($key1))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj1->hydrate($row, 0, true); // rehydrate
             } else {
 
-                $cls = UserSettingsPeer::getOMClass();
+                $cls = SettingsPeer::getOMClass();
 
                 $obj1 = new $cls();
                 $obj1->hydrate($row);
-                UserSettingsPeer::addInstanceToPool($obj1, $key1);
+                SettingsPeer::addInstanceToPool($obj1, $key1);
             } // if $obj1 already loaded
 
             $key2 = UserPeer::getPrimaryKeyHashFromRow($row, $startcol);
@@ -573,7 +573,7 @@ abstract class BaseUserSettingsPeer
                     UserPeer::addInstanceToPool($obj2, $key2);
                 } // if obj2 already loaded
 
-                // Add the $obj1 (UserSettings) to $obj2 (User)
+                // Add the $obj1 (Settings) to $obj2 (User)
                 // one to one relationship
                 $obj1->setUser($obj2);
 
@@ -604,26 +604,26 @@ abstract class BaseUserSettingsPeer
         // We need to set the primary table name, since in the case that there are no WHERE columns
         // it will be impossible for the BasePeer::createSelectSql() method to determine which
         // tables go into the FROM clause.
-        $criteria->setPrimaryTableName(UserSettingsPeer::TABLE_NAME);
+        $criteria->setPrimaryTableName(SettingsPeer::TABLE_NAME);
 
         if ($distinct && !in_array(Criteria::DISTINCT, $criteria->getSelectModifiers())) {
             $criteria->setDistinct();
         }
 
         if (!$criteria->hasSelectClause()) {
-            UserSettingsPeer::addSelectColumns($criteria);
+            SettingsPeer::addSelectColumns($criteria);
         }
 
         $criteria->clearOrderByColumns(); // ORDER BY won't ever affect the count
 
         // Set the correct dbName
-        $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+        $criteria->setDbName(SettingsPeer::DATABASE_NAME);
 
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria->addJoin(UserSettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(SettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doCount($criteria, $con);
 
@@ -638,12 +638,12 @@ abstract class BaseUserSettingsPeer
     }
 
     /**
-     * Selects a collection of UserSettings objects pre-filled with all related objects.
+     * Selects a collection of Settings objects pre-filled with all related objects.
      *
      * @param      Criteria  $criteria
      * @param      PropelPDO $con
      * @param      String    $join_behavior the type of joins to use, defaults to Criteria::LEFT_JOIN
-     * @return array           Array of UserSettings objects.
+     * @return array           Array of Settings objects.
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
@@ -653,32 +653,32 @@ abstract class BaseUserSettingsPeer
 
         // Set the correct dbName if it has not been overridden
         if ($criteria->getDbName() == Propel::getDefaultDB()) {
-            $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+            $criteria->setDbName(SettingsPeer::DATABASE_NAME);
         }
 
-        UserSettingsPeer::addSelectColumns($criteria);
-        $startcol2 = UserSettingsPeer::NUM_HYDRATE_COLUMNS;
+        SettingsPeer::addSelectColumns($criteria);
+        $startcol2 = SettingsPeer::NUM_HYDRATE_COLUMNS;
 
         UserPeer::addSelectColumns($criteria);
         $startcol3 = $startcol2 + UserPeer::NUM_HYDRATE_COLUMNS;
 
-        $criteria->addJoin(UserSettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
+        $criteria->addJoin(SettingsPeer::USER_ID, UserPeer::ID, $join_behavior);
 
         $stmt = BasePeer::doSelect($criteria, $con);
         $results = array();
 
         while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
-            $key1 = UserSettingsPeer::getPrimaryKeyHashFromRow($row, 0);
-            if (null !== ($obj1 = UserSettingsPeer::getInstanceFromPool($key1))) {
+            $key1 = SettingsPeer::getPrimaryKeyHashFromRow($row, 0);
+            if (null !== ($obj1 = SettingsPeer::getInstanceFromPool($key1))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj1->hydrate($row, 0, true); // rehydrate
             } else {
-                $cls = UserSettingsPeer::getOMClass();
+                $cls = SettingsPeer::getOMClass();
 
                 $obj1 = new $cls();
                 $obj1->hydrate($row);
-                UserSettingsPeer::addInstanceToPool($obj1, $key1);
+                SettingsPeer::addInstanceToPool($obj1, $key1);
             } // if obj1 already loaded
 
             // Add objects for joined User rows
@@ -695,7 +695,7 @@ abstract class BaseUserSettingsPeer
                     UserPeer::addInstanceToPool($obj2, $key2);
                 } // if obj2 loaded
 
-                // Add the $obj1 (UserSettings) to the collection in $obj2 (User)
+                // Add the $obj1 (Settings) to the collection in $obj2 (User)
                 $obj1->setUser($obj2);
             } // if joined row not null
 
@@ -715,7 +715,7 @@ abstract class BaseUserSettingsPeer
      */
     public static function getTableMap()
     {
-        return Propel::getDatabaseMap(UserSettingsPeer::DATABASE_NAME)->getTable(UserSettingsPeer::TABLE_NAME);
+        return Propel::getDatabaseMap(SettingsPeer::DATABASE_NAME)->getTable(SettingsPeer::TABLE_NAME);
     }
 
     /**
@@ -723,9 +723,9 @@ abstract class BaseUserSettingsPeer
      */
     public static function buildTableMap()
     {
-      $dbMap = Propel::getDatabaseMap(BaseUserSettingsPeer::DATABASE_NAME);
-      if (!$dbMap->hasTable(BaseUserSettingsPeer::TABLE_NAME)) {
-        $dbMap->addTableObject(new \wiosloCMS\UserBundle\Model\map\UserSettingsTableMap());
+      $dbMap = Propel::getDatabaseMap(BaseSettingsPeer::DATABASE_NAME);
+      if (!$dbMap->hasTable(BaseSettingsPeer::TABLE_NAME)) {
+        $dbMap->addTableObject(new \wiosloCMS\UserBundle\Model\map\SettingsTableMap());
       }
     }
 
@@ -737,13 +737,13 @@ abstract class BaseUserSettingsPeer
      */
     public static function getOMClass($row = 0, $colnum = 0)
     {
-        return UserSettingsPeer::OM_CLASS;
+        return SettingsPeer::OM_CLASS;
     }
 
     /**
-     * Performs an INSERT on the database, given a UserSettings or Criteria object.
+     * Performs an INSERT on the database, given a Settings or Criteria object.
      *
-     * @param      mixed $values Criteria or UserSettings object containing data that is used to create the INSERT statement.
+     * @param      mixed $values Criteria or Settings object containing data that is used to create the INSERT statement.
      * @param      PropelPDO $con the PropelPDO connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -752,18 +752,18 @@ abstract class BaseUserSettingsPeer
     public static function doInsert($values, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         if ($values instanceof Criteria) {
             $criteria = clone $values; // rename for clarity
         } else {
-            $criteria = $values->buildCriteria(); // build Criteria from UserSettings object
+            $criteria = $values->buildCriteria(); // build Criteria from Settings object
         }
 
 
         // Set the correct dbName
-        $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+        $criteria->setDbName(SettingsPeer::DATABASE_NAME);
 
         try {
             // use transaction because $criteria could contain info
@@ -780,9 +780,9 @@ abstract class BaseUserSettingsPeer
     }
 
     /**
-     * Performs an UPDATE on the database, given a UserSettings or Criteria object.
+     * Performs an UPDATE on the database, given a Settings or Criteria object.
      *
-     * @param      mixed $values Criteria or UserSettings object containing data that is used to create the UPDATE statement.
+     * @param      mixed $values Criteria or Settings object containing data that is used to create the UPDATE statement.
      * @param      PropelPDO $con The connection to use (specify PropelPDO connection object to exert more control over transactions).
      * @return int             The number of affected rows (if supported by underlying database driver).
      * @throws PropelException Any exceptions caught during processing will be
@@ -791,29 +791,29 @@ abstract class BaseUserSettingsPeer
     public static function doUpdate($values, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
-        $selectCriteria = new Criteria(UserSettingsPeer::DATABASE_NAME);
+        $selectCriteria = new Criteria(SettingsPeer::DATABASE_NAME);
 
         if ($values instanceof Criteria) {
             $criteria = clone $values; // rename for clarity
 
-            $comparison = $criteria->getComparison(UserSettingsPeer::USER_ID);
-            $value = $criteria->remove(UserSettingsPeer::USER_ID);
+            $comparison = $criteria->getComparison(SettingsPeer::USER_ID);
+            $value = $criteria->remove(SettingsPeer::USER_ID);
             if ($value) {
-                $selectCriteria->add(UserSettingsPeer::USER_ID, $value, $comparison);
+                $selectCriteria->add(SettingsPeer::USER_ID, $value, $comparison);
             } else {
-                $selectCriteria->setPrimaryTableName(UserSettingsPeer::TABLE_NAME);
+                $selectCriteria->setPrimaryTableName(SettingsPeer::TABLE_NAME);
             }
 
-        } else { // $values is UserSettings object
+        } else { // $values is Settings object
             $criteria = $values->buildCriteria(); // gets full criteria
             $selectCriteria = $values->buildPkeyCriteria(); // gets criteria w/ primary key(s)
         }
 
         // set the correct dbName
-        $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+        $criteria->setDbName(SettingsPeer::DATABASE_NAME);
 
         return BasePeer::doUpdate($selectCriteria, $criteria, $con);
     }
@@ -828,19 +828,19 @@ abstract class BaseUserSettingsPeer
     public static function doDeleteAll(PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
         $affectedRows = 0; // initialize var to track total num of affected rows
         try {
             // use transaction because $criteria could contain info
             // for more than one table or we could emulating ON DELETE CASCADE, etc.
             $con->beginTransaction();
-            $affectedRows += BasePeer::doDeleteAll(UserSettingsPeer::TABLE_NAME, $con, UserSettingsPeer::DATABASE_NAME);
+            $affectedRows += BasePeer::doDeleteAll(SettingsPeer::TABLE_NAME, $con, SettingsPeer::DATABASE_NAME);
             // Because this db requires some delete cascade/set null emulation, we have to
             // clear the cached instance *after* the emulation has happened (since
             // instances get re-added by the select statement contained therein).
-            UserSettingsPeer::clearInstancePool();
-            UserSettingsPeer::clearRelatedInstancePool();
+            SettingsPeer::clearInstancePool();
+            SettingsPeer::clearRelatedInstancePool();
             $con->commit();
 
             return $affectedRows;
@@ -851,9 +851,9 @@ abstract class BaseUserSettingsPeer
     }
 
     /**
-     * Performs a DELETE on the database, given a UserSettings or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a Settings or Criteria object OR a primary key value.
      *
-     * @param      mixed $values Criteria or UserSettings object or primary key or array of primary keys
+     * @param      mixed $values Criteria or Settings object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param      PropelPDO $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -864,32 +864,32 @@ abstract class BaseUserSettingsPeer
      public static function doDelete($values, PropelPDO $con = null)
      {
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_WRITE);
         }
 
         if ($values instanceof Criteria) {
             // invalidate the cache for all objects of this type, since we have no
             // way of knowing (without running a query) what objects should be invalidated
             // from the cache based on this Criteria.
-            UserSettingsPeer::clearInstancePool();
+            SettingsPeer::clearInstancePool();
             // rename for clarity
             $criteria = clone $values;
-        } elseif ($values instanceof UserSettings) { // it's a model object
+        } elseif ($values instanceof Settings) { // it's a model object
             // invalidate the cache for this single object
-            UserSettingsPeer::removeInstanceFromPool($values);
+            SettingsPeer::removeInstanceFromPool($values);
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(UserSettingsPeer::DATABASE_NAME);
-            $criteria->add(UserSettingsPeer::USER_ID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(SettingsPeer::DATABASE_NAME);
+            $criteria->add(SettingsPeer::USER_ID, (array) $values, Criteria::IN);
             // invalidate the cache for this object(s)
             foreach ((array) $values as $singleval) {
-                UserSettingsPeer::removeInstanceFromPool($singleval);
+                SettingsPeer::removeInstanceFromPool($singleval);
             }
         }
 
         // Set the correct dbName
-        $criteria->setDbName(UserSettingsPeer::DATABASE_NAME);
+        $criteria->setDbName(SettingsPeer::DATABASE_NAME);
 
         $affectedRows = 0; // initialize var to track total num of affected rows
 
@@ -899,7 +899,7 @@ abstract class BaseUserSettingsPeer
             $con->beginTransaction();
 
             $affectedRows += BasePeer::doDelete($criteria, $con);
-            UserSettingsPeer::clearRelatedInstancePool();
+            SettingsPeer::clearRelatedInstancePool();
             $con->commit();
 
             return $affectedRows;
@@ -910,13 +910,13 @@ abstract class BaseUserSettingsPeer
     }
 
     /**
-     * Validates all modified columns of given UserSettings object.
+     * Validates all modified columns of given Settings object.
      * If parameter $columns is either a single column name or an array of column names
      * than only those columns are validated.
      *
      * NOTICE: This does not apply to primary or foreign keys for now.
      *
-     * @param UserSettings $obj The object to validate.
+     * @param Settings $obj The object to validate.
      * @param      mixed $cols Column name or array of column names.
      *
      * @return mixed TRUE if all columns are valid or the error message of the first invalid column.
@@ -926,8 +926,8 @@ abstract class BaseUserSettingsPeer
         $columns = array();
 
         if ($cols) {
-            $dbMap = Propel::getDatabaseMap(UserSettingsPeer::DATABASE_NAME);
-            $tableMap = $dbMap->getTable(UserSettingsPeer::TABLE_NAME);
+            $dbMap = Propel::getDatabaseMap(SettingsPeer::DATABASE_NAME);
+            $tableMap = $dbMap->getTable(SettingsPeer::TABLE_NAME);
 
             if (! is_array($cols)) {
                 $cols = array($cols);
@@ -943,7 +943,7 @@ abstract class BaseUserSettingsPeer
 
         }
 
-        return BasePeer::doValidate(UserSettingsPeer::DATABASE_NAME, UserSettingsPeer::TABLE_NAME, $columns);
+        return BasePeer::doValidate(SettingsPeer::DATABASE_NAME, SettingsPeer::TABLE_NAME, $columns);
     }
 
     /**
@@ -951,23 +951,23 @@ abstract class BaseUserSettingsPeer
      *
      * @param int $pk the primary key.
      * @param      PropelPDO $con the connection to use
-     * @return UserSettings
+     * @return Settings
      */
     public static function retrieveByPK($pk, PropelPDO $con = null)
     {
 
-        if (null !== ($obj = UserSettingsPeer::getInstanceFromPool((string) $pk))) {
+        if (null !== ($obj = SettingsPeer::getInstanceFromPool((string) $pk))) {
             return $obj;
         }
 
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
-        $criteria = new Criteria(UserSettingsPeer::DATABASE_NAME);
-        $criteria->add(UserSettingsPeer::USER_ID, $pk);
+        $criteria = new Criteria(SettingsPeer::DATABASE_NAME);
+        $criteria->add(SettingsPeer::USER_ID, $pk);
 
-        $v = UserSettingsPeer::doSelect($criteria, $con);
+        $v = SettingsPeer::doSelect($criteria, $con);
 
         return !empty($v) > 0 ? $v[0] : null;
     }
@@ -977,31 +977,31 @@ abstract class BaseUserSettingsPeer
      *
      * @param      array $pks List of primary keys
      * @param      PropelPDO $con the connection to use
-     * @return UserSettings[]
+     * @return Settings[]
      * @throws PropelException Any exceptions caught during processing will be
      *		 rethrown wrapped into a PropelException.
      */
     public static function retrieveByPKs($pks, PropelPDO $con = null)
     {
         if ($con === null) {
-            $con = Propel::getConnection(UserSettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
+            $con = Propel::getConnection(SettingsPeer::DATABASE_NAME, Propel::CONNECTION_READ);
         }
 
         $objs = null;
         if (empty($pks)) {
             $objs = array();
         } else {
-            $criteria = new Criteria(UserSettingsPeer::DATABASE_NAME);
-            $criteria->add(UserSettingsPeer::USER_ID, $pks, Criteria::IN);
-            $objs = UserSettingsPeer::doSelect($criteria, $con);
+            $criteria = new Criteria(SettingsPeer::DATABASE_NAME);
+            $criteria->add(SettingsPeer::USER_ID, $pks, Criteria::IN);
+            $objs = SettingsPeer::doSelect($criteria, $con);
         }
 
         return $objs;
     }
 
-} // BaseUserSettingsPeer
+} // BaseSettingsPeer
 
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-BaseUserSettingsPeer::buildTableMap();
+BaseSettingsPeer::buildTableMap();
 

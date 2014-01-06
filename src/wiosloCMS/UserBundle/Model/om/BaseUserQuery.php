@@ -17,11 +17,11 @@ use wiosloCMS\PhotoBundle\Model\PhotoComment;
 use wiosloCMS\PhotoBundle\Model\Rating;
 use wiosloCMS\PhotoBundle\Model\UserRate;
 use wiosloCMS\UserBundle\Model\Role;
+use wiosloCMS\UserBundle\Model\Settings;
 use wiosloCMS\UserBundle\Model\User;
 use wiosloCMS\UserBundle\Model\UserPeer;
 use wiosloCMS\UserBundle\Model\UserQuery;
 use wiosloCMS\UserBundle\Model\UserRole;
-use wiosloCMS\UserBundle\Model\UserSettings;
 
 /**
  * @method UserQuery orderById($order = Criteria::ASC) Order by the id column
@@ -56,9 +56,9 @@ use wiosloCMS\UserBundle\Model\UserSettings;
  * @method UserQuery rightJoinUserRate($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserRate relation
  * @method UserQuery innerJoinUserRate($relationAlias = null) Adds a INNER JOIN clause to the query using the UserRate relation
  *
- * @method UserQuery leftJoinUserSettings($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserSettings relation
- * @method UserQuery rightJoinUserSettings($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserSettings relation
- * @method UserQuery innerJoinUserSettings($relationAlias = null) Adds a INNER JOIN clause to the query using the UserSettings relation
+ * @method UserQuery leftJoinSettings($relationAlias = null) Adds a LEFT JOIN clause to the query using the Settings relation
+ * @method UserQuery rightJoinSettings($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Settings relation
+ * @method UserQuery innerJoinSettings($relationAlias = null) Adds a INNER JOIN clause to the query using the Settings relation
  *
  * @method UserQuery leftJoinUserRole($relationAlias = null) Adds a LEFT JOIN clause to the query using the UserRole relation
  * @method UserQuery rightJoinUserRole($relationAlias = null) Adds a RIGHT JOIN clause to the query using the UserRole relation
@@ -742,41 +742,41 @@ abstract class BaseUserQuery extends ModelCriteria
     }
 
     /**
-     * Filter the query by a related UserSettings object
+     * Filter the query by a related Settings object
      *
-     * @param   UserSettings|PropelObjectCollection $userSettings  the related object to use as filter
+     * @param   Settings|PropelObjectCollection $settings  the related object to use as filter
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return                 UserQuery The current query, for fluid interface
      * @throws PropelException - if the provided filter is invalid.
      */
-    public function filterByUserSettings($userSettings, $comparison = null)
+    public function filterBySettings($settings, $comparison = null)
     {
-        if ($userSettings instanceof UserSettings) {
+        if ($settings instanceof Settings) {
             return $this
-                ->addUsingAlias(UserPeer::ID, $userSettings->getUserId(), $comparison);
-        } elseif ($userSettings instanceof PropelObjectCollection) {
+                ->addUsingAlias(UserPeer::ID, $settings->getUserId(), $comparison);
+        } elseif ($settings instanceof PropelObjectCollection) {
             return $this
-                ->useUserSettingsQuery()
-                ->filterByPrimaryKeys($userSettings->getPrimaryKeys())
+                ->useSettingsQuery()
+                ->filterByPrimaryKeys($settings->getPrimaryKeys())
                 ->endUse();
         } else {
-            throw new PropelException('filterByUserSettings() only accepts arguments of type UserSettings or PropelCollection');
+            throw new PropelException('filterBySettings() only accepts arguments of type Settings or PropelCollection');
         }
     }
 
     /**
-     * Adds a JOIN clause to the query using the UserSettings relation
+     * Adds a JOIN clause to the query using the Settings relation
      *
      * @param     string $relationAlias optional alias for the relation
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
      * @return UserQuery The current query, for fluid interface
      */
-    public function joinUserSettings($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function joinSettings($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         $tableMap = $this->getTableMap();
-        $relationMap = $tableMap->getRelation('UserSettings');
+        $relationMap = $tableMap->getRelation('Settings');
 
         // create a ModelJoin object for this join
         $join = new ModelJoin();
@@ -791,14 +791,14 @@ abstract class BaseUserQuery extends ModelCriteria
             $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
             $this->addJoinObject($join, $relationAlias);
         } else {
-            $this->addJoinObject($join, 'UserSettings');
+            $this->addJoinObject($join, 'Settings');
         }
 
         return $this;
     }
 
     /**
-     * Use the UserSettings relation UserSettings object
+     * Use the Settings relation Settings object
      *
      * @see       useQuery()
      *
@@ -806,13 +806,13 @@ abstract class BaseUserQuery extends ModelCriteria
      *                                   to be used as main alias in the secondary query
      * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
      *
-     * @return   \wiosloCMS\UserBundle\Model\UserSettingsQuery A secondary query class using the current class as primary query
+     * @return   \wiosloCMS\UserBundle\Model\SettingsQuery A secondary query class using the current class as primary query
      */
-    public function useUserSettingsQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    public function useSettingsQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
     {
         return $this
-            ->joinUserSettings($relationAlias, $joinType)
-            ->useQuery($relationAlias ? $relationAlias : 'UserSettings', '\wiosloCMS\UserBundle\Model\UserSettingsQuery');
+            ->joinSettings($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'Settings', '\wiosloCMS\UserBundle\Model\SettingsQuery');
     }
 
     /**

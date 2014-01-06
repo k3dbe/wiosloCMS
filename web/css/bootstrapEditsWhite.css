@@ -1,0 +1,115 @@
+/*IMPORTS*/
+.navbar {
+  margin-bottom: 0px; }
+
+.row {
+  margin-right: 0px;
+  margin-left: 0px; }
+
+.dropdown-menu > li > a {
+  padding: 10px 20px;
+  color: #333333;
+  white-space: nowrap; }
+
+.btn-lg {
+  width: 100px;
+  padding: 10px 10px;
+  font-size: 16px;
+  line-height: 1.5;
+  border-radius: 1px; }
+
+.footer .btn {
+  margin-left: 10px;
+  width: 110px; }
+
+.img-responsive {
+  display: block;
+  height: auto;
+  width: 100%; }
+
+@media (max-width: 767px) {
+  .btn-lg {
+    width: 50%;
+    padding: 10px 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    border-radius: 1px; }
+
+  .navbar-fixed-bottom {
+    position: static;
+    right: 0;
+    left: 0;
+    z-index: 1030; } }
+@media (min-width: 1200px) {
+  .btn-lg {
+    padding: 20px 10px;
+    font-size: 18px;
+    line-height: 1.8;
+    border-radius: 2px;
+    background-color: gray; } }
+/*
+	----------------------------------------------------------MOJE
+*/
+.w100prc {
+  width: 100% !important; }
+
+.w50prc {
+  width: 50% !important; }
+
+.w25prc {
+  width: 25% !important; }
+
+.w20prc {
+  width: 20% !important; }
+
+.w50 {
+  width: 50px !important; }
+
+.w100 {
+  width: 100px !important; }
+
+.w200 {
+  width: 200px !important; }
+
+.w300 {
+  width: 300px !important; }
+
+.w400 {
+  width: 400px !important; }
+
+.w500 {
+  width: 500px !important; }
+
+.h100prc {
+  height: 100% !important; }
+
+.h50prc {
+  height: 50% !important; }
+
+.h25prc {
+  height: 25% !important; }
+
+.h20prc {
+  height: 20% !important; }
+
+.h50 {
+  height: 50px !important; }
+
+.h100 {
+  height: 100px !important; }
+
+.h200 {
+  height: 200px !important; }
+
+.h300 {
+  height: 300px !important; }
+
+.h400 {
+  height: 400px !important; }
+
+.h500 {
+  height: 500px !important; }
+
+/*
+	KONIEC MOJE---------------------------------------------------
+*/
